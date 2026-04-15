@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useCameraStore, useRouteStore, useAppModeStore } from '../../store';
+import { useRouteStore, useAppModeStore } from '../../store';
 import { useDensityStore } from '../../store/densityStore';
 import { useNetworkStore } from '../../store/networkStore';
 import type { AppMode } from '../../store';
@@ -46,7 +46,6 @@ export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
 
   /* ---- stores ---- */
   const { appMode, mapVisualization } = useAppModeStore();
-  const cameraCount = useCameraStore(s => s.cameras.length);
   const { normalRoute, avoidanceRoute } = useRouteStore();
   const hasRoutes = !!(normalRoute && avoidanceRoute);
 
@@ -135,6 +134,12 @@ export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
         return (
           <div className="pb-8">
             <MapPanelContent />
+            <div className="mt-6 pt-4 border-t border-dark-700/50">
+              <p className="text-[10px] text-dark-500 text-center">
+                Maps by{' '}
+                <a href="https://openroadlabs.org" target="_blank" rel="noopener noreferrer" className="hover:text-dark-300 transition-colors">OpenRoad Labs LLC</a>
+              </p>
+            </div>
           </div>
         );
 
@@ -155,10 +160,10 @@ export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
 
             {/* Footer */}
             <div className="mt-6 pt-4 border-t border-dark-700/50">
-              <div className="flex items-center justify-between text-sm text-dark-400">
-                <span>Data from OpenStreetMap</span>
-                <span className="text-dark-300 font-medium">{cameraCount.toLocaleString()} US cameras</span>
-              </div>
+              <p className="text-[10px] text-dark-500 text-center">
+                Maps by{' '}
+                <a href="https://openroadlabs.org" target="_blank" rel="noopener noreferrer" className="hover:text-dark-300 transition-colors">OpenRoad Labs LLC</a>
+              </p>
             </div>
           </div>
         );
@@ -189,10 +194,10 @@ export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
 
             {/* Footer */}
             <div className="mt-6 pt-4 border-t border-dark-700/50">
-              <div className="flex items-center justify-between text-sm text-dark-400">
-                <span>Data from OpenStreetMap</span>
-                <span className="text-dark-300 font-medium">{cameraCount.toLocaleString()} US cameras</span>
-              </div>
+              <p className="text-[10px] text-dark-500 text-center">
+                Maps by{' '}
+                <a href="https://openroadlabs.org" target="_blank" rel="noopener noreferrer" className="hover:text-dark-300 transition-colors">OpenRoad Labs LLC</a>
+              </p>
             </div>
           </div>
         );
@@ -237,6 +242,13 @@ export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
                 </div>
               </>
             )}
+
+            <div className="mt-6 pt-4 border-t border-dark-700/50">
+              <p className="text-[10px] text-dark-500 text-center">
+                Maps by{' '}
+                <a href="https://openroadlabs.org" target="_blank" rel="noopener noreferrer" className="hover:text-dark-300 transition-colors">OpenRoad Labs LLC</a>
+              </p>
+            </div>
           </div>
         );
 
@@ -245,6 +257,12 @@ export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
         return (
           <div className="pb-8">
             <NetworkPanelContent />
+            <div className="mt-6 pt-4 border-t border-dark-700/50">
+              <p className="text-[10px] text-dark-500 text-center">
+                Maps by{' '}
+                <a href="https://openroadlabs.org" target="_blank" rel="noopener noreferrer" className="hover:text-dark-300 transition-colors">OpenRoad Labs LLC</a>
+              </p>
+            </div>
           </div>
         );
 
