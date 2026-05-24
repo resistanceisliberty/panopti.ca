@@ -75,13 +75,15 @@ export function MapPage() {
   }, [center, zoom, appMode, mapVisualization, setSearchParams]);
 
   // Responsive breakpoint — single source of truth for timeline bar layout
+  // Never go mobile in embed mode — the iframe width should not affect layout
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
+    if (isEmbed) return;
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  }, [isEmbed]);
 
   // Sync URL params with app mode on mount
   useEffect(() => {
@@ -283,7 +285,8 @@ export function MapPage() {
         />
       )}
       <div className={`map-page h-screen w-screen flex flex-col bg-dark-900 overflow-hidden ${isExploreMode ? 'timeline-active' : ''}`}>
-        {/* Header - Persistent on Map View */}
+        {/* Header - hidden in embed mode */}
+        {!isEmbed && (
         <header className="h-12 bg-dark-900 border-b border-dark-600 flex items-center z-50 shrink-0">
           <div className="w-full px-4 lg:px-5">
             <div className="flex items-center justify-between h-12">
@@ -345,20 +348,18 @@ export function MapPage() {
                 </button>
               </div>
 
-              {/* Desktop: Share + Legacy map link */}
-              {!isEmbed && (
               <div className="hidden lg:flex items-center gap-4 flex-shrink-0">
                 <ShareButton variant="header" />
                 <div className="w-px h-4 bg-dark-600" />
                 <LegacyMapLink variant="header" />
               </div>
-              )}
             </div>
           </div>
         </header>
+        )} {/* end !isEmbed header */}
 
-        {/* Mobile slide-down menu */}
-        {mobileMenuOpen && (
+        {/* Mobile slide-down menu — only relevant outside embed mode */}
+        {!isEmbed && mobileMenuOpen && (
           <nav
             className="lg:hidden absolute top-12 left-0 right-0 z-[60] bg-dark-800 border-b border-dark-600"
             aria-label="Mobile navigation"
@@ -384,8 +385,8 @@ export function MapPage() {
               ))}
             </div>
             <div className="border-t border-dark-600 mt-1 pt-1 px-4 pb-2 space-y-0.5">
-              {!isEmbed && <ShareButton variant="menu-item" />}
-              {!isEmbed && <LegacyMapLink variant="menu-item" />}
+              <ShareButton variant="menu-item" />
+              <LegacyMapLink variant="menu-item" />
             </div>
           </nav>
         )}
