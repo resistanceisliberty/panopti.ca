@@ -22,7 +22,7 @@
 
 # Canada ALPR dataset — refreshed nightly by CI. Allow short browser caching but
 # revalidate so users pick up the new data within an hour of each deploy.
+# (Content-Type + CORS are inherited from the /*.json rule above; don't repeat
+# them here or Cloudflare emits a duplicated, spec-invalid header value.)
 /cameras-ca.json
-  Content-Type: application/json
-  Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=3600, stale-while-revalidate=86400
