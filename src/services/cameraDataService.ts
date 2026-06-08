@@ -55,8 +55,12 @@ export async function loadBundledCameras(): Promise<ALPRCamera[]> {
       loadAttempts++;
       
       try {
-        // Fetch from data Worker — browser handles gzip decompression automatically
-        const response = await fetch('https://data.dontgetflocked.com/cameras.geojson.gz', {
+        // Fetch Canada ALPR data. Defaults to the bundled local file; override
+        // with VITE_DATA_API_URL to point at a deployed data Worker / R2 bucket.
+        const dataUrl = import.meta.env.VITE_DATA_API_URL
+          ? `${import.meta.env.VITE_DATA_API_URL}/cameras-ca.json`
+          : '/cameras-ca.json';
+        const response = await fetch(dataUrl, {
           headers: {
             'Accept': 'application/geo+json, application/json',
           },

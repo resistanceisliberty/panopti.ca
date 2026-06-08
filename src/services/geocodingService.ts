@@ -126,10 +126,10 @@ async function searchPhoton(query: string, signal?: AbortSignal): Promise<Geocod
     lang: 'en',
   });
   
-  // Bias results toward US
-  // Columbus, OH as rough center of continental US
-  params.append('lat', '39.9612');
-  params.append('lon', '-82.9988');
+  // Bias results toward Canada
+  // Ottawa as a populated reference point near the country's east-centre
+  params.append('lat', '45.4215');
+  params.append('lon', '-75.6972');
 
   const response = await fetch(`${PHOTON_API}?${params}`, { signal });
   
@@ -141,9 +141,9 @@ async function searchPhoton(query: string, signal?: AbortSignal): Promise<Geocod
   
   return data.features
     .filter(f => {
-      // Filter to US results (or results without country info)
+      // Filter to Canadian results (or results without country info)
       const cc = f.properties.countrycode?.toLowerCase();
-      return !cc || cc === 'us';
+      return !cc || cc === 'ca';
     })
     .map(photonToResult);
 }
@@ -195,7 +195,7 @@ function photonToResult(feature: PhotonFeature): GeocodingResult {
   if (props.state) descParts.push(props.state);
   if (props.postcode) descParts.push(props.postcode);
   
-  const description = descParts.join(', ') || 'United States';
+  const description = descParts.join(', ') || 'Canada';
   
   return {
     id: `photon-${props.osm_id}-${props.osm_type}`,
@@ -255,7 +255,7 @@ function nominatimToResult(result: NominatimResult): GeocodingResult {
   if (addr?.state) descParts.push(addr.state);
   if (addr?.postcode) descParts.push(addr.postcode);
 
-  const description = descParts.join(', ') || 'United States';
+  const description = descParts.join(', ') || 'Canada';
 
   return {
     id: `nom-${result.place_id}`,
@@ -342,11 +342,11 @@ async function searchWithFallback(query: string, source: string, signal?: AbortS
 
 /**
  * Smart geocoding search that handles:
- * - GPS coordinates (40.7128, -74.0060)
- * - ZIP codes (43215) - resolved by the backend proxy
- * - Addresses (123 Main St, Columbus, OH)
- * - Cities (Columbus, Ohio)
- * - POI/Business (Walmart Columbus)
+ * - GPS coordinates (45.4215, -75.6972)
+ * - Postal codes (K1A 0A6) - resolved by the backend proxy
+ * - Addresses (123 Main St, Ottawa, ON)
+ * - Cities (Toronto, Ontario)
+ * - POI/Business (Tim Hortons Ottawa)
  */
 export async function smartSearch(query: string, source: string, signal?: AbortSignal): Promise<GeocodingResult[]> {
   const trimmed = query.trim();

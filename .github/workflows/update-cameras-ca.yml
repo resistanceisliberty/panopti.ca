@@ -1,0 +1,46 @@
+name: Update Canada ALPR data
+
+# Refreshes public/cameras-ca.json from OpenStreetMap (via Overpass) and commits
+# any changes back to the repo. Runs nightly and on demand.
+
+on:
+  schedule:
+    # 07:10 UTC daily ≈ 02:10 ET / 23:10 PT — off the top of the hour to avoid
+    # the Overpass load spike that hits on exact-hour cron schedules.
+    - cron: '10 7 * * *'
+  workflow_dispatch: {}
+
+# Allow the job to push the regenerated data file back to the default branch.
+permissions:
+  contents: write
+
+concurrency:
+  group: update-cameras-ca
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Regenerate cameras-ca.json
+        run: node scripts/build-cameras-ca.mjs
+
+      - name: Commit if changed
+        run: |
+          git config user.name "deflock-ca-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/cameras-ca.json
+          if git diff --staged --quiet; then
+            echo "No changes to Canada ALPR data."
+          else
+            git commit -m "chore(data): refresh Canada ALPR data ($(date -u +%Y-%m-%d))"
+            git push
+          fi

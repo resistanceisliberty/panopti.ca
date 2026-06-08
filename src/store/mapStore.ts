@@ -36,10 +36,10 @@ interface MapStoreState extends MapState {
   setTimelineTickCallback: (cb: ((dateStr: string) => void) | null) => void;
 }
 
-// Default center: Geographic center of the contiguous US
-const DEFAULT_CENTER: [number, number] = [39.8283, -98.5795];
-// On mobile (< 1024px), use a lower zoom so the whole US is visible on first load
-const DEFAULT_ZOOM = typeof window !== 'undefined' && window.innerWidth < 1024 ? 2.5 : 4;
+// Default center: Geographic centre of Canada
+const DEFAULT_CENTER: [number, number] = [56.1304, -106.3468];
+// On mobile (< 1024px), use a lower zoom so the whole country is visible on first load
+const DEFAULT_ZOOM = typeof window !== 'undefined' && window.innerWidth < 1024 ? 2.5 : 3.5;
 
 export const useMapStore = create<MapStoreState>((set) => ({
   center: DEFAULT_CENTER,

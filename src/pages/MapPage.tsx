@@ -27,6 +27,12 @@ const MODE_LABELS: Record<AppMode, { icon: typeof Route; label: string }> = {
   network: { icon: Network, label: 'Network' },
 };
 
+// Modes exposed in the UI. The Route/Timeline/Analysis/Network modes rely on
+// US-only datasets (boundaries, agency sharing network, US routing API), so the
+// Canada build ships the camera map only. Re-add modes here once CA data exists.
+const VISIBLE_MODES: AppMode[] = ['map'];
+const showModeNav = VISIBLE_MODES.length > 1;
+
 export function MapPage() {
   const { 
     ensureCamerasLoaded,
@@ -263,8 +269,8 @@ export function MapPage() {
 
   const seo = (
     <Seo
-      title="DeFlock Maps | ALPR Camera Map & Privacy Routes"
-      description="Explore the national ALPR camera map and compare direct routes with privacy-optimized alternatives."
+      title="DeFlock Canada | ALPR Camera Map"
+      description="Explore crowdsourced ALPR (automatic licence plate reader) camera locations across Canada, mapped on OpenStreetMap."
       path="/"
     />
   );
@@ -308,13 +314,14 @@ export function MapPage() {
                     alt="DeFlock Logo"
                     className="h-7 lg:h-8 w-auto object-contain"
                   />
-                  <span className="text-dark-400 text-[11px] font-medium tracking-[0.2em] uppercase hidden sm:inline self-end mb-[3px]">Maps</span>
+                  <span className="text-dark-400 text-[11px] font-medium tracking-[0.2em] uppercase hidden sm:inline self-end mb-[3px]">Canada</span>
                 </a>
               </div>
 
               {/* Desktop: Mode tabs - editorial underline style */}
+              {showModeNav && (
               <nav className="hidden lg:flex items-center gap-6" aria-label="App modes">
-                {(Object.entries(MODE_LABELS) as [AppMode, typeof MODE_LABELS[AppMode]][]).map(([mode, { label }]) => (
+                {VISIBLE_MODES.map((mode) => (
                   <button
                     key={mode}
                     onClick={() => handleSetAppMode(mode)}
@@ -325,13 +332,14 @@ export function MapPage() {
                     }`}
                     aria-current={appMode === mode ? 'page' : undefined}
                   >
-                    {label}
+                    {MODE_LABELS[mode].label}
                     {appMode === mode && (
                       <span className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-accent" />
                     )}
                   </button>
                 ))}
               </nav>
+              )}
 
               {/* Mobile: Camera count + hamburger */}
               <div className="lg:hidden flex items-center gap-2">
@@ -365,7 +373,9 @@ export function MapPage() {
             aria-label="Mobile navigation"
           >
             <div className="px-4 py-2 space-y-0.5">
-              {(Object.entries(MODE_LABELS) as [AppMode, typeof MODE_LABELS[AppMode]][]).map(([mode, { icon: Icon, label }]) => (
+              {showModeNav && VISIBLE_MODES.map((mode) => {
+                const { icon: Icon, label } = MODE_LABELS[mode];
+                return (
                 <button
                   key={mode}
                   onClick={() => {
@@ -382,7 +392,8 @@ export function MapPage() {
                   <Icon className="w-4 h-4" aria-hidden="true" />
                   <span>{label}</span>
                 </button>
-              ))}
+                );
+              })}
             </div>
             <div className="border-t border-dark-600 mt-1 pt-1 px-4 pb-2 space-y-0.5">
               <ShareButton variant="menu-item" />

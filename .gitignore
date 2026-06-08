@@ -3,6 +3,9 @@ node_modules/
 .pnp
 .pnp.js
 
+# This project uses npm (package-lock.json); ignore bun's lockfile if dev runs under bun
+bun.lock
+
 # Build outputs
 dist/
 build/

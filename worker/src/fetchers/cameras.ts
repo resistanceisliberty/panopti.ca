@@ -3,16 +3,19 @@ import { queryOverpass } from '../lib/overpass';
 import { pointFeature, buildFeatureCollection } from '../lib/geojson';
 
 export const CAMERAS_OVERPASS_QUERY = `[out:json][timeout:300];
-area["ISO3166-1"="US"]->.us;
+area["ISO3166-1"="CA"]->.ca;
 (
-  node["man_made"="surveillance"]["surveillance:type"="ALPR"](area.us);
-  way["man_made"="surveillance"]["surveillance:type"="ALPR"](area.us);
+  node["man_made"="surveillance"]["surveillance:type"="ALPR"](area.ca);
+  way["man_made"="surveillance"]["surveillance:type"="ALPR"](area.ca);
 );
 out meta;
 >;
 out skel qt;`;
 
-const MIN_CAMERA_COUNT = 50_000;
+// Sanity floor: Canada had ~156 mapped ALPRs as of mid-2026. Keep this well
+// below the live count so a partial Overpass response is rejected, but not so
+// high that normal growth trips it.
+const MIN_CAMERA_COUNT = 50;
 
 const CARDINALS: Record<string, number> = {
   N: 0, NNE: 22.5, NE: 45, ENE: 67.5,

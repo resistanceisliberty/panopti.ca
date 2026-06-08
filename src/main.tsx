@@ -76,10 +76,10 @@ function PreloadManager() {
   }, [isInitialized, preloadCameras]);
 
   useEffect(() => {
-    if (!document.querySelector('link[href="/cameras-us.json"]')) {
+    if (!document.querySelector('link[href="/cameras-ca.json"]')) {
       const prefetchLink = document.createElement('link');
       prefetchLink.rel = 'prefetch';
-      prefetchLink.href = '/cameras-us.json';
+      prefetchLink.href = '/cameras-ca.json';
       prefetchLink.as = 'fetch';
       prefetchLink.crossOrigin = 'anonymous';
       document.head.appendChild(prefetchLink);

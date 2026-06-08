@@ -28,7 +28,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "update-cameras": "node scripts/build-cameras-ca.mjs"
   },
   "dependencies": {
     "@deck.gl/core": "^9.2.9",

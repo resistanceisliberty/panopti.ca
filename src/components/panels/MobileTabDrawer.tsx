@@ -25,12 +25,9 @@ interface TabDef {
   label: string;
 }
 
+// Canada build: camera map only. Other modes depend on US-only datasets.
 const TABS: TabDef[] = [
   { mode: 'map', label: 'Map' },
-  { mode: 'route', label: 'Route' },
-  { mode: 'explore', label: 'Timeline' },
-  { mode: 'density', label: 'Analysis' },
-  { mode: 'network', label: 'Network' },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -106,7 +103,7 @@ export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
   /* ================================================================ */
 
   const headerContent = (
-    <div className="grid grid-cols-5 gap-1">
+    <div className="grid grid-cols-1 gap-1">
       {TABS.map(({ mode, label }) => {
         const isActive = appMode === mode;
         return (

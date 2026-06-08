@@ -158,7 +158,7 @@ export const useCameraStore = create<CameraState>((set, get) => ({
       try {
         // Load from bundled JSON file (much faster than Overpass API!)
         if (import.meta.env.DEV) {
-          console.log('[CameraStore] Fetching cameras-us.json...');
+          console.log('[CameraStore] Fetching cameras-ca.json...');
         }
         const cameras = await loadBundledCameras();
         
