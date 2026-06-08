@@ -1,4 +1,9 @@
-# Panopti.ca
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="branding/panoptica-dark.svg">
+    <img src="branding/panoptica-light.svg" alt="panopti.ca" width="360">
+  </picture>
+</p>
 
 A Canada-focused map of automatic licence plate readers (ALPRs), built on
 crowdsourced [OpenStreetMap](https://www.openstreetmap.org) data. It shows where
