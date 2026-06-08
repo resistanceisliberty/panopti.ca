@@ -12,9 +12,9 @@ see them.
 
 **Live:** https://maps.panopti.ca/
 
-This is a localized fork of [DeFlock Maps / FlockHopper](https://github.com/FoggedLens/deflockhopper_maps).
+This is a localized fork of **[DeFlock Maps / FlockHopper](https://github.com/FoggedLens/deflockhopper_maps)**.
 The US-only features (route avoidance, density analysis, agency network) are hidden;
-this project ships the camera map for Canada. A big shoutout to [Fogged Lens](https://github.com/FoggedLens)) as well as the various contributors who built upon their work for their efforts on the original [DeFlock](https://github.com/FoggedLens/deflock) project!
+this project ships the camera map for Canada. A big shoutout to **[Fogged Lens](https://github.com/FoggedLens)** as well as the various contributors who built upon their work for their efforts on the **original [DeFlock](https://github.com/FoggedLens/deflock) project**!
 
 ## How it works
 
