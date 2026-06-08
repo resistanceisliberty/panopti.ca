@@ -291,6 +291,15 @@ export function MapPage() {
         />
       )}
       <div className={`map-page h-screen w-screen flex flex-col bg-dark-900 overflow-hidden ${isExploreMode ? 'timeline-active' : ''}`}>
+        {/* DeFlock credit banner - hidden in embed mode */}
+        {!isEmbed && (
+          <div className="shrink-0 bg-dark-800 border-b border-dark-700 px-3 py-1.5 text-center text-[11px] sm:text-xs text-dark-300 leading-snug z-50">
+            Built on{' '}
+            <a href="https://deflock.org/" target="_blank" rel="noopener noreferrer" className="text-accent font-semibold hover:underline">DeFlock</a>
+            , the original ALPR-mapping project — for United States ALPR data, visit{' '}
+            <a href="https://deflock.org/" target="_blank" rel="noopener noreferrer" className="text-accent font-semibold hover:underline">deflock.org</a>.
+          </div>
+        )}
         {/* Header - hidden in embed mode */}
         {!isEmbed && (
         <header className="h-12 bg-dark-900 border-b border-dark-600 flex items-center z-50 shrink-0">
