@@ -306,13 +306,16 @@ async function searchProxy(query: string, source: string, signal?: AbortSignal):
 type GeocodingProvider = (query: string, source: string, signal?: AbortSignal) => Promise<GeocodingResult[]>;
 
 /**
- * Search through providers in order: Proxy → Photon (fallback).
+ * Search through providers in order: Photon → Proxy (fallback).
+ * Photon is primary because it is biased to Canada and filtered to Canadian
+ * results (see searchPhoton); the upstream proxy is US-biased and would return
+ * US places for Canadian queries (e.g. "Toronto, ON" → Toronto Paseo, CA).
  * Falls through to the next provider on failure or empty results.
  */
 async function searchWithFallback(query: string, source: string, signal?: AbortSignal): Promise<GeocodingResult[]> {
   const providers: { name: string; search: GeocodingProvider }[] = [
-    { name: 'Proxy', search: searchProxy },
     { name: 'Photon', search: (q, _source, s) => searchPhoton(q, s) },
+    { name: 'Proxy', search: searchProxy },
   ];
 
   for (const provider of providers) {
