@@ -1,14 +1,14 @@
-# ALPR Map Canada
+# Panopti.ca
 
 A Canada-focused map of automatic licence plate readers (ALPRs), built on
 crowdsourced [OpenStreetMap](https://www.openstreetmap.org) data. It shows where
 ALPR / Flock-style surveillance cameras are deployed across Canada so people can
 see them.
 
-**Live:** https://alpr-map-canada.pages.dev/
+**Live:** https://maps.panopti.ca/
 
 This is a localized fork of [DeFlock Maps / FlockHopper](https://github.com/FoggedLens/deflockhopper_maps).
-The US-only modes (route avoidance, density analysis, agency network) are hidden;
+The US-only features (route avoidance, density analysis, agency network) are hidden;
 this build ships the camera map for Canada.
 
 ## How it works
