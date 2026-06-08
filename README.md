@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-A Canada-focused map of automatic licence plate readers (ALPRs), built on
+Inspired by the prototypical metaphor for mass surveillance, Jeremy Bentham's [Panopticon](https://www.ebsco.com/research-starters/history/panopticon), this project is a Canada-focused map of automatic licence plate readers (ALPRs), built on
 crowdsourced [OpenStreetMap](https://www.openstreetmap.org) data. It shows where
 ALPR / Flock-style surveillance cameras are deployed across Canada so people can
 see them.
@@ -14,7 +14,7 @@ see them.
 
 This is a localized fork of [DeFlock Maps / FlockHopper](https://github.com/FoggedLens/deflockhopper_maps).
 The US-only features (route avoidance, density analysis, agency network) are hidden;
-this build ships the camera map for Canada.
+this project ships the camera map for Canada. A big shoutout to [Fogged Lens]([Fogged Lens](https://github.com/FoggedLens)) as well as the various contributors who built upon their work for their efforts on the original [DeFlock](https://github.com/FoggedLens/deflock) project!
 
 ## How it works
 
