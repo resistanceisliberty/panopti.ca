@@ -57,8 +57,22 @@ export interface MapLibreViewHandle {
 }
 
 import { layers as pmLayers, namedFlavor } from '@protomaps/basemaps';
+import { Protocol } from 'pmtiles';
 
-const TILES_URL = 'https://tiles.dontgetflocked.com';
+// Register pmtiles:// once so MapLibre can read vector tiles directly from a
+// PMTiles archive (e.g. a Canada extract on Cloudflare R2) via HTTP range
+// requests — no tile server required.
+maplibregl.addProtocol('pmtiles', new Protocol().tile);
+
+// Basemap config — override via env to use self-hosted infrastructure:
+//   VITE_PMTILES_URL        — PMTiles vector basemap URL; when set, tiles are
+//                             read directly from this archive.
+//   VITE_TILES_URL          — legacy z/x/y tile-server base (fallback when no
+//                             PMTiles URL is configured).
+//   VITE_BASEMAP_ASSETS_URL — Protomaps fonts (glyphs) + sprites base URL.
+const PMTILES_URL = (import.meta.env.VITE_PMTILES_URL as string | undefined) || '';
+const TILES_URL = (import.meta.env.VITE_TILES_URL as string | undefined) || 'https://tiles.dontgetflocked.com';
+const ASSETS_URL = (import.meta.env.VITE_BASEMAP_ASSETS_URL as string | undefined) || 'https://protomaps.github.io/basemaps-assets';
 
 // Map our style IDs to Protomaps flavor names (must match R2 sprites at /sprites/v4/{flavor})
 const FLAVOR_MAP: Record<MapTileStyleId, string> = {
@@ -86,16 +100,19 @@ function buildMapStyle(tileStyleId: MapTileStyleId): maplibregl.StyleSpecificati
     mapLayers = mapLayers.filter((l: any) => l.type !== 'symbol');
   }
 
+  const attribution = '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>';
+  // Read tiles directly from a PMTiles archive when configured; otherwise fall
+  // back to the legacy z/x/y tile server.
+  const protomapsSource: maplibregl.VectorSourceSpecification = PMTILES_URL
+    ? { type: 'vector', url: `pmtiles://${PMTILES_URL}`, attribution }
+    : { type: 'vector', url: `${TILES_URL}/planet.json`, attribution };
+
   return {
     version: 8,
-    glyphs: `${TILES_URL}/fonts/{fontstack}/{range}.pbf`,
-    sprite: `${TILES_URL}/sprites/v4/${flavorName}`,
+    glyphs: `${ASSETS_URL}/fonts/{fontstack}/{range}.pbf`,
+    sprite: `${ASSETS_URL}/sprites/v4/${flavorName}`,
     sources: {
-      protomaps: {
-        type: 'vector',
-        url: `${TILES_URL}/planet.json`,
-        attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>',
-      },
+      protomaps: protomapsSource,
     },
     layers: mapLayers as maplibregl.LayerSpecification[],
   };
