@@ -13,7 +13,7 @@ export function Seo({
   title,
   description,
   path,
-  image = '/deflock-logo.svg',
+  image = '/og-panoptica.png',
   noIndex = false,
 }: SeoProps) {
   const location = useLocation();

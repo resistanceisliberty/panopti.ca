@@ -9,7 +9,7 @@ import { MapPanel } from '@/components/panels/MapPanel';
 import { MobileTabDrawer } from '@/components/panels/MobileTabDrawer';
 import { DensityLegendBar } from '@/components/map/DensityLegendBar';
 import { NetworkAgencyCount } from '@/components/map/NetworkAgencyCount';
-import { Seo, LegacyMapLink, ShareButton, ProductSwitcher } from '@/components/common';
+import { Seo, ShareButton } from '@/components/common';
 import { parseViewportFromURL, writeViewportParams } from '@/utils/urlParams';
 import { useCameraStore, useMapStore, useAppModeStore } from '@/store';
 import { useEmbedMode } from '@/hooks/useEmbedMode';
@@ -269,7 +269,7 @@ export function MapPage() {
 
   const seo = (
     <Seo
-      title="DeFlock Canada | ALPR Camera Map"
+      title="panopti.ca — ALPR Camera Map for Canada"
       description="Explore crowdsourced ALPR (automatic licence plate reader) camera locations across Canada, mapped on OpenStreetMap."
       path="/"
     />
@@ -296,25 +296,14 @@ export function MapPage() {
         <header className="h-12 bg-dark-900 border-b border-dark-600 flex items-center z-50 shrink-0">
           <div className="w-full px-4 lg:px-5">
             <div className="flex items-center justify-between h-12">
-              {/* Logo + Product Switcher */}
+              {/* Logo */}
               <div className="flex items-center gap-1.5 flex-shrink-0">
-                <ProductSwitcher />
-                <a
-                  href="https://deflock.org"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2"
-                >
+                <a href="/" className="flex items-center">
                   <img
-                    src="/deflock-icon.png"
-                    alt="DeFlock Icon"
-                    className="h-7 lg:h-8 w-auto object-contain"
+                    src="/panoptica-dark.svg"
+                    alt="panopti.ca"
+                    className="h-6 lg:h-7 w-auto object-contain"
                   />
-                  <img
-                    src="/deflock-logo.svg"
-                    alt="DeFlock Logo"
-                    className="h-7 lg:h-8 w-auto object-contain"
-                  />
-                  <span className="text-dark-400 text-[11px] font-medium tracking-[0.2em] uppercase hidden sm:inline self-end mb-[3px]">Canada</span>
                 </a>
               </div>
 
@@ -358,8 +347,6 @@ export function MapPage() {
 
               <div className="hidden lg:flex items-center gap-4 flex-shrink-0">
                 <ShareButton variant="header" />
-                <div className="w-px h-4 bg-dark-600" />
-                <LegacyMapLink variant="header" />
               </div>
             </div>
           </div>
@@ -397,7 +384,6 @@ export function MapPage() {
             </div>
             <div className="border-t border-dark-600 mt-1 pt-1 px-4 pb-2 space-y-0.5">
               <ShareButton variant="menu-item" />
-              <LegacyMapLink variant="menu-item" />
             </div>
           </nav>
         )}
@@ -416,7 +402,7 @@ export function MapPage() {
 
           {/* Map */}
           <main className="flex-1 relative w-full lg:w-auto">
-            <h1 className="sr-only">DeFlock ALPR Camera Map</h1>
+            <h1 className="sr-only">panopti.ca — ALPR Camera Map for Canada</h1>
             <MapLibreView
               ref={mapRef}
               mapKey={mapKey}

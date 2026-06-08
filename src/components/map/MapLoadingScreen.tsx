@@ -76,15 +76,10 @@ export function MapLoadingScreen({
         <div className="w-full px-3 lg:px-6">
           <div className="flex items-center justify-between h-14 lg:h-16">
             {/* Logo */}
-            <a href="https://deflock.org" className="flex items-center gap-2 group">
+            <a href="/" className="flex items-center gap-2 group">
               <img
-                src="/deflock-icon.png"
-                alt="DeFlock Icon"
-                className="h-8 lg:h-10 w-auto object-contain transition-all duration-300 group-hover:scale-110"
-              />
-              <img
-                src="/deflock-logo.svg"
-                alt="DeFlock Logo"
+                src="/panoptica-dark.svg"
+                alt="panopti.ca"
                 className="h-8 lg:h-10 w-auto object-contain transition-all duration-300 group-hover:scale-110"
               />
             </a>
@@ -127,13 +122,8 @@ export function MapLoadingScreen({
           <div className="relative z-10 flex flex-col items-center gap-6 px-6 max-w-md text-center">
             <div className="flex items-center gap-2 lg:gap-3 opacity-50">
               <img
-                src="/deflock-icon.png"
-                alt="DeFlock Icon"
-                className="h-12 lg:h-20 w-auto object-contain"
-              />
-              <img
-                src="/deflock-logo.svg"
-                alt="DeFlock"
+                src="/panoptica-dark.svg"
+                alt="panopti.ca"
                 className="h-12 lg:h-20 w-auto object-contain"
               />
             </div>
@@ -161,13 +151,8 @@ export function MapLoadingScreen({
             {/* Logo */}
             <div className="flex items-center gap-2 lg:gap-3">
               <img
-                src="/deflock-icon.png"
-                alt="DeFlock Icon"
-                className="h-12 lg:h-24 w-auto object-contain"
-              />
-              <img
-                src="/deflock-logo.svg"
-                alt="DeFlock"
+                src="/panoptica-dark.svg"
+                alt="panopti.ca"
                 className="h-12 lg:h-24 w-auto object-contain"
               />
             </div>
