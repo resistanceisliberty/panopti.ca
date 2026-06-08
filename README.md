@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-Name after the prototypical metaphor for mass surveillance, Jeremy Bentham's [Panopticon](https://www.ebsco.com/research-starters/history/panopticon), this project is a Canada-focused map of automatic licence plate readers (ALPRs), built on
+Named after the prototypical metaphor for mass surveillance, Jeremy Bentham's [Panopticon](https://www.ebsco.com/research-starters/history/panopticon), this project is a Canada-focused map of automatic licence plate readers (ALPRs), built on
 crowdsourced [OpenStreetMap](https://www.openstreetmap.org) data. It shows where
 ALPR / Flock-style surveillance cameras are deployed across Canada so people can
 see them.
