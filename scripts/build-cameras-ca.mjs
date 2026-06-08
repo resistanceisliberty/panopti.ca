@@ -29,8 +29,14 @@ const MIN_CAMERA_COUNT = Number(process.env.MIN_CAMERA_COUNT ?? 50);
 const OVERPASS_ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
   'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
 ];
+
+// Public Overpass instances frequently return transient 504/429s under load, so
+// retry the whole endpoint list a few times with backoff before giving up.
+const MAX_ROUNDS = 4;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Mirrors worker/src/fetchers/cameras.ts. `out meta` gives tags + version +
 // timestamp; the recursion (`>`) emits member nodes so ways can be centroided.
@@ -81,33 +87,50 @@ function parseDirection(value) {
   return [null, token || null];
 }
 
+async function tryEndpoint(endpoint) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 300_000);
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'DeFlockCanada/1.0 (+https://github.com/) cameras-ca refresh',
+      },
+      body: new URLSearchParams({ data: OVERPASS_QUERY }),
+      signal: controller.signal,
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (!data.elements?.length) throw new Error('empty response');
+    return data;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 async function queryOverpass() {
   const errors = [];
-  for (const endpoint of OVERPASS_ENDPOINTS) {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 300_000);
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'DeFlockCanada/1.0 (+https://github.com/) cameras-ca refresh',
-        },
-        body: new URLSearchParams({ data: OVERPASS_QUERY }),
-        signal: controller.signal,
-      });
-      clearTimeout(timeout);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (!data.elements?.length) throw new Error('empty response');
-      console.log(`Overpass OK via ${endpoint}: ${data.elements.length} elements`);
-      return data;
-    } catch (err) {
-      console.warn(`Overpass endpoint ${endpoint} failed: ${err.message}`);
-      errors.push(err);
+  // Each round tries every endpoint once; between rounds, back off to let
+  // transiently-overloaded public instances (504/429) recover.
+  for (let round = 1; round <= MAX_ROUNDS; round++) {
+    for (const endpoint of OVERPASS_ENDPOINTS) {
+      try {
+        const data = await tryEndpoint(endpoint);
+        console.log(`Overpass OK via ${endpoint}: ${data.elements.length} elements (round ${round})`);
+        return data;
+      } catch (err) {
+        console.warn(`[round ${round}] ${endpoint} failed: ${err.message}`);
+        errors.push(`${endpoint}: ${err.message}`);
+      }
+    }
+    if (round < MAX_ROUNDS) {
+      const backoffMs = round * 30_000; // 30s, 60s, 90s
+      console.warn(`All endpoints failed round ${round}; retrying in ${backoffMs / 1000}s…`);
+      await sleep(backoffMs);
     }
   }
-  throw new Error(`All Overpass endpoints failed: ${errors.map((e) => e.message).join('; ')}`);
+  throw new Error(`All Overpass endpoints failed after ${MAX_ROUNDS} rounds: ${errors.join('; ')}`);
 }
 
 function toCamera(el, lat, lon) {
