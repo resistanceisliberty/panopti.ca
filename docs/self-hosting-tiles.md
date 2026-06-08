@@ -53,7 +53,7 @@ Then, in the bucket settings:
 
 ```json
 [{
-  "AllowedOrigins": ["https://alpr-map-canada.pages.dev", "https://yourdomain.ca"],
+  "AllowedOrigins": ["https://panopti.ca", "https://maps.panopti.ca"],
   "AllowedMethods": ["GET", "HEAD"],
   "AllowedHeaders": ["range", "if-match"],
   "ExposeHeaders": ["etag", "content-length", "content-range", "accept-ranges"]
