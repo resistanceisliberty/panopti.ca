@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://maps.deflock.org/sitemap.xml
+Sitemap: https://maps.panopti.ca/sitemap.xml
