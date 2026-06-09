@@ -307,7 +307,7 @@ export function MapPage() {
             <div className="flex items-center justify-between h-12">
               {/* Logo */}
               <div className="flex items-center gap-1.5 flex-shrink-0">
-                <a href="/" className="flex items-center">
+                <a href="https://panopti.ca" className="flex items-center">
                   <img
                     src="/panoptica-dark.svg"
                     alt="panopti.ca"
