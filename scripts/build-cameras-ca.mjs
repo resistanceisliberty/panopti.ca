@@ -111,6 +111,32 @@ function parseDirection(value) {
   return [null, token || null];
 }
 
+/**
+ * Parse a camera facing tag value. Cameras tag the bearing as `camera:direction`
+ * (preferred) or the plain `direction` key, and may give several semicolon-
+ * separated bearings for multiple cameras on one pole (e.g. "0;90"). Returns the
+ * primary bearing plus the full list when there's more than one.
+ */
+function parseDirectionTag(value) {
+  if (!value) return { direction: null, directionCardinal: null, directions: null };
+  const parts = String(value).split(';').map((s) => s.trim()).filter(Boolean);
+  const bearings = [];
+  for (const part of parts) {
+    const [deg] = parseDirection(part);
+    if (deg !== null) bearings.push(deg);
+  }
+  if (bearings.length === 0) {
+    const [, card] = parseDirection(value);
+    return { direction: null, directionCardinal: card, directions: null };
+  }
+  const [, primaryCardinal] = parseDirection(parts[0]);
+  return {
+    direction: bearings[0],
+    directionCardinal: primaryCardinal,
+    directions: bearings.length > 1 ? bearings : null,
+  };
+}
+
 async function tryEndpoint(endpoint) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 300_000);
@@ -159,13 +185,16 @@ async function queryOverpass() {
 
 function toCamera(el, lat, lon) {
   const tags = el.tags ?? {};
-  const [direction, directionCardinal] = parseDirection(tags['camera:direction']);
+  const { direction, directionCardinal, directions } = parseDirectionTag(
+    tags['camera:direction'] ?? tags['direction']
+  );
   const cam = { osmId: el.id, osmType: el.type, lat, lon };
   const brand = tags.brand || tags.manufacturer;
   if (tags.operator) cam.operator = tags.operator;
   if (brand) cam.brand = brand;
   if (direction !== null) cam.direction = direction;
   if (directionCardinal !== null) cam.directionCardinal = directionCardinal;
+  if (directions) cam.directions = directions;
   if (tags['surveillance:zone']) cam.surveillanceZone = tags['surveillance:zone'];
   if (tags['camera:mount']) cam.mountType = tags['camera:mount'];
   if (tags.ref) cam.ref = tags.ref;
