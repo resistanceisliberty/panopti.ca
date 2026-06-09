@@ -119,6 +119,17 @@ function CameraTypeToggle() {
           );
         })}
       </div>
+      {/* Colour key — matches the map markers */}
+      <div className="flex items-center gap-4 mt-2.5 text-[11px] text-dark-400">
+        <span className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: '#0080BC' }} />
+          ALPR
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: '#F59E0B' }} />
+          Gov CCTV
+        </span>
+      </div>
     </div>
   );
 }

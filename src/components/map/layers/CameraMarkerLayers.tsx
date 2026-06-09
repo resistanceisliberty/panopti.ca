@@ -5,6 +5,18 @@ import { useMapStore } from '../../../store';
 import { DIRECTIONAL_ZONE, CAMERA_DETECTION, ZONE_SAFETY_MULTIPLIERS } from '../../../services/routingConfig';
 import type { ALPRCamera } from '../../../types';
 
+// Brand-based marker colors: ALPRs in blue, government CCTV in amber
+// (blue/amber is a colorblind-safe pair).
+const CCTV_BRAND = 'Government CCTV';
+const COLORS = {
+  alpr: { core: '#0080BC', glow: '#4DA6FF', stroke: '#93CBFF', coneLine: '#0080BC' },
+  cctv: { core: '#F59E0B', glow: '#FBBF24', stroke: '#FCD34D', coneLine: '#D97706' },
+};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const IS_CCTV: any = ['==', ['get', 'brand'], CCTV_BRAND];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const byBrand = (cctvVal: string, alprVal: string): any => ['case', IS_CCTV, cctvVal, alprVal];
+
 // Helper to create a direction cone polygon from a point and direction
 // Uses the same parameters as the routing algorithm for consistency
 function createDirectionCone(
@@ -98,16 +110,13 @@ const clusterLayer: maplibregl.LayerSpecification = {
   source: 'cameras',
   filter: ['has', 'point_count'],
   paint: {
+    // Colour a cluster by its dominant device type (size is encoded by radius):
+    // amber if at least half its points are government CCTV, otherwise blue.
     'circle-color': [
-      'step',
-      ['get', 'point_count'],
-      '#4DA6FF', // Blue for small clusters
-      5,
-      '#0080BC', // Darker blue for medium
-      20,
-      '#1565C0', // Even darker for large
-      50,
-      '#0D47A1', // Darkest for huge
+      'case',
+      ['>=', ['*', 2, ['coalesce', ['get', 'cctv'], 0]], ['get', 'point_count']],
+      COLORS.cctv.core,
+      COLORS.alpr.core,
     ],
     'circle-radius': [
       'step',
@@ -150,10 +159,10 @@ const unclusteredPointLayer: maplibregl.LayerSpecification = {
   source: 'cameras',
   filter: ['!', ['has', 'point_count']],
   paint: {
-    'circle-color': '#0080BC',
+    'circle-color': byBrand(COLORS.cctv.core, COLORS.alpr.core),
     'circle-radius': 6,
     'circle-stroke-width': 2,
-    'circle-stroke-color': '#93CBFF',
+    'circle-stroke-color': byBrand(COLORS.cctv.stroke, COLORS.alpr.stroke),
     'circle-opacity': 1,
   },
 };
@@ -165,7 +174,7 @@ const unclusteredGlowLayer: maplibregl.LayerSpecification = {
   source: 'cameras',
   filter: ['!', ['has', 'point_count']],
   paint: {
-    'circle-color': '#4DA6FF',
+    'circle-color': byBrand(COLORS.cctv.glow, COLORS.alpr.glow),
     'circle-radius': 16,
     'circle-opacity': 0.4,
     'circle-blur': 0.5,
@@ -179,7 +188,7 @@ const directionConeLayer: maplibregl.LayerSpecification = {
   source: 'direction-cones',
   minzoom: 12, // Only show when zoomed in past cluster level
   paint: {
-    'fill-color': '#4DA6FF',
+    'fill-color': byBrand(COLORS.cctv.glow, COLORS.alpr.glow),
     'fill-opacity': 0.35,
   },
 };
@@ -191,7 +200,7 @@ const directionConeOutlineLayer: maplibregl.LayerSpecification = {
   source: 'direction-cones',
   minzoom: 12, // Only show when zoomed in past cluster level
   paint: {
-    'line-color': '#0080BC',
+    'line-color': byBrand(COLORS.cctv.coneLine, COLORS.alpr.coneLine),
     'line-width': 2,
     'line-opacity': 0.7,
   },
@@ -340,7 +349,7 @@ export function CameraMarkerLayers({ cameras, visible, clustered, crossfadeZoom 
       const ts = camera.osmTimestamp ? new Date(camera.osmTimestamp).getTime() : 0;
       for (const bearing of bearings) {
         const cone = createDirectionCone(camera.lon, camera.lat, bearing);
-        cone.properties = { ...cone.properties, ts };
+        cone.properties = { ...cone.properties, ts, brand: camera.brand || '' };
         features.push(cone);
       }
     }
@@ -368,6 +377,7 @@ export function CameraMarkerLayers({ cameras, visible, clustered, crossfadeZoom 
         cluster={clustered}
         clusterMaxZoom={11}
         clusterRadius={35}
+        clusterProperties={{ cctv: ['+', ['case', IS_CCTV, 1, 0]] }}
       >
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <Layer {...unclusteredGlowLayer} layout={{ visibility: cameraLayerVisibility }} paint={(crossfadePaints?.glow ?? unclusteredGlowLayer.paint) as any} minzoom={crossfadeZoom ?? unclusteredGlowLayer.minzoom} />
