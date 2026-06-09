@@ -6,7 +6,7 @@ import type { BoundaryLevel } from '../../services/boundaryDataService';
 import { BottomSheet, type SnapPoint } from '../common/BottomSheet';
 import { HeatmapControls } from '../../modes/heatmap/HeatmapControls';
 import { HeatmapLegend } from '../../modes/heatmap/HeatmapLegend';
-import { ChevronLeft, ChevronRight, ChevronDown, Map as MapIcon, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronDown, Map as MapIcon, Search, ExternalLink } from 'lucide-react';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const SURVEILLANCE_ZONES = [
@@ -83,6 +83,43 @@ function SubLabel({ children }: { children: React.ReactNode }) {
     <span className="block text-[10px] font-semibold text-dark-500 uppercase tracking-[0.08em] mb-2">
       {children}
     </span>
+  );
+}
+
+// ─── Camera Type Scope Toggle (ALPR / Government CCTV) ───────────────────────
+const CAMERA_TYPE_OPTIONS: { id: 'all' | 'alpr' | 'cctv'; label: string }[] = [
+  { id: 'alpr', label: 'ALPRs' },
+  { id: 'cctv', label: 'Gov CCTV' },
+  { id: 'all', label: 'Both' },
+];
+
+function CameraTypeToggle() {
+  const cameraType = useCameraStore((s) => s.cameraType);
+  const setCameraType = useCameraStore((s) => s.setCameraType);
+
+  return (
+    <div className="px-6 pt-4">
+      <SubLabel>Show</SubLabel>
+      <div className="grid grid-cols-3 gap-1 p-1 bg-dark-800 rounded-lg border border-dark-700/50">
+        {CAMERA_TYPE_OPTIONS.map((o) => {
+          const active = cameraType === o.id;
+          return (
+            <button
+              key={o.id}
+              onClick={() => setCameraType(o.id)}
+              aria-pressed={active}
+              className={`px-2 py-1.5 rounded-md text-[11px] font-semibold transition-all duration-150 ${
+                active
+                  ? 'bg-accent text-white shadow-sm'
+                  : 'text-dark-300 hover:text-white hover:bg-dark-700/50'
+              }`}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -555,6 +592,9 @@ export function MapPanelContent() {
 
   return (
     <div className="flex flex-col">
+      {/* ALPR / Government CCTV scope toggle */}
+      <CameraTypeToggle />
+
       {/* Hero: Cameras in View */}
       <div className="px-6 pt-4 pb-3">
         <div className="bg-gradient-to-br from-accent/10 to-accent/[0.03] border border-accent/15 rounded-xl px-5 py-4 text-center">
@@ -818,6 +858,18 @@ export function MapPanel() {
             </a>{' '}
             contributors.
           </p>
+          <p className="text-xs text-dark-400 leading-relaxed mt-2">
+            Spot an ALPR or government CCTV camera that&apos;s not on the map? Anyone can add it to OpenStreetMap &mdash; it&apos;ll show up here after the next refresh.
+          </p>
+          <a
+            href="https://panopti.ca/report"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-lg bg-accent/10 hover:bg-accent/20 border border-accent/20 text-accent text-xs font-semibold transition-colors"
+          >
+            How to contribute
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
         </div>
 
         {/* Scrollable content */}

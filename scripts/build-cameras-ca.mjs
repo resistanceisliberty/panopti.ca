@@ -3,9 +3,12 @@
  * Regenerates public/cameras-ca.json from OpenStreetMap.
  *
  * Queries the Overpass API for every `surveillance:type=ALPR` feature in
- * Canada and writes them as the flat-array format the map app expects
- * (see src/services/cameraDataService.ts). Dependency-free: uses Node's
- * global fetch (Node 18+) and built-ins only.
+ * Canada, plus government-operated CCTV (`surveillance:type=camera` whose
+ * operator looks governmental, or traffic-zone cameras), and writes them as
+ * the flat-array format the map app expects (see
+ * src/services/cameraDataService.ts). Government CCTV is labelled with
+ * brand "Government CCTV" so the map's ALPR/CCTV toggle can separate them.
+ * Dependency-free: uses Node's global fetch (Node 18+) and built-ins only.
  *
  * Run locally:  node scripts/build-cameras-ca.mjs
  * In CI:        invoked nightly by .github/workflows/update-cameras-ca.yml
@@ -38,6 +41,26 @@ const OVERPASS_ENDPOINTS = [
 const MAX_ROUNDS = 4;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Brand label applied to government CCTV so the map can toggle it apart from ALPRs.
+const CCTV_BRAND = 'Government CCTV';
+
+// Government-CCTV is sparsely tagged with operator:type, so we also match
+// recognizable government operator names and traffic-zone cameras. This is a
+// discovery heuristic (some false positives / misses) — see /report on the portal.
+const GOV_OPERATOR_RE =
+  'Ville de|City of|Ministry of|Ministère|Police|School Board|Commission scolaire|' +
+  'Universit|Region|Régie|RCMP|GRC|County|Comté|Transit|Metro|Translink|gouvernement|Province|District';
+
+const CCTV = '["man_made"="surveillance"]["surveillance:type"="camera"]';
+const CCTV_CLAUSES = [
+  `node${CCTV}["operator:type"~"government|public|council|military"](area.ca);`,
+  `way${CCTV}["operator:type"~"government|public|council|military"](area.ca);`,
+  `node${CCTV}["operator"~"${GOV_OPERATOR_RE}",i](area.ca);`,
+  `way${CCTV}["operator"~"${GOV_OPERATOR_RE}",i](area.ca);`,
+  `node${CCTV}["surveillance:zone"="traffic"](area.ca);`,
+  `way${CCTV}["surveillance:zone"="traffic"](area.ca);`,
+].join('\n  ');
+
 // Mirrors worker/src/fetchers/cameras.ts. `out meta` gives tags + version +
 // timestamp; the recursion (`>`) emits member nodes so ways can be centroided.
 const OVERPASS_QUERY = `[out:json][timeout:300];
@@ -45,6 +68,7 @@ area["ISO3166-1"="CA"]->.ca;
 (
   node["man_made"="surveillance"]["surveillance:type"="ALPR"](area.ca);
   way["man_made"="surveillance"]["surveillance:type"="ALPR"](area.ca);
+  ${CCTV_CLAUSES}
 );
 out meta;
 >;
@@ -162,13 +186,21 @@ function build(data) {
   }
 
   const cameras = [];
+  let alprCount = 0;
+  let cctvCount = 0;
   for (const el of data.elements) {
-    // Only tagged ALPR elements carry tags; skel-only nodes have none.
-    const isAlpr = el.tags?.['surveillance:type'] === 'ALPR';
-    if (!isAlpr) continue;
+    // Only tagged ALPR/camera elements carry tags; skel-only member nodes have none.
+    const stype = el.tags?.['surveillance:type'];
+    const isAlpr = stype === 'ALPR';
+    // Every camera in the response matched a government clause (see OVERPASS_QUERY).
+    const isCCTV = stype === 'camera';
+    if (!isAlpr && !isCCTV) continue;
 
+    let lat;
+    let lon;
     if (el.type === 'node' && typeof el.lat === 'number') {
-      cameras.push(toCamera(el, el.lat, el.lon));
+      lat = el.lat;
+      lon = el.lon;
     } else if (el.type === 'way' && Array.isArray(el.nodes) && el.nodes.length) {
       let sumLat = 0;
       let sumLon = 0;
@@ -181,19 +213,34 @@ function build(data) {
           n++;
         }
       }
-      if (n > 0) cameras.push(toCamera(el, sumLat / n, sumLon / n));
+      if (!n) continue;
+      lat = sumLat / n;
+      lon = sumLon / n;
+    } else {
+      continue;
     }
+
+    const cam = toCamera(el, lat, lon);
+    if (isCCTV) {
+      cam.brand = CCTV_BRAND; // override any camera brand so the map can group them
+      cctvCount++;
+    } else {
+      alprCount++;
+    }
+    cameras.push(cam);
   }
-  return cameras;
+  return { cameras, alprCount, cctvCount };
 }
 
 async function main() {
   const data = await queryOverpass();
-  const cameras = build(data);
+  const { cameras, alprCount, cctvCount } = build(data);
 
-  if (cameras.length < MIN_CAMERA_COUNT) {
+  // Sanity floor on ALPRs (the core dataset) only — a partial Overpass response
+  // must never overwrite good data. Government CCTV is supplementary and may vary.
+  if (alprCount < MIN_CAMERA_COUNT) {
     throw new Error(
-      `Refusing to write: only ${cameras.length} cameras (< MIN_CAMERA_COUNT ${MIN_CAMERA_COUNT}). ` +
+      `Refusing to write: only ${alprCount} ALPRs (< MIN_CAMERA_COUNT ${MIN_CAMERA_COUNT}). ` +
         `Likely a partial Overpass response.`
     );
   }
@@ -201,10 +248,9 @@ async function main() {
   await writeFile(OUTPUT_PATH, JSON.stringify(cameras));
 
   const operators = new Set(cameras.map((c) => c.operator).filter(Boolean));
-  const brands = new Set(cameras.map((c) => c.brand).filter(Boolean));
   console.log(
     `Wrote ${cameras.length} cameras → ${OUTPUT_PATH} ` +
-      `(${operators.size} operators, ${brands.size} brands)`
+      `(${alprCount} ALPR, ${cctvCount} gov CCTV; ${operators.size} operators)`
   );
 }
 

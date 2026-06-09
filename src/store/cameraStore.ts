@@ -7,10 +7,19 @@ import {
   getUniqueBrands 
 } from '../services/cameraDataService';
 import { 
-  buildSpatialGrid, 
-  getCamerasInBoundsFromGrid, 
-  type SpatialGrid 
+  buildSpatialGrid,
+  getCamerasInBoundsFromGrid,
+  type SpatialGrid
 } from '../utils/geo';
+
+// ── Local-only: government CCTV nodes carry this brand label in the dataset ──
+const CCTV_BRAND = 'Government CCTV';
+export type CameraTypeFilter = 'all' | 'alpr' | 'cctv';
+function applyCameraTypeFilter(list: ALPRCamera[], type: CameraTypeFilter): ALPRCamera[] {
+  if (type === 'alpr') return list.filter((c) => c.brand !== CCTV_BRAND);
+  if (type === 'cctv') return list.filter((c) => c.brand === CCTV_BRAND);
+  return list;
+}
 
 /** Get the Monday (YYYY-MM-DD) of the ISO week containing the given ISO timestamp */
 function getWeekMonday(isoTimestamp: string): string {
@@ -36,6 +45,7 @@ interface CameraState {
   isPreloading: boolean;
   error: string | null;
   filters: CameraFilters;
+  cameraType: CameraTypeFilter;
   availableOperators: string[];
   availableBrands: string[];
 
@@ -65,6 +75,7 @@ interface CameraState {
   ensureCamerasLoaded: () => Promise<void>;
   retryCameraLoad: () => Promise<void>;
   setFilters: (filters: Partial<CameraFilters>) => void;
+  setCameraType: (type: CameraTypeFilter) => void;
   clearFilters: () => void;
   getCameraById: (osmId: number) => ALPRCamera | undefined;
   getCamerasInBounds: (north: number, south: number, east: number, west: number) => ALPRCamera[];
@@ -97,6 +108,7 @@ export const useCameraStore = create<CameraState>((set, get) => ({
     mountTypes: [],
     showAll: true,
   },
+  cameraType: 'alpr',
   availableOperators: [],
   availableBrands: [],
   timelineMinDate: '2017-04',
@@ -223,7 +235,7 @@ export const useCameraStore = create<CameraState>((set, get) => ({
 
         set((state) => ({
           cameras,
-          filteredCameras: cameras,
+          filteredCameras: applyCameraTypeFilter(cameras, state.cameraType),
           spatialGrid,
           availableOperators: operators,
           availableBrands: brands,
@@ -358,7 +370,7 @@ export const useCameraStore = create<CameraState>((set, get) => ({
 
         set((state) => ({
           cameras,
-          filteredCameras: cameras,
+          filteredCameras: applyCameraTypeFilter(cameras, state.cameraType),
           spatialGrid,
           availableOperators: operators,
           availableBrands: brands,
@@ -395,7 +407,7 @@ export const useCameraStore = create<CameraState>((set, get) => ({
   },
 
   setFilters: (newFilters: Partial<CameraFilters>) => {
-    const { cameras, filters, dataVersion } = get();
+    const { cameras, filters, dataVersion, cameraType } = get();
     const updatedFilters = { ...filters, ...newFilters };
 
     // Apply filters
@@ -408,6 +420,9 @@ export const useCameraStore = create<CameraState>((set, get) => ({
         (c) => !c.osmTimestamp || c.osmTimestamp <= cutoff
       );
     }
+
+    // ALPR / Government-CCTV scope (always applies, independent of showAll)
+    filtered = applyCameraTypeFilter(filtered, cameraType);
 
     if (!updatedFilters.showAll) {
       if (updatedFilters.operators.length > 0) {
@@ -445,8 +460,31 @@ export const useCameraStore = create<CameraState>((set, get) => ({
     });
   },
 
+  // Top-level scope toggle: show ALPRs + CCTV ('all'), just ALPRs, or just CCTV.
+  // Re-applies the currently-active detailed filters on top of the new scope.
+  setCameraType: (type: CameraTypeFilter) => {
+    const { cameras, filters, dataVersion } = get();
+    let filtered = cameras;
+
+    if (filters.timelineDate) {
+      const cutoff = filters.timelineDate + 'T23:59:59Z';
+      filtered = filtered.filter((c) => !c.osmTimestamp || c.osmTimestamp <= cutoff);
+    }
+
+    filtered = applyCameraTypeFilter(filtered, type);
+
+    if (!filters.showAll) {
+      if (filters.operators.length > 0) filtered = filtered.filter((c) => c.operator && filters.operators.includes(c.operator));
+      if (filters.brands.length > 0) filtered = filtered.filter((c) => c.brand && filters.brands.includes(c.brand));
+      if (filters.surveillanceZones.length > 0) filtered = filtered.filter((c) => c.surveillanceZone && filters.surveillanceZones.includes(c.surveillanceZone));
+      if (filters.mountTypes.length > 0) filtered = filtered.filter((c) => c.mountType && filters.mountTypes.includes(c.mountType));
+    }
+
+    set({ cameraType: type, filteredCameras: filtered, dataVersion: dataVersion + 1, error: null });
+  },
+
   clearFilters: () => {
-    const { cameras } = get();
+    const { cameras, cameraType } = get();
     set({
       filters: {
         operators: [],
@@ -456,7 +494,7 @@ export const useCameraStore = create<CameraState>((set, get) => ({
         showAll: true,
         timelineDate: undefined,
       },
-      filteredCameras: cameras,
+      filteredCameras: applyCameraTypeFilter(cameras, cameraType),
     });
   },
 
@@ -470,7 +508,7 @@ export const useCameraStore = create<CameraState>((set, get) => ({
   },
 
   applyPendingFilters: () => {
-    const { pendingFilters, cameras, filters, dataVersion } = get();
+    const { pendingFilters, cameras, filters, dataVersion, cameraType } = get();
     const hasAnyFilter =
       pendingFilters.brands.length > 0 ||
       pendingFilters.operators.length > 0 ||
@@ -492,6 +530,8 @@ export const useCameraStore = create<CameraState>((set, get) => ({
       const cutoff = updatedFilters.timelineDate + 'T23:59:59Z';
       filtered = filtered.filter((c) => !c.osmTimestamp || c.osmTimestamp <= cutoff);
     }
+
+    filtered = applyCameraTypeFilter(filtered, cameraType);
 
     if (!updatedFilters.showAll) {
       if (updatedFilters.brands.length > 0) {
@@ -517,7 +557,7 @@ export const useCameraStore = create<CameraState>((set, get) => ({
   },
 
   resetAllFilters: () => {
-    const { cameras } = get();
+    const { cameras, cameraType } = get();
     set({
       pendingFilters: { brands: [], operators: [], surveillanceZones: [], mountTypes: [] },
       filters: {
@@ -528,7 +568,7 @@ export const useCameraStore = create<CameraState>((set, get) => ({
         showAll: true,
         timelineDate: undefined,
       },
-      filteredCameras: cameras,
+      filteredCameras: applyCameraTypeFilter(cameras, cameraType),
     });
   },
 

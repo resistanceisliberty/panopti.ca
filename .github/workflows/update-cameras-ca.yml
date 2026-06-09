@@ -1,6 +1,6 @@
-name: Update Canada ALPR data
+name: Update Canada ALPR + CCTV data
 
-# Refreshes public/cameras-ca.json from OpenStreetMap (via Overpass) and commits
+# Refreshes public/cameras-ca.json (ALPRs + government CCTV) from OpenStreetMap and commits
 # any changes back to the repo. Runs nightly and on demand.
 
 on:
@@ -39,8 +39,8 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add public/cameras-ca.json
           if git diff --staged --quiet; then
-            echo "No changes to Canada ALPR data."
+            echo "No changes to Canada camera data."
           else
-            git commit -m "chore(data): refresh Canada ALPR data ($(date -u +%Y-%m-%d))"
+            git commit -m "chore(data): refresh Canada camera data ($(date -u +%Y-%m-%d))"
             git push
           fi
