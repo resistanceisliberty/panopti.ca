@@ -24,7 +24,7 @@ A big shoutout to **[Fogged Lens](https://github.com/FoggedLens)** as well as th
   - **ALPRs** — nodes tagged `surveillance:type=ALPR`.
   - **Government CCTV** — `surveillance:type=camera` cameras that look
     government-operated (`operator:type=government`, a recognizable government
-    operator name, or a traffic-zone camera), labelled `brand=Government CCTV`.
+    operator name, or a traffic-zone camera), labelled `brand=Government CCTVs`.
     See [panopti.ca/report](https://panopti.ca/report) for how to add one.
 
   Both are bundled as [`public/cameras-ca.json`](public/cameras-ca.json) and

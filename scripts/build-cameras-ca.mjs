@@ -7,7 +7,7 @@
  * operator looks governmental, or traffic-zone cameras), and writes them as
  * the flat-array format the map app expects (see
  * src/services/cameraDataService.ts). Government CCTV is labelled with
- * brand "Government CCTV" so the map's ALPR/CCTV toggle can separate them.
+ * brand "Government CCTVs" so the map's ALPR/CCTV toggle can separate them.
  * Dependency-free: uses Node's global fetch (Node 18+) and built-ins only.
  *
  * Run locally:  node scripts/build-cameras-ca.mjs
@@ -42,7 +42,7 @@ const MAX_ROUNDS = 4;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // Brand label applied to government CCTV so the map can toggle it apart from ALPRs.
-const CCTV_BRAND = 'Government CCTV';
+const CCTV_BRAND = 'Government CCTVs';
 
 // Government-CCTV is sparsely tagged with operator:type, so we also match
 // recognizable government operator names and traffic-zone cameras. This is a

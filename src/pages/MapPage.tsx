@@ -295,7 +295,7 @@ export function MapPage() {
         {!isEmbed && (
           <div className="shrink-0 bg-dark-800 border-b border-dark-700 px-3 py-1.5 text-center text-[11px] sm:text-xs text-dark-300 leading-snug z-50">
             Built on{' '}
-            <a href="https://deflock.org/" target="_blank" rel="noopener noreferrer" className="text-accent font-semibold hover:underline">DeFlock</a>
+            <a href="https://github.com/FoggedLens/deflock" target="_blank" rel="noopener noreferrer" className="text-accent font-semibold hover:underline">DeFlock</a>
             , the original ALPR-mapping project — for United States ALPR data, visit{' '}
             <a href="https://deflock.org/" target="_blank" rel="noopener noreferrer" className="text-accent font-semibold hover:underline">deflock.org</a>.
           </div>

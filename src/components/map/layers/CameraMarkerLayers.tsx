@@ -7,7 +7,7 @@ import type { ALPRCamera } from '../../../types';
 
 // Brand-based marker colors: ALPRs in blue, government CCTV in amber
 // (blue/amber is a colorblind-safe pair).
-const CCTV_BRAND = 'Government CCTV';
+const CCTV_BRAND = 'Government CCTVs';
 const COLORS = {
   alpr: { core: '#0080BC', glow: '#4DA6FF', stroke: '#93CBFF', coneLine: '#0080BC' },
   cctv: { core: '#F59E0B', glow: '#FBBF24', stroke: '#FCD34D', coneLine: '#D97706' },

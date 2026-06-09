@@ -13,7 +13,7 @@ import {
 } from '../utils/geo';
 
 // ── Local-only: government CCTV nodes carry this brand label in the dataset ──
-const CCTV_BRAND = 'Government CCTV';
+const CCTV_BRAND = 'Government CCTVs';
 export type CameraTypeFilter = 'all' | 'alpr' | 'cctv';
 function applyCameraTypeFilter(list: ALPRCamera[], type: CameraTypeFilter): ALPRCamera[] {
   if (type === 'alpr') return list.filter((c) => c.brand !== CCTV_BRAND);

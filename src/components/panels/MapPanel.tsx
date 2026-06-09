@@ -89,7 +89,7 @@ function SubLabel({ children }: { children: React.ReactNode }) {
 // ─── Camera Type Scope Toggle (ALPR / Government CCTV) ───────────────────────
 const CAMERA_TYPE_OPTIONS: { id: 'all' | 'alpr' | 'cctv'; label: string }[] = [
   { id: 'alpr', label: 'ALPRs' },
-  { id: 'cctv', label: 'Gov CCTV' },
+  { id: 'cctv', label: 'Gov CCTVs' },
   { id: 'all', label: 'Both' },
 ];
 
@@ -127,7 +127,7 @@ function CameraTypeToggle() {
         </span>
         <span className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: '#F59E0B' }} />
-          Gov CCTV
+          Gov CCTVs
         </span>
       </div>
     </div>
