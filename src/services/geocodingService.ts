@@ -271,7 +271,12 @@ function nominatimToResult(result: NominatimResult): GeocodingResult {
 // PROXY GEOCODING (Primary - custom proxy returning Nominatim-format results)
 // ============================================================================
 
-const GEOCODE_PROXY_URL = (import.meta.env.VITE_GEOCODE_API_URL as string | undefined) || 'https://api.deflock.org/geocode/multi';
+// Optional fallback geocoder. There is deliberately NO third-party default:
+// for a privacy-focused, anti-surveillance tool, user search queries (which can
+// be home addresses) must not be shipped to an external proxy that wasn't
+// explicitly opted into. Set VITE_GEOCODE_API_URL to a self-hosted Nominatim-
+// format endpoint to enable it; otherwise Photon is the sole provider.
+const GEOCODE_PROXY_URL = (import.meta.env.VITE_GEOCODE_API_URL as string | undefined) || '';
 
 /**
  * Search using the custom geocoding proxy (returns Nominatim-format JSON).
@@ -306,16 +311,19 @@ async function searchProxy(query: string, source: string, signal?: AbortSignal):
 type GeocodingProvider = (query: string, source: string, signal?: AbortSignal) => Promise<GeocodingResult[]>;
 
 /**
- * Search through providers in order: Photon → Proxy (fallback).
+ * Search through providers in order: Photon, then an optional Proxy fallback
+ * that only exists when VITE_GEOCODE_API_URL is configured.
  * Photon is primary because it is biased to Canada and filtered to Canadian
- * results (see searchPhoton); the upstream proxy is US-biased and would return
- * US places for Canadian queries (e.g. "Toronto, ON" → Toronto Paseo, CA).
- * Falls through to the next provider on failure or empty results.
+ * results (see searchPhoton). Falls through to the next provider on failure or
+ * empty results.
  */
 async function searchWithFallback(query: string, source: string, signal?: AbortSignal): Promise<GeocodingResult[]> {
   const providers: { name: string; search: GeocodingProvider }[] = [
     { name: 'Photon', search: (q, _source, s) => searchPhoton(q, s) },
-    { name: 'Proxy', search: searchProxy },
+    // Proxy fallback only runs when VITE_GEOCODE_API_URL is configured (see
+    // GEOCODE_PROXY_URL). Unconfigured, Photon is the only provider and no
+    // search query leaves for a third-party geocoder beyond Photon.
+    ...(GEOCODE_PROXY_URL ? [{ name: 'Proxy', search: searchProxy }] : []),
   ];
 
   for (const provider of providers) {
@@ -371,7 +379,7 @@ export async function smartSearch(query: string, source: string, signal?: AbortS
     }];
   }
 
-  // Search with 2-tier fallback: Proxy → Photon
+  // Search via Photon (+ optional configured proxy fallback)
   return searchWithFallback(trimmed, source, signal);
 }
 
