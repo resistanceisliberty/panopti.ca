@@ -1239,7 +1239,7 @@ function CameraPopupContent({ camera }: { camera: ALPRCamera }) {
           )}
         </div>
         <div>
-          <h3 className="font-display font-semibold text-white text-base">ALPR Camera</h3>
+          <h3 className="font-display font-semibold text-white text-base">{camera.brand === 'Government CCTVs' ? 'Government CCTV' : 'ALPR Camera'}</h3>
           <p className="text-xs text-dark-400">ID: {camera.osmId}</p>
         </div>
       </div>
@@ -1252,7 +1252,7 @@ function CameraPopupContent({ camera }: { camera: ALPRCamera }) {
           </div>
         )}
 
-        {camera.brand && (
+        {camera.brand && camera.brand !== 'Government CCTVs' && (
           <div className="flex justify-between gap-4">
             <span className="text-dark-400">Made by</span>
             <span className="text-dark-200 truncate max-w-[140px]">{camera.brand}</span>
