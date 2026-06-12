@@ -44,7 +44,7 @@ export function HeatmapControls() {
   const { cameras } = useCameraStore();
   const { heatmapSettings, updateHeatmapSettings } = useAppModeStore();
 
-  const schemeIds: ColorSchemeId[] = ['neon', 'thermal', 'inferno', 'classic', 'plasma', 'viridis'];
+  const schemeIds: ColorSchemeId[] = ['alpr', 'cctv', 'neon', 'thermal', 'inferno', 'classic', 'plasma', 'viridis'];
 
   return (
     <div className="space-y-6">

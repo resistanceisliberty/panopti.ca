@@ -6,15 +6,24 @@ import {
   getUniqueOperators, 
   getUniqueBrands 
 } from '../services/cameraDataService';
-import { 
+import {
   buildSpatialGrid,
   getCamerasInBoundsFromGrid,
   type SpatialGrid
 } from '../utils/geo';
+import { useAppModeStore, type ColorSchemeId } from './appModeStore';
 
 // ── Local-only: government CCTV nodes carry this brand label in the dataset ──
 const CCTV_BRAND = 'Government CCTVs';
 export type CameraTypeFilter = 'all' | 'alpr' | 'cctv';
+// Default heatmap palette per "Show" selection so ALPR (blue) and government
+// CCTV (amber) heatmaps read differently. The manual scheme picker still wins
+// until the next time the toggle is switched.
+const HEATMAP_SCHEME_FOR_TYPE: Record<CameraTypeFilter, ColorSchemeId> = {
+  all: 'plasma',
+  alpr: 'alpr',
+  cctv: 'cctv',
+};
 function applyCameraTypeFilter(list: ALPRCamera[], type: CameraTypeFilter): ALPRCamera[] {
   if (type === 'alpr') return list.filter((c) => c.brand !== CCTV_BRAND);
   if (type === 'cctv') return list.filter((c) => c.brand === CCTV_BRAND);
@@ -481,6 +490,8 @@ export const useCameraStore = create<CameraState>((set, get) => ({
     }
 
     set({ cameraType: type, filteredCameras: filtered, dataVersion: dataVersion + 1, error: null });
+    // Re-point the heatmap palette at the layer now being shown.
+    useAppModeStore.getState().updateHeatmapSettings({ colorScheme: HEATMAP_SCHEME_FOR_TYPE[type] });
   },
 
   clearFilters: () => {

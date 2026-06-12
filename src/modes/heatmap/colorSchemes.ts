@@ -88,6 +88,34 @@ export const COLOR_SCHEMES: Record<ColorSchemeId, ColorScheme> = {
     ],
     gradient: 'linear-gradient(90deg, #440154, #31688e, #35b779, #90d743, #fde725)',
   },
+  // Type-matched schemes — keyed to the marker colors so the heatmap reads as
+  // ALPR (blue) vs Government CCTV (amber) when one layer is shown on its own.
+  alpr: {
+    id: 'alpr',
+    name: 'ALPR (blue)',
+    stops: [
+      [0, 'rgba(0,0,0,0)'],
+      [0.2, '#0a3d62'],
+      [0.4, '#0080BC'],
+      [0.6, '#2ea6e0'],
+      [0.8, '#7fd0ff'],
+      [1, '#d6f0ff'],
+    ],
+    gradient: 'linear-gradient(90deg, #0a3d62, #0080BC, #2ea6e0, #7fd0ff, #d6f0ff)',
+  },
+  cctv: {
+    id: 'cctv',
+    name: 'CCTV (amber)',
+    stops: [
+      [0, 'rgba(0,0,0,0)'],
+      [0.2, '#7a3d00'],
+      [0.4, '#d97706'],
+      [0.6, '#F59E0B'],
+      [0.8, '#FBBF24'],
+      [1, '#fff3c4'],
+    ],
+    gradient: 'linear-gradient(90deg, #7a3d00, #d97706, #F59E0B, #FBBF24, #fff3c4)',
+  },
 };
 
 /**

@@ -18,7 +18,7 @@ export interface DensitySettings {
   heightScale: DensityHeightScale;
 }
 
-export type ColorSchemeId = 'neon' | 'thermal' | 'inferno' | 'classic' | 'plasma' | 'viridis';
+export type ColorSchemeId = 'neon' | 'thermal' | 'inferno' | 'classic' | 'plasma' | 'viridis' | 'alpr' | 'cctv';
 export type MapVisualizationType = 'heatmap' | 'dots';
 export type MapTileStyleId = 'dark' | 'dark-nolabels' | 'light' | 'light-nolabels' | 'white' | 'white-nolabels' | 'black' | 'black-nolabels' | 'grayscale' | 'grayscale-nolabels';
 
@@ -56,7 +56,7 @@ const DEFAULT_HEATMAP_SETTINGS: HeatmapSettings = {
   intensity: 1.0,
   radius: 10,
   opacity: 0.85,
-  colorScheme: 'plasma',
+  colorScheme: 'alpr', // matches the default 'alpr' camera type; setCameraType keeps these in sync
   showMarkers: false,
 };
 
