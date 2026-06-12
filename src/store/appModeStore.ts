@@ -58,7 +58,7 @@ const DEFAULT_HEATMAP_SETTINGS: HeatmapSettings = {
   radius: 10,
   opacity: 0.85,
   colorScheme: 'plasma',       // ALPRs
-  cctvColorScheme: 'inferno',  // government CCTVs — distinct from the ALPR palette by default
+  cctvColorScheme: 'classic',  // government CCTVs — distinct from the ALPR palette by default
   showMarkers: false,
 };
 
