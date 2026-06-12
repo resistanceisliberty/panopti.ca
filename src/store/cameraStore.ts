@@ -80,7 +80,6 @@ interface CameraState {
   getCameraById: (osmId: number) => ALPRCamera | undefined;
   getCamerasInBounds: (north: number, south: number, east: number, west: number) => ALPRCamera[];
 
-  // Staged filter state — pending changes not yet applied
   pendingFilters: {
     brands: string[];
     operators: string[];
@@ -131,7 +130,6 @@ export const useCameraStore = create<CameraState>((set, get) => ({
   },
 
   // Background preload - starts loading without blocking UI
-  // Called from landing page after initial render completes
   preloadCameras: () => {
     const { isInitialized, _initPromise, isPreloading } = get();
 
@@ -139,27 +137,18 @@ export const useCameraStore = create<CameraState>((set, get) => ({
     if (isInitialized || _initPromise || isPreloading) return;
 
     set({ isPreloading: true, loadPhase: 'fetching' });
-
-    // Start loading immediately - the 300ms delay in PreloadManager
-    // already gives the landing page time to render
     get().initializeCameras().catch(() => {
-      // Errors are handled in initializeCameras, just stop preloading state
       set({ isPreloading: false, loadPhase: 'idle' });
     });
   },
 
-  // Load camera data from bundled JSON (fast!)
-  // This method now properly handles concurrent calls by returning the same promise
   initializeCameras: async () => {
     const { isInitialized, _initPromise } = get();
 
-    // Already loaded - return immediately
     if (isInitialized) return;
 
-    // Already loading - return the existing promise so callers can await it
     if (_initPromise) return _initPromise;
 
-    // Start loading - create and store the promise
     const loadPromise = (async () => {
       if (import.meta.env.DEV) {
         console.log('[CameraStore] Starting camera initialization...');
@@ -168,7 +157,6 @@ export const useCameraStore = create<CameraState>((set, get) => ({
       set({ isLoading: true, error: null, loadPhase: 'fetching' });
 
       try {
-        // Load from bundled JSON file (much faster than Overpass API!)
         if (import.meta.env.DEV) {
           console.log('[CameraStore] Fetching cameras-ca.json...');
         }
@@ -177,17 +165,13 @@ export const useCameraStore = create<CameraState>((set, get) => ({
         if (import.meta.env.DEV) {
           console.log(`[CameraStore] Fetch complete: ${cameras.length} cameras. Now hydrating...`);
         }
-        
-        // Update phase to hydrating while building spatial grid
         set({ loadPhase: 'hydrating' });
         
         const operators = getUniqueOperators(cameras);
         const brands = getUniqueBrands(cameras);
 
-        // Build spatial grid for fast geographic lookups
         const spatialGrid = buildSpatialGrid(cameras);
 
-        // Compute timeline metadata from osmTimestamp fields
         const monthlyCounts = new Map<string, number>();
         let minDate = '9999-99';
         let maxDate = '0000-00';
@@ -261,9 +245,9 @@ export const useCameraStore = create<CameraState>((set, get) => ({
           isLoading: false,
           isPreloading: false,
           loadPhase: 'error',
-          _initPromise: null, // Clear promise on error so retry can work
+          _initPromise: null,
         });
-        throw error; // Re-throw so callers know it failed
+        throw error;
       }
     })();
 
@@ -271,28 +255,22 @@ export const useCameraStore = create<CameraState>((set, get) => ({
     return loadPromise;
   },
 
-  // Ensure cameras are loaded - useful for components that need cameras to be ready
-  // Returns immediately if already loaded, waits if loading, starts load if not started
   ensureCamerasLoaded: async () => {
     const startTime = performance.now();
     const state = get();
 
-    // Already loaded - return immediately (also clear any stale error state)
     if (state.isInitialized && state.cameras.length > 0) {
       if (import.meta.env.DEV) {
         console.log(`[CameraStore] ensureCamerasLoaded: already loaded (${state.cameras.length} cameras) in ${(performance.now() - startTime).toFixed(0)}ms`);
       }
-      // Clear stale error state from previous failed attempts (fixes navigation back)
       if (state.error) {
         set({ error: null, loadPhase: 'ready' });
       }
       return;
     }
 
-    // Already loading - wait for it
     if (state._initPromise) return state._initPromise;
 
-    // If preloading flag is set but promise not yet, wait briefly (race condition)
     if (state.isPreloading && !state._initPromise) {
       await new Promise(resolve => setTimeout(resolve, 50));
       const updatedState = get();
@@ -310,13 +288,11 @@ export const useCameraStore = create<CameraState>((set, get) => ({
     return get().initializeCameras();
   },
 
-  // Retry loading cameras after a failure
   retryCameraLoad: async () => {
     if (import.meta.env.DEV) {
       console.log('[CameraStore] Retry requested...');
     }
     
-    // Clear any existing promise to allow fresh retry
     set({ isLoading: true, error: null, _initPromise: null, isPreloading: false, loadPhase: 'fetching' });
 
     const retryPromise = (async () => {

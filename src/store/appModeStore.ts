@@ -107,8 +107,6 @@ export const useAppModeStore = create<AppModeState>((set) => ({
   mapVisualization: 'heatmap',
   setAppMode: (mode) => {
     if (mode === 'explore') {
-      // Default to today so all cameras are visible (no timeline filtering).
-      // The /timeline route explicitly overrides this to '2024-07-01'.
       set({
         appMode: mode,
         timelineSettings: {

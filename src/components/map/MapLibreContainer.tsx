@@ -11,10 +11,6 @@ import Map, {
   type MapLayerMouseEvent
 } from 'react-map-gl/maplibre';
 
-// @vis.gl/react-maplibre's GeolocateControl only patches _setupUI for Strict Mode reuse,
-// but misses _finishSetupUI (the async half that adds the click listener). In Strict Mode
-// this runs twice, registering two listeners: the second immediately cancels the first.
-// Fix: also guard _finishSetupUI with the same _setup flag MapLibre sets after first run.
 function GeolocateControl({ position }: { position: string }) {
   useControl(
     ({ mapLib }) => {
@@ -50,7 +46,6 @@ import type { DensityFeatureProperties } from '../../types';
 
 import type { ALPRCamera, Location } from '../../types';
 
-// Expose map ready state to parent components
 export interface MapLibreViewHandle {
   isMarkersReady: boolean;
   forceRemount: () => void;
@@ -59,22 +54,11 @@ export interface MapLibreViewHandle {
 import { layers as pmLayers, namedFlavor } from '@protomaps/basemaps';
 import { Protocol } from 'pmtiles';
 
-// Register pmtiles:// once so MapLibre can read vector tiles directly from a
-// PMTiles archive (e.g. a Canada extract on Cloudflare R2) via HTTP range
-// requests — no tile server required.
 maplibregl.addProtocol('pmtiles', new Protocol().tile);
-
-// Basemap config — override via env to use self-hosted infrastructure:
-//   VITE_PMTILES_URL        — PMTiles vector basemap URL; when set, tiles are
-//                             read directly from this archive.
-//   VITE_TILES_URL          — legacy z/x/y tile-server base (fallback when no
-//                             PMTiles URL is configured).
-//   VITE_BASEMAP_ASSETS_URL — Protomaps fonts (glyphs) + sprites base URL.
 const PMTILES_URL = (import.meta.env.VITE_PMTILES_URL as string | undefined) || '';
 const TILES_URL = (import.meta.env.VITE_TILES_URL as string | undefined) || 'https://tiles.dontgetflocked.com';
 const ASSETS_URL = (import.meta.env.VITE_BASEMAP_ASSETS_URL as string | undefined) || 'https://protomaps.github.io/basemaps-assets';
 
-// Map our style IDs to Protomaps flavor names (must match R2 sprites at /sprites/v4/{flavor})
 const FLAVOR_MAP: Record<MapTileStyleId, string> = {
   'dark':               'dark',
   'dark-nolabels':      'dark',
@@ -96,13 +80,10 @@ function buildMapStyle(tileStyleId: MapTileStyleId): maplibregl.StyleSpecificati
   let mapLayers = pmLayers('protomaps', namedFlavor(flavorName), { lang: 'en' });
 
   if (isNoLabels) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mapLayers = mapLayers.filter((l: any) => l.type !== 'symbol');
   }
 
   const attribution = '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>';
-  // Read tiles directly from a PMTiles archive when configured; otherwise fall
-  // back to the legacy z/x/y tile server.
   const protomapsSource: maplibregl.VectorSourceSpecification = PMTILES_URL
     ? { type: 'vector', url: `pmtiles://${PMTILES_URL}`, attribution }
     : { type: 'vector', url: `${TILES_URL}/planet.json`, attribution };
@@ -118,9 +99,7 @@ function buildMapStyle(tileStyleId: MapTileStyleId): maplibregl.StyleSpecificati
   };
 }
 
-// Convert cameras to GeoJSON - optimized with pre-allocated array
 function camerasToGeoJSON(cameras: ALPRCamera[]): GeoJSON.FeatureCollection {
-  // Pre-allocate array for better performance with large camera sets
   const features = new Array(cameras.length);
   for (let i = 0; i < cameras.length; i++) {
     const camera = cameras[i];
@@ -157,7 +136,6 @@ interface PopupInfo {
   camera: ALPRCamera;
 }
 
-// Watchdog retry delays (ms) - progressively longer backoffs
 const WATCHDOG_DELAYS = [50, 150, 500, 1000];
 const MAX_WATCHDOG_RETRIES = WATCHDOG_DELAYS.length;
 
@@ -179,13 +157,10 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
   const latestDataVersionRef = useRef(0);
   const watchdogRetryCount = useRef(0);
   const [, forceUpdate] = useState(0);
-  
-  // Use selectors to avoid re-rendering on unrelated store changes
   const center = useMapStore(s => s.center);
   const zoom = useMapStore(s => s.zoom);
   const showCameraLayer = useMapStore(s => s.showCameraLayer);
   const flyToCommand = useMapStore(s => s.flyToCommand);
-  // Actions are stable references — safe to grab once
   const { setViewState, setBounds, clearFlyToCommand } = useMapStore.getState();
   const filteredCameras = useCameraStore(s => s.filteredCameras);
   const cameras = useCameraStore(s => s.cameras);
@@ -207,13 +182,6 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
   const setActiveView = useMapModeStore(s => s.setActiveView);
   const isHeatmapMode = isExploreMode && mapVisualization === 'heatmap';
   const isDotsMode = isExploreMode && mapVisualization === 'dots';
-  // Only render camera markers + direction cones when needed.
-  // In map-mode auto, both heatmap & markers are mounted — crossfade opacity handles
-  // the transition seamlessly. For explicit heatmap/clusters/individual selections,
-  // only the chosen layer is shown so they never overlap.
-  // In explore mode, auto-show markers when zoomed past 13 (heatmap crossfades out 13-14),
-  // or when the user explicitly toggles "Show Markers" at any zoom.
-  // In density mode, hide camera markers entirely to keep choropleth clean.
   const isMapModeAuto = isMapMode && mapModeViz === 'auto';
   const showCameraMarkers = !isNetworkMode && !isDensityMode && (
     appMode === 'route'
@@ -222,14 +190,12 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
     || (isHeatmapMode && (heatmapSettings.showMarkers || zoom >= 13))
     || (isDotsMode && (dotDensitySettings.showMarkers || zoom >= 13))
   );
-  // Expose handle to parent
   useImperativeHandle(ref, () => ({
     isMarkersReady: markersReady,
     forceRemount: () => forceUpdate(n => n + 1),
   }), [markersReady]);
   const { origin, destination, normalRoute, avoidanceRoute, activeRoute, pickingLocation, setPickedLocation, cancelPickingLocation } = useRouteStore();
 
-  // Handle flyTo commands from store
   useEffect(() => {
     if (!mapRef.current || !flyToCommand) return;
     if (flyToCommand.timestamp <= lastFlyToRef.current) return;
@@ -291,15 +257,11 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
 
   // --- Timeline filter handler (imperative setFilter, no GeoJSON rebuild) ---
   const TIMELINE_LAYERS = useMemo(() => ['unclustered-point', 'unclustered-glow', 'pulse-ring-outer', 'pulse-ring-inner'], []);
-  // Cache the last cutoff to skip redundant setFilter calls (same date = same filter).
-  // With 71 Protomaps vector layers, every setFilter triggers an expensive render cycle.
   const lastCutoffRef = useRef<number>(0);
 
   const handleTimelineTick = useCallback((dateStr: string) => {
     const map = mapRef.current?.getMap();
     if (!map) return;
-
-    // Read viz state imperatively (no dependency needed — keeps callback stable)
     const { mapVisualization, appMode, heatmapSettings, dotDensitySettings } = useAppModeStore.getState();
     const isExplore = appMode === 'explore';
     const isHeatmap = isExplore && mapVisualization === 'heatmap';
@@ -307,8 +269,6 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
     const markersVisible = !isExplore
       || (isHeatmap && heatmapSettings.showMarkers)
       || (isDots && dotDensitySettings.showMarkers);
-
-    // If date is at or past the max camera date, clear filters (every point passes)
     const { timelineMaxDay } = useCameraStore.getState();
     if (dateStr >= timelineMaxDay) {
       if (lastCutoffRef.current === Infinity) return; // already cleared
@@ -330,17 +290,9 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
     const [year, month, day] = parts;
     const cutoffMs = new Date(year, month - 1, day, 23, 59, 59, 999).getTime();
 
-    // Skip if cutoff hasn't changed — avoids triggering a 71-layer render cycle
     if (cutoffMs === lastCutoffRef.current) return;
     lastCutoffRef.current = cutoffMs;
-
-    // Simplified filter: ts=0 (no-date cameras) is always <= any valid cutoffMs,
-    // so a single comparison replaces the previous 3-operation ['any',['==',0],['<=']] chain.
-    // Evaluated 78K times per tick — this matters.
     const vizFilter: maplibregl.FilterSpecification = ['<=', ['get', 'ts'], cutoffMs];
-
-    // Only filter layers that are actually visible — avoids expensive
-    // Supercluster re-evaluation on hidden clustered layers
     if (markersVisible) {
       const timelineFilter: maplibregl.FilterSpecification = [
         'all',
@@ -364,8 +316,7 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
       useMapStore.getState().setTimelineTickCallback(handleTimelineTick);
     } else {
       useMapStore.getState().setTimelineTickCallback(null);
-      lastCutoffRef.current = 0; // Reset so next enable re-applies filters
-      // Restore default filters when timeline is disabled
+      lastCutoffRef.current = 0;
       const map = mapRef.current?.getMap();
       if (map && map.isStyleLoaded()) {
         const defaultFilter: maplibregl.FilterSpecification = ['!', ['has', 'point_count']];
@@ -379,13 +330,6 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
     }
     return () => useMapStore.getState().setTimelineTickCallback(null);
   }, [isTimelineActive, handleTimelineTick, TIMELINE_LAYERS]);
-
-  // Apply initial filter when timeline enables and map is ready.
-  // The dot-density-layer (cameras-dots source) may not be ready when this first
-  // fires — react-map-gl defers addSource/addLayer and the 62K-feature GeoJSON
-  // needs to be tiled by MapLibre's web worker. Listen for the source to finish
-  // loading, then re-apply the current filter and force a repaint so the dots
-  // become visible without requiring a user zoom interaction.
   useEffect(() => {
     if (!mapLoaded || !isTimelineActive) return;
     const map = mapRef.current?.getMap();
@@ -502,8 +446,7 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
         return false;
       }
     };
-    
-    // Watchdog: retry with exponential backoff
+
     const startWatchdog = (retryIndex: number) => {
       if (isCleanedUp || retryIndex >= MAX_WATCHDOG_RETRIES) {
         if (retryIndex >= MAX_WATCHDOG_RETRIES && import.meta.env.DEV) {
@@ -540,7 +483,6 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
       }
     };
     
-    // Try immediately
     if (applyDataToSource()) {
       return;
     }
@@ -609,8 +551,6 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
         console.log('[MapLibre] Map loaded, waiting for style...');
       }
       
-      // Wait for style to be fully loaded before marking map as loaded
-      // This ensures the deterministic pipeline has a ready map
       const checkStyleAndFinish = () => {
         if (map.isStyleLoaded()) {
           if (import.meta.env.DEV) {

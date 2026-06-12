@@ -78,7 +78,7 @@ export function HeatmapControls() {
 
   return (
     <div className="space-y-6">
-      {/* Color Scheme — one palette per layer; both show together in "Both" mode */}
+      {/* Color Scheme */}
       <div className="space-y-4">
         <span className="block text-xs font-medium text-dark-400 uppercase tracking-wider">
           Color Scheme

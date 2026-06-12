@@ -3,7 +3,6 @@ import type { ColorSchemeId } from '../../store/appModeStore';
 export interface ColorScheme {
   id: ColorSchemeId;
   name: string;
-  // MapLibre heatmap-color interpolation stops: [weight, color] pairs
   stops: [number, string][];
   // CSS gradient for preview swatches
   gradient: string;
@@ -90,9 +89,6 @@ export const COLOR_SCHEMES: Record<ColorSchemeId, ColorScheme> = {
   },
 };
 
-/**
- * Build a MapLibre heatmap-color expression from a color scheme.
- */
 export function buildHeatmapColorExpression(schemeId: ColorSchemeId) {
   const scheme = COLOR_SCHEMES[schemeId];
   const expr: unknown[] = ['interpolate', ['linear'], ['heatmap-density']];
