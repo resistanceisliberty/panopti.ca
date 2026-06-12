@@ -18,7 +18,7 @@ export interface DensitySettings {
   heightScale: DensityHeightScale;
 }
 
-export type ColorSchemeId = 'neon' | 'thermal' | 'inferno' | 'classic' | 'plasma' | 'viridis' | 'alpr' | 'cctv';
+export type ColorSchemeId = 'neon' | 'thermal' | 'inferno' | 'classic' | 'plasma' | 'viridis';
 export type MapVisualizationType = 'heatmap' | 'dots';
 export type MapTileStyleId = 'dark' | 'dark-nolabels' | 'light' | 'light-nolabels' | 'white' | 'white-nolabels' | 'black' | 'black-nolabels' | 'grayscale' | 'grayscale-nolabels';
 
@@ -26,7 +26,8 @@ export interface HeatmapSettings {
   intensity: number;
   radius: number;
   opacity: number;
-  colorScheme: ColorSchemeId;
+  colorScheme: ColorSchemeId;      // ALPR heatmap palette
+  cctvColorScheme: ColorSchemeId;  // government CCTV heatmap palette (shown alongside ALPRs in "Both")
   showMarkers: boolean;
 }
 
@@ -56,7 +57,8 @@ const DEFAULT_HEATMAP_SETTINGS: HeatmapSettings = {
   intensity: 1.0,
   radius: 10,
   opacity: 0.85,
-  colorScheme: 'alpr', // matches the default 'alpr' camera type; setCameraType keeps these in sync
+  colorScheme: 'plasma',       // ALPRs
+  cctvColorScheme: 'inferno',  // government CCTVs — distinct from the ALPR palette by default
   showMarkers: false,
 };
 

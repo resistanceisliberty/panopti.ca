@@ -39,7 +39,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { useMapStore, useCameraStore, useRouteStore, useAppModeStore } from '../../store';
 import type { MapTileStyleId } from '../../store/appModeStore';
 import { useMapModeStore, getActiveViewForZoom } from '../../store/mapModeStore';
-import { HeatmapLayers } from './layers/HeatmapLayers';
+import { HeatmapLayers, HEATMAP_LAYER_IDS } from './layers/HeatmapLayers';
 import { DotDensityLayers } from './layers/DotDensityLayers';
 import { DensityLayers } from './layers/DensityLayers';
 import { NetworkLayers } from './layers/NetworkLayers';
@@ -321,7 +321,7 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
         if (map.getLayer('direction-cones')) map.setFilter('direction-cones', null, { validate: false });
         if (map.getLayer('direction-cones-outline')) map.setFilter('direction-cones-outline', null, { validate: false });
       }
-      if (isHeatmap && map.getLayer('heatmap-layer')) map.setFilter('heatmap-layer', null, { validate: false });
+      if (isHeatmap) for (const id of HEATMAP_LAYER_IDS) { if (map.getLayer(id)) map.setFilter(id, null, { validate: false }); }
       if (isDots && map.getLayer('dot-density-layer')) map.setFilter('dot-density-layer', null, { validate: false });
       return;
     }
@@ -353,7 +353,7 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
       if (map.getLayer('direction-cones')) map.setFilter('direction-cones', vizFilter, { validate: false });
       if (map.getLayer('direction-cones-outline')) map.setFilter('direction-cones-outline', vizFilter, { validate: false });
     }
-    if (isHeatmap && map.getLayer('heatmap-layer')) map.setFilter('heatmap-layer', vizFilter, { validate: false });
+    if (isHeatmap) for (const id of HEATMAP_LAYER_IDS) { if (map.getLayer(id)) map.setFilter(id, vizFilter, { validate: false }); }
     if (isDots && map.getLayer('dot-density-layer')) map.setFilter('dot-density-layer', vizFilter, { validate: false });
 
   }, [TIMELINE_LAYERS]);

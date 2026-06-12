@@ -40,43 +40,62 @@ function SliderControl({
   );
 }
 
+const SCHEME_IDS: ColorSchemeId[] = ['neon', 'thermal', 'inferno', 'classic', 'plasma', 'viridis'];
+
+function SchemeGrid({ value, onChange }: { value: ColorSchemeId; onChange: (id: ColorSchemeId) => void }) {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {SCHEME_IDS.map((id) => {
+        const scheme = COLOR_SCHEMES[id];
+        const isActive = value === id;
+        return (
+          <button
+            key={id}
+            onClick={() => onChange(id)}
+            className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all ${
+              isActive
+                ? 'bg-dark-700 border-dark-600'
+                : 'bg-dark-800 border-dark-600 hover:border-dark-500'
+            }`}
+          >
+            <div
+              className="w-8 h-3 rounded-full flex-shrink-0"
+              style={{ background: scheme.gradient }}
+            />
+            <span className={`text-xs font-medium ${isActive ? 'text-white' : 'text-dark-300'}`}>
+              {scheme.name}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function HeatmapControls() {
   const { cameras } = useCameraStore();
   const { heatmapSettings, updateHeatmapSettings } = useAppModeStore();
 
-  const schemeIds: ColorSchemeId[] = ['alpr', 'cctv', 'neon', 'thermal', 'inferno', 'classic', 'plasma', 'viridis'];
-
   return (
     <div className="space-y-6">
-      {/* Color Scheme */}
-      <div>
-        <span className="block text-xs font-medium text-dark-400 uppercase tracking-wider mb-3">
+      {/* Color Scheme — one palette per layer; both show together in "Both" mode */}
+      <div className="space-y-4">
+        <span className="block text-xs font-medium text-dark-400 uppercase tracking-wider">
           Color Scheme
         </span>
-        <div className="grid grid-cols-2 gap-2">
-          {schemeIds.map((id) => {
-            const scheme = COLOR_SCHEMES[id];
-            const isActive = heatmapSettings.colorScheme === id;
-            return (
-              <button
-                key={id}
-                onClick={() => updateHeatmapSettings({ colorScheme: id })}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all ${
-                  isActive
-                    ? 'bg-dark-700 border-dark-600'
-                    : 'bg-dark-800 border-dark-600 hover:border-dark-500'
-                }`}
-              >
-                <div
-                  className="w-8 h-3 rounded-full flex-shrink-0"
-                  style={{ background: scheme.gradient }}
-                />
-                <span className={`text-xs font-medium ${isActive ? 'text-white' : 'text-dark-300'}`}>
-                  {scheme.name}
-                </span>
-              </button>
-            );
-          })}
+        <div>
+          <span className="block text-xs font-medium text-dark-300 mb-2">ALPRs</span>
+          <SchemeGrid
+            value={heatmapSettings.colorScheme}
+            onChange={(id) => updateHeatmapSettings({ colorScheme: id })}
+          />
+        </div>
+        <div>
+          <span className="block text-xs font-medium text-dark-300 mb-2">Government CCTVs</span>
+          <SchemeGrid
+            value={heatmapSettings.cctvColorScheme}
+            onChange={(id) => updateHeatmapSettings({ cctvColorScheme: id })}
+          />
         </div>
       </div>
 
