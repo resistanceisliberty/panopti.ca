@@ -30,9 +30,8 @@ function getCellKey(lat: number, lon: number): string {
  * Build a spatial grid from cameras for fast lookups
  */
 export function buildSpatialGrid(cameras: ALPRCamera[]): SpatialGrid {
-  if (cachedSpatialGrid && cachedSpatialGrid.cells.size > 0) {
-    return cachedSpatialGrid;
-  }
+  // Always rebuild from the supplied cameras — short-circuiting on the cached
+  // grid made reloads/retries (a new camera array) serve stale positions.
 
   const cells = new Map<string, ALPRCamera[]>();
 

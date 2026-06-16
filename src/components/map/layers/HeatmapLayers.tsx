@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { Source, Layer, useMap } from 'react-map-gl/maplibre';
 import { useCameraStore, useAppModeStore } from '../../../store';
 import { buildHeatmapColorExpression } from '../../../modes/heatmap/colorSchemes';
+import type maplibregl from 'maplibre-gl';
 import type { ALPRCamera } from '../../../types';
 
 const CCTV_BRAND = 'Government CCTVs';
@@ -33,7 +34,7 @@ function camerasToHeatmapGeoJSON(cameras: ALPRCamera[]): GeoJSON.FeatureCollecti
   return { type: 'FeatureCollection', features };
 }
 
-function intensityExpr(intensity: number) {
+function intensityExpr(intensity: number): maplibregl.ExpressionSpecification {
   return [
     'interpolate', ['linear'], ['zoom'],
     0,  intensity * 0.15,
@@ -44,7 +45,7 @@ function intensityExpr(intensity: number) {
     14, intensity * 3.0,
   ];
 }
-function radiusExpr(radius: number) {
+function radiusExpr(radius: number): maplibregl.ExpressionSpecification {
   return [
     'interpolate', ['linear'], ['zoom'],
     0,  2,
@@ -55,7 +56,7 @@ function radiusExpr(radius: number) {
     14, radius * 1.8,
   ];
 }
-function opacityExpr(opacity: number) {
+function opacityExpr(opacity: number): maplibregl.ExpressionSpecification {
   return [
     'interpolate', ['linear'], ['zoom'],
     0,  opacity,
@@ -104,9 +105,9 @@ export function HeatmapLayers({ visible = true }: { visible?: boolean }) {
     const prev = prevSettingsRef.current;
     const curr = heatmapSettings;
 
-    const setBoth = (prop: string, value: unknown) => {
+    const setBoth = (prop: string, value: maplibregl.ExpressionSpecification) => {
       for (const id of HEATMAP_LAYER_IDS) {
-        if (mapInstance.getLayer(id)) mapInstance.setPaintProperty(id, prop, value as any);
+        if (mapInstance.getLayer(id)) mapInstance.setPaintProperty(id, prop, value);
       }
     };
 
@@ -115,23 +116,26 @@ export function HeatmapLayers({ visible = true }: { visible?: boolean }) {
       if (prev.radius !== curr.radius) setBoth('heatmap-radius', radiusExpr(curr.radius));
       if (prev.opacity !== curr.opacity) setBoth('heatmap-opacity', opacityExpr(curr.opacity));
       if (prev.colorScheme !== curr.colorScheme && mapInstance.getLayer(ALPR_LAYER)) {
-        mapInstance.setPaintProperty(ALPR_LAYER, 'heatmap-color', buildHeatmapColorExpression(curr.colorScheme) as any);
+        mapInstance.setPaintProperty(ALPR_LAYER, 'heatmap-color', buildHeatmapColorExpression(curr.colorScheme));
       }
       if (prev.cctvColorScheme !== curr.cctvColorScheme && mapInstance.getLayer(CCTV_LAYER)) {
-        mapInstance.setPaintProperty(CCTV_LAYER, 'heatmap-color', buildHeatmapColorExpression(curr.cctvColorScheme) as any);
+        mapInstance.setPaintProperty(CCTV_LAYER, 'heatmap-color', buildHeatmapColorExpression(curr.cctvColorScheme));
       }
-    } catch {
+    } catch (e) {
+      if (import.meta.env.DEV) console.warn('[heatmap] paint update failed', e);
     }
 
     prevSettingsRef.current = curr;
   }, [heatmapSettings, map]);
 
-  const buildPaint = (colorExpression: ReturnType<typeof buildHeatmapColorExpression>) => ({
+  const buildPaint = (
+    colorExpression: maplibregl.ExpressionSpecification
+  ): maplibregl.HeatmapLayerSpecification['paint'] => ({
     'heatmap-weight': 1,
-    'heatmap-intensity': intensityExpr(heatmapSettings.intensity) as unknown as number,
-    'heatmap-color': colorExpression as any,
-    'heatmap-radius': radiusExpr(heatmapSettings.radius) as unknown as number,
-    'heatmap-opacity': opacityExpr(heatmapSettings.opacity) as unknown as number,
+    'heatmap-intensity': intensityExpr(heatmapSettings.intensity),
+    'heatmap-color': colorExpression,
+    'heatmap-radius': radiusExpr(heatmapSettings.radius),
+    'heatmap-opacity': opacityExpr(heatmapSettings.opacity),
   });
 
   const layout = { visibility: visible ? ('visible' as const) : ('none' as const) };

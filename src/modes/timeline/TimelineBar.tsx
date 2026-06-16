@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useCallback, useMemo, useRef } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useCameraStore } from '../../store';
 import { useMapStore } from '../../store/mapStore';
 import { useAppModeStore } from '../../store/appModeStore';
@@ -23,9 +24,24 @@ export function TimelineBar() {
     timelineWeeklyCounts,
     timelineMinWeek,
     timelineMaxWeek,
-  } = useCameraStore();
+  } = useCameraStore(
+    useShallow((s) => ({
+      cameras: s.cameras,
+      timelineMinDay: s.timelineMinDay,
+      timelineMaxDay: s.timelineMaxDay,
+      timelineDailyCounts: s.timelineDailyCounts,
+      timelineWeeklyCounts: s.timelineWeeklyCounts,
+      timelineMinWeek: s.timelineMinWeek,
+      timelineMaxWeek: s.timelineMaxWeek,
+    }))
+  );
   const tickCallback = useMapStore((s) => s._timelineTickCallback);
-  const { timelineSettings, updateTimelineSettings } = useAppModeStore();
+  const { timelineSettings, updateTimelineSettings } = useAppModeStore(
+    useShallow((s) => ({
+      timelineSettings: s.timelineSettings,
+      updateTimelineSettings: s.updateTimelineSettings,
+    }))
+  );
 
   const { currentDate, isPlaying, playSpeed } = timelineSettings;
 

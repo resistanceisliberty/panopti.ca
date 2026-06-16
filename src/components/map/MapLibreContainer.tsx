@@ -32,6 +32,7 @@ function GeolocateControl({ position }: { position: string }) {
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
+import { useShallow } from 'zustand/react/shallow';
 import { useMapStore, useCameraStore, useRouteStore, useAppModeStore } from '../../store';
 import type { MapTileStyleId } from '../../store/appModeStore';
 import { useMapModeStore, getActiveViewForZoom } from '../../store/mapModeStore';
@@ -194,7 +195,18 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
     isMarkersReady: markersReady,
     forceRemount: () => forceUpdate(n => n + 1),
   }), [markersReady]);
-  const { origin, destination, normalRoute, avoidanceRoute, activeRoute, pickingLocation, setPickedLocation, cancelPickingLocation } = useRouteStore();
+  const { origin, destination, normalRoute, avoidanceRoute, activeRoute, pickingLocation, setPickedLocation, cancelPickingLocation } = useRouteStore(
+    useShallow((s) => ({
+      origin: s.origin,
+      destination: s.destination,
+      normalRoute: s.normalRoute,
+      avoidanceRoute: s.avoidanceRoute,
+      activeRoute: s.activeRoute,
+      pickingLocation: s.pickingLocation,
+      setPickedLocation: s.setPickedLocation,
+      cancelPickingLocation: s.cancelPickingLocation,
+    }))
+  );
 
   useEffect(() => {
     if (!mapRef.current || !flyToCommand) return;
@@ -325,7 +337,10 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
         }
         if (map.getLayer('direction-cones')) map.setFilter('direction-cones', null);
         if (map.getLayer('direction-cones-outline')) map.setFilter('direction-cones-outline', null);
-
+        for (const id of HEATMAP_LAYER_IDS) {
+          if (map.getLayer(id)) map.setFilter(id, null);
+        }
+        if (map.getLayer('dot-density-layer')) map.setFilter('dot-density-layer', null);
       }
     }
     return () => useMapStore.getState().setTimelineTickCallback(null);
