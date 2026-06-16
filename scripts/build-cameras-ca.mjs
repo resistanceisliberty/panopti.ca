@@ -113,7 +113,7 @@ function parseDirection(value) {
   const num = Number(upper);
   if (!Number.isNaN(num)) {
     const d = norm(num);
-    return [d, Number.isInteger(d) ? String(d) : String(d)];
+    return [d, String(d)];
   }
   return [null, token || null];
 }
@@ -271,8 +271,13 @@ function build(data) {
 // ALPR count from the previously committed data, or null if there is none.
 async function previousAlprCount() {
   try {
-    const prev = JSON.parse(await readFile(OUTPUT_PATH, 'utf8'));
-    return prev.filter((c) => c.brand !== CCTV_BRAND).length;
+    const parsed = JSON.parse(await readFile(OUTPUT_PATH, 'utf8'));
+    // Support both the flat array we write and a GeoJSON FeatureCollection, so
+    // the regression guard never silently no-ops on a format change.
+    const list = Array.isArray(parsed)
+      ? parsed
+      : (parsed.features ?? []).map((f) => f.properties ?? {});
+    return list.filter((c) => c.brand !== CCTV_BRAND).length;
   } catch {
     return null;
   }

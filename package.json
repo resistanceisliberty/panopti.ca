@@ -1,18 +1,18 @@
 {
-  "name": "deflock-maps",
+  "name": "panopti-ca-map",
   "version": "1.0.0",
-  "description": "ALPR camera map and privacy-focused route planning application, hosted at maps.deflock.org",
+  "description": "ALPR and government CCTV camera map for Canada, hosted at maps.panopti.ca",
   "type": "module",
   "license": "MIT",
   "author": "FlockHopper Contributors",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR_USERNAME/flockhopper.git"
+    "url": "https://github.com/resistanceisliberty/panopti.ca.git"
   },
   "bugs": {
-    "url": "https://github.com/YOUR_USERNAME/flockhopper/issues"
+    "url": "https://github.com/resistanceisliberty/panopti.ca/issues"
   },
-  "homepage": "https://github.com/YOUR_USERNAME/flockhopper#readme",
+  "homepage": "https://github.com/resistanceisliberty/panopti.ca#readme",
   "keywords": [
     "privacy",
     "routing",
