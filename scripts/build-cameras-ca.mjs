@@ -17,7 +17,7 @@
  * commits empty or partial data.
  */
 
-import { writeFile } from 'node:fs/promises';
+import { writeFile, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -28,6 +28,13 @@ const OUTPUT_PATH = join(__dirname, '..', 'public', 'cameras-ca.json');
 // live count so a truncated Overpass response is rejected, but low enough that
 // it won't trip on normal data. Override with MIN_CAMERA_COUNT env var.
 const MIN_CAMERA_COUNT = Number(process.env.MIN_CAMERA_COUNT ?? 50);
+
+// Regression guard: a stale or replication-lagged Overpass mirror can return an
+// older, smaller snapshot that still clears the absolute floor (e.g. 223 -> 156
+// when recent additions are missing). Reject any build whose ALPR count drops
+// more than this fraction below the previously committed data. Override with
+// MAX_ALPR_DROP env var.
+const MAX_ALPR_DROP = Number(process.env.MAX_ALPR_DROP ?? 0.1);
 
 const OVERPASS_ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
@@ -261,6 +268,16 @@ function build(data) {
   return { cameras, alprCount, cctvCount };
 }
 
+// ALPR count from the previously committed data, or null if there is none.
+async function previousAlprCount() {
+  try {
+    const prev = JSON.parse(await readFile(OUTPUT_PATH, 'utf8'));
+    return prev.filter((c) => c.brand !== CCTV_BRAND).length;
+  } catch {
+    return null;
+  }
+}
+
 async function main() {
   const data = await queryOverpass();
   const { cameras, alprCount, cctvCount } = build(data);
@@ -271,6 +288,15 @@ async function main() {
     throw new Error(
       `Refusing to write: only ${alprCount} ALPRs (< MIN_CAMERA_COUNT ${MIN_CAMERA_COUNT}). ` +
         `Likely a partial Overpass response.`
+    );
+  }
+
+  const prevAlpr = await previousAlprCount();
+  if (prevAlpr !== null && alprCount < prevAlpr * (1 - MAX_ALPR_DROP)) {
+    throw new Error(
+      `Refusing to write: ALPRs dropped ${prevAlpr} -> ${alprCount} ` +
+        `(> ${Math.round(MAX_ALPR_DROP * 100)}% below the last build). ` +
+        `Likely a stale or partial Overpass response; keeping existing data.`
     );
   }
 
