@@ -257,7 +257,7 @@ export function NetworkPanelContent() {
                   )}
                   {selectedNode.portalSlug && (
                     <a
-                      href={`https://transparency.flocksafety.com/${selectedNode.portalSlug}`}
+                      href={`https://transparency.flocksafety.com/${encodeURIComponent(selectedNode.portalSlug)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 mt-3 text-sm bg-[#3C7F66] hover:bg-[#346E58] active:bg-[#2C5D4A] text-white px-4 py-1.5 rounded-full font-semibold shadow-sm shadow-[#3C7F66]/30 transition-colors"

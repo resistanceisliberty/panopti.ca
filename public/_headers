@@ -2,6 +2,19 @@
 # SECURITY HEADERS (Applied to all routes)
 # =============================================================================
 /*
+  # Content Security Policy. Strict on the XSS/clickjacking-critical directives
+  # (script-src 'self', object-src none, base-uri self, frame-ancestors none).
+  # Deliberately permissive (https:) on connect-src/img-src because the map talks
+  # to several env-dependent hosts (tiles, routing/data API, geocoders, OSM/
+  # Wikimedia imagery) — listing them exactly risks blanking the map. WebGL needs
+  # worker-src blob: (MapLibre workers) and inline styles for map controls.
+  # static.cloudflareinsights.com is Cloudflare Web Analytics, auto-injected by Pages.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://static.cloudflareinsights.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https: data: blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; manifest-src 'self'; upgrade-insecure-requests
+
+  # Clickjacking (the map app is not meant to be embedded). frame-ancestors covers
+  # modern browsers; X-Frame-Options covers older ones.
+  X-Frame-Options: DENY
+
   # Prevent MIME type sniffing
   X-Content-Type-Options: nosniff
 
