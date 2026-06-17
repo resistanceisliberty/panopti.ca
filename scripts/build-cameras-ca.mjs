@@ -73,8 +73,8 @@ const CCTV_CLAUSES = [
 const OVERPASS_QUERY = `[out:json][timeout:300];
 area["ISO3166-1"="CA"]->.ca;
 (
-  node["man_made"="surveillance"]["surveillance:type"="ALPR"](area.ca);
-  way["man_made"="surveillance"]["surveillance:type"="ALPR"](area.ca);
+  node["surveillance:type"~"(^|;)ALPR($|;)"](area.ca);
+  way["surveillance:type"~"(^|;)ALPR($|;)"](area.ca);
   ${CCTV_CLAUSES}
 );
 out meta;
@@ -227,7 +227,8 @@ function build(data) {
   for (const el of data.elements) {
     // Only tagged ALPR/camera elements carry tags; skel-only member nodes have none.
     const stype = el.tags?.['surveillance:type'];
-    const isAlpr = stype === 'ALPR';
+    // ALPR may be one of several ;-separated surveillance:type values (e.g. "camera;ALPR").
+    const isAlpr = (stype ?? '').split(';').map((s) => s.trim()).includes('ALPR');
     // Every camera in the response matched a government clause (see OVERPASS_QUERY).
     const isCCTV = stype === 'camera';
     if (!isAlpr && !isCCTV) continue;
