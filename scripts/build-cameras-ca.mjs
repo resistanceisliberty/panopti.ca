@@ -166,28 +166,17 @@ async function tryEndpoint(endpoint) {
   }
 }
 
-async function queryOverpass() {
-  const errors = [];
-  // Each round tries every endpoint once; between rounds, back off to let
-  // transiently-overloaded public instances (504/429) recover.
-  for (let round = 1; round <= MAX_ROUNDS; round++) {
-    for (const endpoint of OVERPASS_ENDPOINTS) {
-      try {
-        const data = await tryEndpoint(endpoint);
-        console.log(`Overpass OK via ${endpoint}: ${data.elements.length} elements (round ${round})`);
-        return data;
-      } catch (err) {
-        console.warn(`[round ${round}] ${endpoint} failed: ${err.message}`);
-        errors.push(`${endpoint}: ${err.message}`);
-      }
-    }
-    if (round < MAX_ROUNDS) {
-      const backoffMs = round * 30_000; // 30s, 60s, 90s
-      console.warn(`All endpoints failed round ${round}; retrying in ${backoffMs / 1000}s…`);
-      await sleep(backoffMs);
-    }
+// Returns null if a freshly-built result passes the floor + regression checks,
+// or a human-readable reason if it looks stale/partial — so we can reject that
+// mirror and try another instead of overwriting good data (or failing the job).
+function validate(alprCount, prevAlpr) {
+  if (alprCount < MIN_CAMERA_COUNT) {
+    return `only ${alprCount} ALPRs (< MIN_CAMERA_COUNT ${MIN_CAMERA_COUNT})`;
   }
-  throw new Error(`All Overpass endpoints failed after ${MAX_ROUNDS} rounds: ${errors.join('; ')}`);
+  if (prevAlpr !== null && alprCount < prevAlpr * (1 - MAX_ALPR_DROP)) {
+    return `ALPRs dropped ${prevAlpr} -> ${alprCount} (> ${Math.round(MAX_ALPR_DROP * 100)}% below the last build)`;
+  }
+  return null;
 }
 
 function toCamera(el, lat, lon) {
@@ -285,33 +274,54 @@ async function previousAlprCount() {
 }
 
 async function main() {
-  const data = await queryOverpass();
-  const { cameras, alprCount, cctvCount } = build(data);
-
-  // Sanity floor on ALPRs (the core dataset) only — a partial Overpass response
-  // must never overwrite good data. Government CCTV is supplementary and may vary.
-  if (alprCount < MIN_CAMERA_COUNT) {
-    throw new Error(
-      `Refusing to write: only ${alprCount} ALPRs (< MIN_CAMERA_COUNT ${MIN_CAMERA_COUNT}). ` +
-        `Likely a partial Overpass response.`
-    );
-  }
-
   const prevAlpr = await previousAlprCount();
-  if (prevAlpr !== null && alprCount < prevAlpr * (1 - MAX_ALPR_DROP)) {
-    throw new Error(
-      `Refusing to write: ALPRs dropped ${prevAlpr} -> ${alprCount} ` +
-        `(> ${Math.round(MAX_ALPR_DROP * 100)}% below the last build). ` +
-        `Likely a stale or partial Overpass response; keeping existing data.`
-    );
+  const errors = [];
+
+  // Try each endpoint per round; build + validate the result and reject a
+  // stale/partial mirror exactly like a failed fetch, so one lagging mirror
+  // can neither overwrite good data nor fail the whole job. Back off between
+  // rounds to let transiently-overloaded public instances (504/429) recover.
+  for (let round = 1; round <= MAX_ROUNDS; round++) {
+    for (const endpoint of OVERPASS_ENDPOINTS) {
+      let data;
+      try {
+        data = await tryEndpoint(endpoint);
+      } catch (err) {
+        console.warn(`[round ${round}] ${endpoint} failed: ${err.message}`);
+        errors.push(`${endpoint}: ${err.message}`);
+        continue;
+      }
+
+      const { cameras, alprCount, cctvCount } = build(data);
+      const staleReason = validate(alprCount, prevAlpr);
+      if (staleReason) {
+        console.warn(`[round ${round}] ${endpoint}: ${data.elements.length} elements but ${staleReason}; trying another mirror`);
+        errors.push(`${endpoint}: stale (${staleReason})`);
+        continue;
+      }
+
+      await writeFile(OUTPUT_PATH, JSON.stringify(cameras));
+      const operators = new Set(cameras.map((c) => c.operator).filter(Boolean));
+      console.log(
+        `Wrote ${cameras.length} cameras → ${OUTPUT_PATH} ` +
+          `(${alprCount} ALPR, ${cctvCount} gov CCTV; ${operators.size} operators) via ${endpoint}`
+      );
+      return;
+    }
+    if (round < MAX_ROUNDS) {
+      const backoffMs = round * 30_000; // 30s, 60s, 90s
+      console.warn(`No fresh data in round ${round}; retrying in ${backoffMs / 1000}s…`);
+      await sleep(backoffMs);
+    }
   }
 
-  await writeFile(OUTPUT_PATH, JSON.stringify(cameras));
-
-  const operators = new Set(cameras.map((c) => c.operator).filter(Boolean));
-  console.log(
-    `Wrote ${cameras.length} cameras → ${OUTPUT_PATH} ` +
-      `(${alprCount} ALPR, ${cctvCount} gov CCTV; ${operators.size} operators)`
+  // No mirror returned fresh, complete data this run. Overpass outages and
+  // replication lag are transient and external, and the committed data is left
+  // untouched — so skip quietly (exit 0) and let the next run self-heal, rather
+  // than failing the workflow on something outside our control.
+  console.warn(
+    `No fresh Overpass data after ${MAX_ROUNDS} rounds; keeping existing data. ` +
+      `Attempts: ${errors.join('; ')}`
   );
 }
 
