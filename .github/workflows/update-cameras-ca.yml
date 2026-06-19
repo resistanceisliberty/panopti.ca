@@ -5,9 +5,15 @@ name: Update Canada ALPR + CCTV data
 
 on:
   schedule:
-    # 07:10 UTC daily ≈ 02:10 ET / 23:10 PT — off the top of the hour to avoid
-    # the Overpass load spike that hits on exact-hour cron schedules.
-    - cron: '10 7 * * *'
+    # Multiple attempts/day because GitHub's scheduled cron is best-effort and
+    # routinely delays or silently drops runs. The build is idempotent (it only
+    # commits when the data actually changes), so extra runs are harmless and a
+    # dropped slot self-heals at the next one. Off-the-hour to dodge the Overpass
+    # load spike. A Cloudflare Cron Trigger (see cron-trigger/) dispatches this
+    # workflow too, as a more reliable belt-and-suspenders.
+    - cron: '10 7 * * *'    # ~02:10 ET
+    - cron: '42 13 * * *'   # ~09:42 ET
+    - cron: '27 19 * * *'   # ~15:27 ET
   workflow_dispatch: {}
 
 # Allow the job to push the regenerated data file back to the default branch.
@@ -24,6 +30,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Full history so the build can read how long cameras-ca.json has gone
+          # without a refresh (the stale-data alert in build-cameras-ca.mjs).
+          fetch-depth: 0
 
       - name: Set up Node
         uses: actions/setup-node@v4
