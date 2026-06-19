@@ -1,7 +1,7 @@
 name: Update Canada ALPR + CCTV data
 
 # Refreshes public/cameras-ca.json (ALPRs + government CCTV) from OpenStreetMap and commits
-# any changes back to the repo. Runs nightly and on demand.
+# any changes back to the repo. Runs several times a day and on demand.
 
 on:
   schedule:

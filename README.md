@@ -28,7 +28,7 @@ A big shoutout to **[Fogged Lens](https://github.com/FoggedLens)** as well as th
     See [panopti.ca/report](https://panopti.ca/report) for how to add one.
 
   Both are bundled as [`public/cameras-ca.json`](public/cameras-ca.json) and
-  refreshed nightly (see below) — no live database.
+  refreshed several times a day (see below) — no live database.
 - **ALPR / CCTV toggle.** The map is ALPR-first: it opens on ALPRs only, with a
   *Show* control to switch to **Both** or **government CCTV** alone. ALPRs render
   in blue and government CCTV in amber (a colourblind-safe pair).
@@ -55,8 +55,9 @@ Overpass API for ALPR and government-CCTV nodes in Canada and writes
 `public/cameras-ca.json`. The ALPR count has its own sanity floor so a partial
 Overpass response can never overwrite good data.
 The [`update-cameras-ca`](.github/workflows/update-cameras-ca.yml) GitHub Action
-runs it nightly and commits any changes, which triggers a Cloudflare Pages
-redeploy.
+runs it several times a day and commits any changes, which triggers a Cloudflare
+Pages redeploy. A [Cloudflare Cron Trigger](cron-trigger/) dispatches the same
+workflow as a reliable backup, since GitHub's own scheduled cron is best-effort.
 
 ```bash
 bun run update-cameras   # regenerate the data file locally
@@ -71,7 +72,7 @@ on Cloudflare R2) by setting `VITE_PMTILES_URL`. See
 ## Deployment
 
 Hosted on Cloudflare Pages (build: `npm run build`, output: `dist`). A push to
-`main` auto-deploys, so the nightly data commit goes live automatically.
+`main` auto-deploys, so the data commit goes live automatically.
 
 ## Attribution & licence
 

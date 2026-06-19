@@ -11,7 +11,7 @@
  * Dependency-free: uses Node's global fetch (Node 18+) and built-ins only.
  *
  * Run locally:  node scripts/build-cameras-ca.mjs
- * In CI:        invoked nightly by .github/workflows/update-cameras-ca.yml
+ * In CI:        invoked several times a day by .github/workflows/update-cameras-ca.yml
  *
  * Exits non-zero on failure (or an implausibly small result) so CI never
  * commits empty or partial data.
