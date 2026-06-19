@@ -1,0 +1,14 @@
+name = "panopti-cameras-cron"
+main = "src/index.js"
+compatibility_date = "2024-11-01"
+
+# Reliable backup triggers for the camera-data refresh workflow. Two attempts a
+# day, both spaced away from the GitHub-side crons, so a dropped GitHub schedule
+# slot is covered. Times are UTC.
+[triggers]
+crons = ["0 9 * * *", "0 21 * * *"]
+
+# Secrets (set via `wrangler secret put`, NOT committed):
+#   GH_DISPATCH_TOKEN  - fine-grained GitHub PAT, Actions: Read and write on
+#                        resistanceisliberty/panopti.ca   (required)
+#   TRIGGER_KEY        - optional shared secret enabling GET /?key=... manual fire
