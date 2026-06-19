@@ -6,7 +6,7 @@ export function NotFound() {
   return (
     <>
       <Seo
-        title="Page Not Found | DeFlock Maps"
+        title="Page Not Found | panopti.ca"
         description="The page you requested could not be found."
         noIndex
       />

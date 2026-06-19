@@ -25,7 +25,7 @@ import { execSync } from 'node:child_process';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUTPUT_PATH = join(__dirname, '..', 'public', 'cameras-ca.json');
 
-// Sanity floor: Canada had ~156 mapped ALPRs as of mid-2026. Set well below the
+// Sanity floor: Canada had ~340 mapped ALPRs as of mid-2026. Set well below the
 // live count so a truncated Overpass response is rejected, but low enough that
 // it won't trip on normal data. Override with MIN_CAMERA_COUNT env var.
 const MIN_CAMERA_COUNT = Number(process.env.MIN_CAMERA_COUNT ?? 50);
@@ -75,8 +75,8 @@ const CCTV_CLAUSES = [
   `way${CCTV}["surveillance:zone"="traffic"](area.ca);`,
 ].join('\n  ');
 
-// Mirrors worker/src/fetchers/cameras.ts. `out meta` gives tags + version +
-// timestamp; the recursion (`>`) emits member nodes so ways can be centroided.
+// `out meta` gives tags + version + timestamp; the recursion (`>`) emits member
+// nodes so ways can be centroided.
 const OVERPASS_QUERY = `[out:json][timeout:300];
 area["ISO3166-1"="CA"]->.ca;
 (

@@ -99,7 +99,7 @@ export function DensityPanel() {
         {snapPoint === 'full' && (
           <div className="pb-8">
             <p className="text-xs text-dark-400 mb-3 leading-relaxed">
-              Compare ALPR surveillance intensity by state or county. Data from <a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a> &amp; <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OSM</a> contributors. Switch between Per Capita and Per Road Mile metrics, toggle 2D/3D views, and customize colors below. Tap any region on the map to reveal its statistics.
+              Compare ALPR surveillance intensity by province or region. Data from <a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a> &amp; <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OSM</a> contributors. Switch between Per Capita and Per Road Mile metrics, toggle 2D/3D views, and customize colors below. Tap any region on the map to reveal its statistics.
             </p>
             {panelContent}
             <div className="mt-6 pt-4 border-t border-dark-700/50">
@@ -124,7 +124,7 @@ export function DensityPanel() {
         <div className="flex-shrink-0 px-6 py-5 border-b border-dark-700/50">
           <h2 className="text-lg font-display font-semibold text-white mb-2">Surveillance Analysis</h2>
           <p className="text-xs text-dark-400 mb-3 leading-relaxed">
-            Compare ALPR surveillance intensity by state or county. Data sourced from <a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a> and <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OpenStreetMap</a> contributors. Switch between Per Capita and Per Road Mile metrics, toggle 2D/3D views, and customize colors below. Click any region on the map to reveal its statistics.
+            Compare ALPR surveillance intensity by province or region. Data sourced from <a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a> and <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OpenStreetMap</a> contributors. Switch between Per Capita and Per Road Mile metrics, toggle 2D/3D views, and customize colors below. Click any region on the map to reveal its statistics.
           </p>
         </div>
 

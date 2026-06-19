@@ -74,7 +74,7 @@ export function ExplorePanel() {
         {snapPoint === 'full' && (
           <div className="pb-8">
             <p className="text-xs text-dark-400 mb-3 leading-relaxed">
-              Visualize when ALPR cameras were mapped on <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OSM</a> across the US. Data from <a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a> &amp; OSM contributors. Use the timeline to scrub through when each camera was added. Switch layers below.
+              Visualize when ALPR cameras were mapped on <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OSM</a> across Canada. Data from <a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a> &amp; OSM contributors. Use the timeline to scrub through when each camera was added. Switch layers below.
             </p>
 
             {/* Map type dropdown */}
@@ -112,7 +112,7 @@ export function ExplorePanel() {
         <div className="flex-shrink-0 px-6 py-5 border-b border-dark-700/50">
           <h2 className="text-lg font-display font-semibold text-white mb-2">Timeline</h2>
           <p className="text-xs text-dark-400 mb-3 leading-relaxed">
-            Visualize when ALPR cameras were mapped on <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OpenStreetMap</a> across the US. Data sourced from <a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a> and OSM contributors. Use the timeline to scrub through when each camera was added to OSM. Switch between Heatmap and Dot Density layers below.
+            Visualize when ALPR cameras were mapped on <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OpenStreetMap</a> across Canada. Data sourced from <a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a> and OSM contributors. Use the timeline to scrub through when each camera was added to OSM. Switch between Heatmap and Dot Density layers below.
           </p>
           <MapTypeDropdown />
         </div>

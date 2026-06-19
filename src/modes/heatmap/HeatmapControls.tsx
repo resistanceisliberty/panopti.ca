@@ -140,7 +140,7 @@ export function HeatmapControls() {
           <div>
             <p className="text-sm text-dark-300 font-medium mb-1">About Heatmap</p>
             <p className="text-xs text-dark-400 leading-relaxed">
-              Visualizes the density of {cameras.length.toLocaleString()} ALPR cameras across the US.
+              Visualizes the density of {cameras.length.toLocaleString()} ALPR cameras across Canada.
               Brighter areas indicate higher camera concentration. At higher zoom levels,
               the heatmap fades to reveal individual camera markers.
             </p>

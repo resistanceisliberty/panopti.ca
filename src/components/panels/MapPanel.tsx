@@ -811,7 +811,7 @@ export function MapPanel() {
               </div>
               <div className="text-left">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-semibold text-white">DeFlock Maps</p>
+                  <p className="text-sm font-semibold text-white">panopti.ca</p>
                   {activeFilterCount > 0 && (
                     <span className="px-1.5 py-0.5 rounded-full bg-accent/10 text-accent text-xs font-semibold">
                       {activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''}
