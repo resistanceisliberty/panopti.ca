@@ -20,6 +20,7 @@
 import { writeFile, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { execSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUTPUT_PATH = join(__dirname, '..', 'public', 'cameras-ca.json');
@@ -35,6 +36,12 @@ const MIN_CAMERA_COUNT = Number(process.env.MIN_CAMERA_COUNT ?? 50);
 // more than this fraction below the previously committed data. Override with
 // MAX_ALPR_DROP env var.
 const MAX_ALPR_DROP = Number(process.env.MAX_ALPR_DROP ?? 0.1);
+
+// Stale-data alert: a skipped run (no fresh mirror) is normally fine and exits
+// cleanly. But if the committed data has gone this many days without a refresh,
+// something is genuinely stuck (mirrors persistently stale, or every trigger
+// failing) — fail loudly so it gets noticed. Override with MAX_STALE_DAYS.
+const MAX_STALE_DAYS = Number(process.env.MAX_STALE_DAYS ?? 3);
 
 const OVERPASS_ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
@@ -273,6 +280,23 @@ async function previousAlprCount() {
   }
 }
 
+// Days since public/cameras-ca.json last actually changed (its last git commit),
+// or null if it can't be determined (e.g. no git history / shallow checkout) — in
+// which case we never false-alarm. Requires fetch-depth: 0 in CI.
+function dataAgeDays() {
+  try {
+    const out = execSync('git log -1 --format=%ct -- public/cameras-ca.json', {
+      cwd: join(__dirname, '..'),
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    if (!out) return null;
+    return (Date.now() - Number(out) * 1000) / 86_400_000;
+  } catch {
+    return null;
+  }
+}
+
 async function main() {
   const prevAlpr = await previousAlprCount();
   const errors = [];
@@ -315,13 +339,22 @@ async function main() {
     }
   }
 
-  // No mirror returned fresh, complete data this run. Overpass outages and
-  // replication lag are transient and external, and the committed data is left
-  // untouched — so skip quietly (exit 0) and let the next run self-heal, rather
-  // than failing the workflow on something outside our control.
+  // No mirror returned fresh, complete data this run. A one-off is transient and
+  // external (Overpass outage/lag), so skip quietly and let the next run self-heal.
+  // But if the committed data is already older than MAX_STALE_DAYS, this is no
+  // longer a blip — fail loudly so the persistent problem gets attention.
+  const ageDays = dataAgeDays();
+  const ageStr = ageDays === null ? 'unknown' : ageDays.toFixed(1);
+  if (ageDays !== null && ageDays > MAX_STALE_DAYS) {
+    throw new Error(
+      `No fresh Overpass data after ${MAX_ROUNDS} rounds, AND committed data is ` +
+        `${ageStr} days old (> ${MAX_STALE_DAYS}d). Failing so this gets noticed. ` +
+        `Attempts: ${errors.join('; ')}`
+    );
+  }
   console.warn(
-    `No fresh Overpass data after ${MAX_ROUNDS} rounds; keeping existing data. ` +
-      `Attempts: ${errors.join('; ')}`
+    `No fresh Overpass data after ${MAX_ROUNDS} rounds; keeping existing data ` +
+      `(${ageStr} days old, within ${MAX_STALE_DAYS}d tolerance). Attempts: ${errors.join('; ')}`
   );
 }
 
