@@ -43,7 +43,10 @@ const MAX_ALPR_DROP = Number(process.env.MAX_ALPR_DROP ?? 0.1);
 // failing) — fail loudly so it gets noticed. Override with MAX_STALE_DAYS.
 const MAX_STALE_DAYS = Number(process.env.MAX_STALE_DAYS ?? 3);
 
+// Query DeFlock's own ALPR Overpass first — it's purpose-built and stays fresh.
+// The public mirrors are fallbacks: flaky under load and sometimes replication-stale.
 const OVERPASS_ENDPOINTS = [
+  'https://overpass.deflock.org/api/interpreter',
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
