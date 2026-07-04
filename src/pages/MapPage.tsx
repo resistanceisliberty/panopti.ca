@@ -27,10 +27,11 @@ const MODE_LABELS: Record<AppMode, { icon: typeof Route; label: string }> = {
   network: { icon: Network, label: 'Network' },
 };
 
-// Modes exposed in the UI. The Route/Timeline/Analysis/Network modes rely on
-// US-only datasets (boundaries, agency sharing network, US routing API), so the
-// Canada build ships the camera map only. Re-add modes here once CA data exists.
-const VISIBLE_MODES: AppMode[] = ['map'];
+// Modes exposed in the UI. 'explore' is the Timeline view — it runs purely off
+// the camera data (osmTimestamp), so it works with Canadian data. Route/Analysis/
+// Network still rely on US-only datasets (routing API, boundaries, agency sharing
+// network) and stay hidden until CA equivalents exist.
+const VISIBLE_MODES: AppMode[] = ['map', 'explore'];
 const showModeNav = VISIBLE_MODES.length > 1;
 
 export function MapPage() {
