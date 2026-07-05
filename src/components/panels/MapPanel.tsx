@@ -93,7 +93,7 @@ const CAMERA_TYPE_OPTIONS: { id: 'all' | 'alpr' | 'cctv'; label: string }[] = [
   { id: 'all', label: 'Both' },
 ];
 
-function CameraTypeToggle() {
+export function CameraTypeToggle() {
   const cameraType = useCameraStore((s) => s.cameraType);
   const setCameraType = useCameraStore((s) => s.setCameraType);
 

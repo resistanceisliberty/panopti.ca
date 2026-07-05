@@ -11,6 +11,7 @@ import {
   formatDateFixed,
   totalDays,
 } from './timelineUtils';
+import { applyCameraTypeFilter, getWeekMonday } from '../../store/cameraStore';
 
 /** Only show the sparkline from this date forward */
 const VISIBLE_START = '2024-01-01';
@@ -18,23 +19,42 @@ const VISIBLE_START = '2024-01-01';
 export function TimelineBar() {
   const {
     cameras,
+    cameraType,
     timelineMinDay,
     timelineMaxDay,
-    timelineDailyCounts,
-    timelineWeeklyCounts,
     timelineMinWeek,
     timelineMaxWeek,
   } = useCameraStore(
     useShallow((s) => ({
       cameras: s.cameras,
+      cameraType: s.cameraType,
       timelineMinDay: s.timelineMinDay,
       timelineMaxDay: s.timelineMaxDay,
-      timelineDailyCounts: s.timelineDailyCounts,
-      timelineWeeklyCounts: s.timelineWeeklyCounts,
       timelineMinWeek: s.timelineMinWeek,
       timelineMaxWeek: s.timelineMaxWeek,
     }))
   );
+
+  // Cameras of the selected type (ALPR / Gov CCTV / Both). The date-axis range
+  // stays from the store (all cameras), so toggling type changes the bars and the
+  // running count, not the timeline extent.
+  const typedCameras = useMemo(
+    () => applyCameraTypeFilter(cameras, cameraType),
+    [cameras, cameraType]
+  );
+  const { weeklyCounts, dailyCounts } = useMemo(() => {
+    const weekly = new Map<string, number>();
+    const daily = new Map<string, number>();
+    for (const c of typedCameras) {
+      const ts = c.osmTimestamp;
+      if (!ts) continue;
+      const monday = getWeekMonday(ts);
+      weekly.set(monday, (weekly.get(monday) || 0) + 1);
+      const day = ts.slice(0, 10);
+      daily.set(day, (daily.get(day) || 0) + 1);
+    }
+    return { weeklyCounts: weekly, dailyCounts: daily };
+  }, [typedCameras]);
   const tickCallback = useMapStore((s) => s._timelineTickCallback);
   const { timelineSettings, updateTimelineSettings } = useAppModeStore(
     useShallow((s) => ({
@@ -120,7 +140,7 @@ export function TimelineBar() {
       const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
       const dd = String(d.getUTCDate()).padStart(2, '0');
       const week = `${yyyy}-${mm}-${dd}`;
-      runningTotal += timelineWeeklyCounts.get(week) || 0;
+      runningTotal += weeklyCounts.get(week) || 0;
       cumulativeAll.push(runningTotal);
     }
 
@@ -134,7 +154,7 @@ export function TimelineBar() {
 
     const peak = bars.length > 0 ? bars[bars.length - 1] : 0;
     return { bars, peak };
-  }, [timelineMinWeek, timelineMaxWeek, timelineWeeklyCounts]);
+  }, [timelineMinWeek, timelineMaxWeek, weeklyCounts]);
 
   // Sparkline position mapped to the visible (clipped) bar range
   const sparklinePosition = useMemo(() => {
@@ -172,20 +192,20 @@ export function TimelineBar() {
     let running = 0;
     for (let i = 0; i <= dayCount; i++) {
       const day = dayIndexToDate(i, timelineMinDay);
-      running += timelineDailyCounts.get(day) || 0;
+      running += dailyCounts.get(day) || 0;
       sums[i] = running;
     }
     return sums;
-  }, [timelineMinDay, timelineMaxDay, timelineDailyCounts]);
+  }, [timelineMinDay, timelineMaxDay, dailyCounts]);
 
   // Cumulative count up to currentDate — O(1) via prefix sum
   const cumulativeCount = useMemo(() => {
     const idx = Math.min(clampedIndex, cumulativePrefixSum.length - 1);
     const countUpToDate = idx >= 0 ? cumulativePrefixSum[idx] : 0;
     const totalWithTimestamps = cumulativePrefixSum[cumulativePrefixSum.length - 1];
-    const noTimestampCount = cameras.length - totalWithTimestamps;
+    const noTimestampCount = typedCameras.length - totalWithTimestamps;
     return countUpToDate + noTimestampCount;
-  }, [clampedIndex, cumulativePrefixSum, cameras.length]);
+  }, [clampedIndex, cumulativePrefixSum, typedCameras.length]);
 
   // --- Scrubber via pointer events (maps to visible range) ---
   const trackRef = useRef<HTMLDivElement>(null);

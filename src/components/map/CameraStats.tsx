@@ -48,7 +48,7 @@ export function CameraStats() {
 
         {/* Total cameras badge */}
         <div className="mt-3 pt-3 border-t border-dark-700/50 flex items-center justify-between">
-          <span className="text-xs text-dark-200">Total US</span>
+          <span className="text-xs text-dark-200">Total Canada</span>
           <span className="text-sm font-medium text-dark-100 tabular-nums">
             {isLoading ? (
               <span className="text-dark-400">—</span>

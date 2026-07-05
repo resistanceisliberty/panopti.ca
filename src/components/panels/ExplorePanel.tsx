@@ -6,6 +6,7 @@ import { HeatmapLegend } from '../../modes/heatmap/HeatmapLegend';
 import { DotDensityControls } from '../../modes/dots/DotDensityControls';
 import { ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 import { MapTypeDropdown, VIZ_OPTIONS } from './MapTypeDropdown';
+import { CameraTypeToggle } from './MapPanel';
 
 export function ExplorePanel() {
   const [isMobile, setIsMobile] = useState(false);
@@ -73,6 +74,7 @@ export function ExplorePanel() {
       >
         {snapPoint === 'full' && (
           <div className="pb-8">
+            <CameraTypeToggle />
             <p className="text-xs text-dark-400 mb-3 leading-relaxed">
               Visualize when ALPR cameras were mapped on <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OSM</a> across Canada. Data from <a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a> &amp; OSM contributors. Use the timeline to scrub through when each camera was added. Switch layers below.
             </p>
@@ -119,6 +121,7 @@ export function ExplorePanel() {
 
         {/* Visualization Controls */}
         <div className="flex-1 overflow-y-auto">
+          <CameraTypeToggle />
           <div className="p-6">
             {renderControls()}
           </div>

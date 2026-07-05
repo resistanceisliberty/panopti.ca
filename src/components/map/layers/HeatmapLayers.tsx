@@ -4,6 +4,7 @@ import { useCameraStore, useAppModeStore } from '../../../store';
 import { buildHeatmapColorExpression } from '../../../modes/heatmap/colorSchemes';
 import type maplibregl from 'maplibre-gl';
 import type { ALPRCamera } from '../../../types';
+import { applyCameraTypeFilter } from '../../../store/cameraStore';
 
 const CCTV_BRAND = 'Government CCTVs';
 
@@ -70,12 +71,18 @@ function opacityExpr(opacity: number): maplibregl.ExpressionSpecification {
 export function HeatmapLayers({ visible = true }: { visible?: boolean }) {
   const filteredCameras = useCameraStore(s => s.filteredCameras);
   const cameras = useCameraStore(s => s.cameras);
+  const cameraType = useCameraStore(s => s.cameraType);
   const heatmapSettings = useAppModeStore((s) => s.heatmapSettings);
   const appMode = useAppModeStore((s) => s.appMode);
   const isTimelineActive = appMode === 'explore';
   const { current: map } = useMap();
   const prevSettingsRef = useRef(heatmapSettings);
-  const cameraSource = isTimelineActive ? cameras : filteredCameras;
+  // Timeline honours the ALPR/CCTV/Both toggle; the brand split below then draws
+  // whichever layer(s) remain. Memoized so identity is stable per type.
+  const cameraSource = useMemo(
+    () => (isTimelineActive ? applyCameraTypeFilter(cameras, cameraType) : filteredCameras),
+    [isTimelineActive, cameras, cameraType, filteredCameras]
+  );
   const { alprData, cctvData } = useMemo(() => {
     const alpr: ALPRCamera[] = [];
     const cctv: ALPRCamera[] = [];

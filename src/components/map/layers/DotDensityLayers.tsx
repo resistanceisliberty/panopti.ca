@@ -3,6 +3,7 @@ import { Source, Layer, useMap } from 'react-map-gl/maplibre';
 import type maplibregl from 'maplibre-gl';
 import { useCameraStore, useAppModeStore } from '../../../store';
 import type { ALPRCamera } from '../../../types';
+import { applyCameraTypeFilter } from '../../../store/cameraStore';
 
 /**
  * Convert cameras to unclustered GeoJSON for dot density rendering.
@@ -33,6 +34,7 @@ function camerasToDotsGeoJSON(cameras: ALPRCamera[]): GeoJSON.FeatureCollection 
 export function DotDensityLayers() {
   const filteredCameras = useCameraStore(s => s.filteredCameras);
   const cameras = useCameraStore(s => s.cameras);
+  const cameraType = useCameraStore(s => s.cameraType);
   // Selective subscriptions: only re-render for settings/mode changes, NOT currentDate
   const dotDensitySettings = useAppModeStore((s) => s.dotDensitySettings);
   const appMode = useAppModeStore((s) => s.appMode);
@@ -40,8 +42,12 @@ export function DotDensityLayers() {
   const { current: map } = useMap();
   const prevSettingsRef = useRef(dotDensitySettings);
 
-  // Derive camera source outside memo so reference equality prevents recomputation on tab switches
-  const cameraSource = isTimelineActive ? cameras : filteredCameras;
+  // Timeline loads all cameras (date visibility is applied imperatively) but still
+  // honours the ALPR/CCTV/Both toggle. Memoized so the reference is stable per type.
+  const cameraSource = useMemo(
+    () => (isTimelineActive ? applyCameraTypeFilter(cameras, cameraType) : filteredCameras),
+    [isTimelineActive, cameras, cameraType, filteredCameras]
+  );
 
   // During timeline, load ALL cameras once; visibility controlled via filter prop
   const geojsonData = useMemo(

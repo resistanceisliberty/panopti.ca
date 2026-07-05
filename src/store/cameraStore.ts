@@ -15,14 +15,14 @@ import {
 // ── Local-only: government CCTV nodes carry this brand label in the dataset ──
 const CCTV_BRAND = 'Government CCTVs';
 export type CameraTypeFilter = 'all' | 'alpr' | 'cctv';
-function applyCameraTypeFilter(list: ALPRCamera[], type: CameraTypeFilter): ALPRCamera[] {
+export function applyCameraTypeFilter(list: ALPRCamera[], type: CameraTypeFilter): ALPRCamera[] {
   if (type === 'alpr') return list.filter((c) => c.brand !== CCTV_BRAND);
   if (type === 'cctv') return list.filter((c) => c.brand === CCTV_BRAND);
   return list;
 }
 
 /** Get the Monday (YYYY-MM-DD) of the ISO week containing the given ISO timestamp */
-function getWeekMonday(isoTimestamp: string): string {
+export function getWeekMonday(isoTimestamp: string): string {
   const d = new Date(isoTimestamp);
   const day = d.getUTCDay(); // 0=Sun, 1=Mon, ..., 6=Sat
   const diff = day === 0 ? -6 : 1 - day;
