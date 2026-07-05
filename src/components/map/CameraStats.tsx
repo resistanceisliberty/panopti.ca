@@ -1,10 +1,21 @@
+import { useMemo } from 'react';
 import { useMapStore, useCameraStore } from '../../store';
+
+const CCTV_BRAND = 'Government CCTVs';
 
 export function CameraStats() {
   const bounds = useMapStore(s => s.bounds);
   const getCamerasInBounds = useCameraStore(s => s.getCamerasInBounds);
-  const cameraCount = useCameraStore(s => s.cameras.length);
+  const cameras = useCameraStore(s => s.cameras);
+  const cameraCount = cameras.length;
   const isLoading = useCameraStore(s => s.isLoading);
+
+  // Dataset totals split by type — matches the ALPR/CCTV timeline toggle.
+  const cctvTotal = useMemo(
+    () => cameras.reduce((n, c) => (c.brand === CCTV_BRAND ? n + 1 : n), 0),
+    [cameras]
+  );
+  const alprTotal = cameraCount - cctvTotal;
   
   // Get cameras in actual map bounds
   const viewCameraCount = bounds 
@@ -46,16 +57,32 @@ export function CameraStats() {
           </div>
         </div>
 
-        {/* Total cameras badge */}
-        <div className="mt-3 pt-3 border-t border-dark-700/50 flex items-center justify-between">
-          <span className="text-xs text-dark-200">Total Canada</span>
-          <span className="text-sm font-medium text-dark-100 tabular-nums">
-            {isLoading ? (
-              <span className="text-dark-400">—</span>
-            ) : (
-              cameraCount.toLocaleString()
-            )}
-          </span>
+        {/* Totals — combined, then split by type (matches the timeline toggle) */}
+        <div className="mt-3 pt-3 border-t border-dark-700/50 space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-dark-200">Total Canada</span>
+            <span className="text-sm font-medium text-dark-100 tabular-nums">
+              {isLoading ? <span className="text-dark-400">—</span> : cameraCount.toLocaleString()}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-dark-300 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: '#0080BC' }} />
+              ALPRs
+            </span>
+            <span className="text-xs font-medium text-dark-200 tabular-nums">
+              {isLoading ? <span className="text-dark-400">—</span> : alprTotal.toLocaleString()}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-dark-300 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: '#F59E0B' }} />
+              Gov CCTVs
+            </span>
+            <span className="text-xs font-medium text-dark-200 tabular-nums">
+              {isLoading ? <span className="text-dark-400">—</span> : cctvTotal.toLocaleString()}
+            </span>
+          </div>
         </div>
       </div>
     </div>
