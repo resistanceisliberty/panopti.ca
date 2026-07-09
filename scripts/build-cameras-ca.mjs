@@ -43,6 +43,13 @@ const MAX_ALPR_DROP = Number(process.env.MAX_ALPR_DROP ?? 0.1);
 // failing) — fail loudly so it gets noticed. Override with MAX_STALE_DAYS.
 const MAX_STALE_DAYS = Number(process.env.MAX_STALE_DAYS ?? 3);
 
+// Mirror-freshness gate: a mirror lagging hours behind the planet reads as a
+// clean small diff (a few recent nodes missing, a few just-deleted ones back)
+// that slips under the count/regression guards. Reject any mirror whose data is
+// older than this so a stale swap can't overwrite good data. Override with
+// MAX_MIRROR_LAG_HOURS.
+const MAX_MIRROR_LAG_HOURS = Number(process.env.MAX_MIRROR_LAG_HOURS ?? 12);
+
 // Public planet mirrors. overpass.deflock.org is intentionally excluded: it's
 // US-focused and serves stale Canada data (drops valid nodes the planet has).
 const OVERPASS_ENDPOINTS = [
@@ -175,10 +182,17 @@ async function tryEndpoint(endpoint) {
   }
 }
 
-// Returns null if a freshly-built result passes the floor + regression checks,
-// or a human-readable reason if it looks stale/partial — so we can reject that
-// mirror and try another instead of overwriting good data (or failing the job).
-function validate(alprCount, prevAlpr) {
+// Returns null if a freshly-built result passes the freshness + floor +
+// regression checks, or a human-readable reason if it looks stale/partial — so
+// we can reject that mirror and try another instead of overwriting good data
+// (or failing the job). baseTs is the mirror's osm3s.timestamp_osm_base.
+function validate(alprCount, prevAlpr, baseTs) {
+  if (baseTs) {
+    const lagH = (Date.now() - Date.parse(baseTs)) / 3_600_000;
+    if (lagH > MAX_MIRROR_LAG_HOURS) {
+      return `data ${lagH.toFixed(1)}h stale (base ${baseTs}, > ${MAX_MIRROR_LAG_HOURS}h)`;
+    }
+  }
   if (alprCount < MIN_CAMERA_COUNT) {
     return `only ${alprCount} ALPRs (< MIN_CAMERA_COUNT ${MIN_CAMERA_COUNT})`;
   }
@@ -319,7 +333,7 @@ async function main() {
       }
 
       const { cameras, alprCount, cctvCount } = build(data);
-      const staleReason = validate(alprCount, prevAlpr);
+      const staleReason = validate(alprCount, prevAlpr, data.osm3s?.timestamp_osm_base);
       if (staleReason) {
         console.warn(`[round ${round}] ${endpoint}: ${data.elements.length} elements but ${staleReason}; trying another mirror`);
         errors.push(`${endpoint}: stale (${staleReason})`);
