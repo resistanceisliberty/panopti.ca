@@ -9,7 +9,7 @@ export function SubmitToast() {
 
   useEffect(() => {
     if (!success) return;
-    const t = setTimeout(() => setSuccess(null), 7000);
+    const t = setTimeout(() => setSuccess(null), 15000);
     return () => clearTimeout(t);
   }, [success, setSuccess]);
 
