@@ -15,6 +15,8 @@ export function SubmitToast() {
 
   return (
     <div
+      role="status"
+      aria-live="polite"
       ref={(el) => { if (el) el.inert = !open; }}
       className={`absolute left-1/2 top-6 z-50 w-[360px] max-w-[calc(100vw-2rem)] -translate-x-1/2 rounded-lg border border-dark-600 bg-dark-800 p-4 shadow-xl transition-all duration-200 ease-out ${open ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3 pointer-events-none'}`}
     >

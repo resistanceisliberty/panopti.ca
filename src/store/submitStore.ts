@@ -41,7 +41,7 @@ export const useSubmitStore = create<SubmitState>((set) => ({
   busy: false,
   error: null,
   success: null,
-  setUser: (user) => set({ user }),
+  setUser: (user) => set(user === null ? { user, success: null } : { user }),
   startAdd: () => set({ mode: 'add', draft: emptyDraft(), point: null, editNode: null, error: null, success: null }),
   startEdit: (editNode, draft) => set({ mode: 'edit', editNode, draft, point: { lat: editNode.lat, lon: editNode.lon }, error: null, success: null }),
   cancel: () => set({ mode: 'idle', point: null, editNode: null, error: null, busy: false }),
