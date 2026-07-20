@@ -16,6 +16,8 @@ import { DensityControls } from '../../modes/density/DensityControls';
 import { DensityLegend } from '../../modes/density/DensityLegend';
 import { MapPanelContent } from './MapPanel';
 import { SubmitButtons } from '../submit/SubmitButtons';
+import { SubmitForm } from '../submit/SubmitForm';
+import { useSubmitStore } from '../../store/submitStore';
 
 /* ------------------------------------------------------------------ */
 /*  Tab definitions                                                    */
@@ -45,6 +47,9 @@ export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
 
   /* ---- stores ---- */
   const { appMode, mapVisualization } = useAppModeStore();
+  const submitMode = useSubmitStore((s) => s.mode);
+  // When a submission starts (Add, or Edit via a map marker), raise the drawer so the docked form is visible.
+  useEffect(() => { if (submitMode !== 'idle') setSnapPoint('full'); }, [submitMode]);
   const { normalRoute, avoidanceRoute } = useRouteStore();
   const hasRoutes = !!(normalRoute && avoidanceRoute);
 
@@ -302,10 +307,14 @@ export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
         disableHeaderTap
       >
         {snapPoint === 'full' && (
-          <>
-            <SubmitButtons />
-            {renderTabContent()}
-          </>
+          submitMode !== 'idle'
+            ? <div className="pb-8"><SubmitForm /></div>
+            : (
+              <>
+                <SubmitButtons />
+                {renderTabContent()}
+              </>
+            )
         )}
       </BottomSheet>
     </>

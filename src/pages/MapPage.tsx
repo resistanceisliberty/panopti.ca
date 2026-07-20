@@ -425,7 +425,7 @@ export function MapPage() {
             {!isEmbed && <MapSearch />}
             {appMode === 'network' ? <NetworkAgencyCount /> : appMode !== 'map' ? <CameraStats /> : null}
             <MapStyleControl />
-            <SubmitPanel />
+            {!isMobile && <SubmitPanel />}
             <SubmitToast />
 
             {/* Density feature popup — floating stats card */}
