@@ -46,6 +46,7 @@ import { BoundaryOverlayLayers } from './layers/BoundaryOverlayLayers';
 import { useDensityStore } from '../../store/densityStore';
 import type { DensityFeatureProperties } from '../../types';
 import { useSubmitStore } from '../../store/submitStore';
+import { DirectionConeLayer } from '../submit/DirectionConeLayer';
 import { fetchNode } from '../../osm/api';
 import { draftFromNode } from '../../osm/fromNode';
 
@@ -1096,6 +1097,8 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
           />
         </Source>
       )}
+
+      <DirectionConeLayer />
 
       {/* Draft marker for the submission tool (add/edit) — draggable to fine-tune placement */}
       {submitPoint && (

@@ -15,7 +15,7 @@ export function TagEditor() {
       {Object.entries(tags).map(([k, v]) => (
         <div key={k} className="flex gap-1">
           <span className="w-40 shrink-0 truncate text-dark-300">{k}</span>
-          <input className="flex-1 rounded bg-dark-800 px-1 text-dark-100" value={v} onChange={(e) => override(k, e.target.value)} />
+          <input className="flex-1 min-w-0 rounded bg-dark-800 px-1 text-dark-100" value={v} onChange={(e) => override(k, e.target.value)} />
           <button className="text-dark-500" onClick={() => remove(k)}>✕</button>
         </div>
       ))}
@@ -34,7 +34,7 @@ function AddTagRow({ onAdd }: { onAdd: (k: string, v: string) => void }) {
       if (k) { onAdd(k, v); f.reset(); }
     }}>
       <input name="k" placeholder="key" className="w-40 rounded bg-dark-800 px-1 text-dark-100" />
-      <input name="v" placeholder="value" className="flex-1 rounded bg-dark-800 px-1 text-dark-100" />
+      <input name="v" placeholder="value" className="flex-1 min-w-0 rounded bg-dark-800 px-1 text-dark-100" />
       <button className="text-accent">+</button>
     </form>
   );
