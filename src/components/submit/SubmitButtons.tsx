@@ -7,18 +7,19 @@ export function SubmitButtons() {
   const error = useSubmitStore((s) => s.error);
   const startAdd = useSubmitStore((s) => s.startAdd);
   const setError = useSubmitStore((s) => s.setError);
+  const showAdd = user && mode === 'idle';
   return (
-    <div className="flex flex-col gap-2 mt-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <OsmAuthButton />
-        {user && mode === 'idle' && (
-          <button className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white" onClick={startAdd}>
+    <div className="mt-3">
+      <OsmAuthButton />
+      {user && (
+        <div className={`overflow-hidden transition-all duration-200 ease-out ${showAdd ? 'max-h-12 opacity-100 mt-2' : 'max-h-0 opacity-0 mt-0'}`}>
+          <button className="w-full rounded bg-accent px-3 py-1.5 text-sm font-medium text-white" onClick={startAdd}>
             ＋ Add a camera
           </button>
-        )}
-      </div>
+        </div>
+      )}
       {mode === 'idle' && error && (
-        <div className="rounded-md bg-red-900/90 border border-red-700 px-3 py-1.5 text-xs text-red-100">
+        <div className="mt-2 rounded-md bg-red-900/90 border border-red-700 px-3 py-1.5 text-xs text-red-100">
           {error} <button className="underline" onClick={() => setError(null)}>dismiss</button>
         </div>
       )}
