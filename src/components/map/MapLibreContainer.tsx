@@ -1,8 +1,9 @@
 import { useRef, useCallback, useEffect, useState, useMemo, memo, useImperativeHandle, forwardRef } from 'react';
 import { md5 } from 'js-md5';
-import Map, { 
-  Source, 
-  Layer, 
+import Map, {
+  Source,
+  Layer,
+  Marker,
   Popup,
   NavigationControl,
   useControl,
@@ -44,6 +45,9 @@ import { CameraMarkerLayers } from './layers/CameraMarkerLayers';
 import { BoundaryOverlayLayers } from './layers/BoundaryOverlayLayers';
 import { useDensityStore } from '../../store/densityStore';
 import type { DensityFeatureProperties } from '../../types';
+import { useSubmitStore } from '../../store/submitStore';
+import { fetchNode } from '../../osm/api';
+import { draftFromNode } from '../../osm/fromNode';
 
 import type { ALPRCamera, Location } from '../../types';
 
@@ -167,6 +171,7 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
   const cameras = useCameraStore(s => s.cameras);
   const getCamerasInBounds = useCameraStore(s => s.getCamerasInBounds);
   const dataVersion = useCameraStore(s => s.dataVersion);
+  const submitPoint = useSubmitStore(s => s.point);
   const appMode = useAppModeStore(s => s.appMode);
   const mapVisualization = useAppModeStore(s => s.mapVisualization);
   const heatmapSettings = useAppModeStore(s => s.heatmapSettings);
@@ -589,6 +594,13 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
 
   // Handle cluster click - zoom in or pick location
   const onClick = useCallback(async (event: MapLayerMouseEvent) => {
+    // Submission tool: in add mode, every map click places/moves the draft point.
+    const submit = useSubmitStore.getState();
+    if (submit.mode === 'add') {
+      submit.setPoint({ lat: event.lngLat.lat, lon: event.lngLat.lng });
+      return;
+    }
+
     if (!mapRef.current) return;
 
     // Network mode: deck.gl handles clicks via its own pickable layers
@@ -691,6 +703,13 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
       }
     }
   }, [pickingLocation, setPickedLocation, isDensityMode, isNetworkMode]);
+
+  // Open the submission panel pre-filled from an existing OSM node (popup "Edit" action)
+  const handleEditCamera = useCallback(async (camera: ALPRCamera) => {
+    const node = await fetchNode(camera.osmId);
+    useSubmitStore.getState().startEdit(node, draftFromNode(node));
+    setPopupInfo(null);
+  }, []);
 
   // Cursor handling - crosshair when adding waypoints or picking location
   const onMouseEnter = useCallback((e: MapLayerMouseEvent) => {
@@ -1074,6 +1093,16 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
         </Source>
       )}
 
+      {/* Draft marker for the submission tool (add/edit) — draggable to fine-tune placement */}
+      {submitPoint && (
+        <Marker
+          longitude={submitPoint.lon}
+          latitude={submitPoint.lat}
+          draggable
+          onDragEnd={(e) => useSubmitStore.getState().setPoint({ lat: e.lngLat.lat, lon: e.lngLat.lng })}
+        />
+      )}
+
       {/* Popup */}
       {popupInfo && (
         <Popup
@@ -1085,7 +1114,7 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
           className="camera-popup-maplibre"
           maxWidth="280px"
         >
-          <MemoizedCameraPopupContent camera={popupInfo.camera} />
+          <MemoizedCameraPopupContent camera={popupInfo.camera} onEdit={handleEditCamera} />
         </Popup>
       )}
 
@@ -1166,8 +1195,9 @@ function wikimediaImageUrl(tag: string): string {
 }
 
 // Popup content component - Dark theme
-function CameraPopupContent({ camera }: { camera: ALPRCamera }) {
+function CameraPopupContent({ camera, onEdit }: { camera: ALPRCamera; onEdit: (camera: ALPRCamera) => void }) {
   const osmUrl = `https://www.openstreetmap.org/${camera.osmType}/${camera.osmId}`;
+  const submitUser = useSubmitStore((s) => s.user);
 
   const wikiImageUrl = camera.wikimediaCommons ? wikimediaImageUrl(camera.wikimediaCommons) : null;
   const [imageUrl, setImageUrl] = useState<string | null>(wikiImageUrl);
@@ -1252,6 +1282,14 @@ function CameraPopupContent({ camera }: { camera: ALPRCamera }) {
         >
           View OSM
         </a>
+        {submitUser && (
+          <button
+            onClick={() => onEdit(camera)}
+            className="flex-1 px-3 py-2 text-xs text-center bg-accent hover:bg-accent/80 text-white rounded-lg transition-colors font-medium"
+          >
+            Edit
+          </button>
+        )}
       </div>
     </div>
   );
