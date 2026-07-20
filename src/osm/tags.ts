@@ -1,0 +1,52 @@
+import type { OsmTags, SubmitDraft } from './types';
+
+const ALPR_BASE: OsmTags = {
+  man_made: 'surveillance',
+  'surveillance:type': 'ALPR',
+  surveillance: 'public',
+  'camera:type': 'fixed',
+  'surveillance:zone': 'traffic',
+};
+
+const CCTV_BASE: OsmTags = {
+  man_made: 'surveillance',
+  'surveillance:type': 'camera',
+  'operator:type': 'government',
+};
+
+export const SOURCE_PRESETS = [
+  { label: 'Survey', value: 'survey' },
+  { label: 'Local Knowledge', value: 'local knowledge' },
+  { label: 'Aerial Imagery', value: 'aerial imagery' },
+  { label: 'GPS', value: 'GPS' },
+  { label: 'Street-Level Photos', value: 'street-level photos' },
+  { label: 'OpenStreetMap Notes', value: 'openstreetmap notes' },
+];
+
+function put(tags: OsmTags, key: string, value?: string) {
+  const v = value?.trim();
+  if (v) tags[key] = v;
+}
+
+export function buildNodeTags(d: SubmitDraft): OsmTags {
+  const tags: OsmTags = { ...(d.deviceType === 'alpr' ? ALPR_BASE : CCTV_BASE) };
+
+  if (d.deviceType === 'alpr' && d.manufacturer.kind !== 'none') {
+    put(tags, 'manufacturer', d.manufacturer.manufacturer);
+    put(tags, 'manufacturer:wikidata', d.manufacturer.wikidata);
+  }
+  put(tags, 'operator', d.operator);
+  put(tags, 'operator:wikidata', d.operatorWikidata);
+  put(tags, 'camera:mount', d.cameraMount);
+
+  const dirs = d.directions.map((s) => s.trim()).filter(Boolean);
+  if (dirs.length) tags.direction = dirs.join(';');
+
+  return { ...tags, ...d.extraTags };
+}
+
+export function buildChangesetTags(d: SubmitDraft): OsmTags {
+  const tags: OsmTags = { comment: d.description, created_by: 'panopti.ca' };
+  if (d.source.kind !== 'none') tags.source = d.source.value.trim();
+  return tags;
+}
