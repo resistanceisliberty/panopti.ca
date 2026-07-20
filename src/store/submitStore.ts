@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { OsmNode, OsmTags, SubmitDraft } from '../osm/types';
+import { SUBMIT_ENABLED } from '../osm/config';
 
 export function emptyDraft(deviceType: SubmitDraft['deviceType'] = 'alpr'): SubmitDraft {
   return {
@@ -20,6 +21,7 @@ interface SubmitState {
   busy: boolean;
   error: string | null;
   success: string | null;
+  submitEnabled: boolean;
   setUser: (u: string | null) => void;
   startAdd: () => void;
   startEdit: (node: OsmNode, draft: SubmitDraft) => void;
@@ -30,6 +32,7 @@ interface SubmitState {
   setBusy: (b: boolean) => void;
   setError: (e: string | null) => void;
   setSuccess: (s: string | null) => void;
+  setSubmitEnabled: (b: boolean) => void;
 }
 
 export const useSubmitStore = create<SubmitState>((set) => ({
@@ -41,6 +44,7 @@ export const useSubmitStore = create<SubmitState>((set) => ({
   busy: false,
   error: null,
   success: null,
+  submitEnabled: SUBMIT_ENABLED,
   setUser: (user) => set(user === null ? { user, success: null } : { user }),
   startAdd: () => set({ mode: 'add', draft: emptyDraft(), point: null, editNode: null, error: null, success: null }),
   startEdit: (editNode, draft) => set({ mode: 'edit', editNode, draft, point: { lat: editNode.lat, lon: editNode.lon }, error: null, success: null }),
@@ -51,4 +55,5 @@ export const useSubmitStore = create<SubmitState>((set) => ({
   setBusy: (busy) => set({ busy }),
   setError: (error) => set({ error }),
   setSuccess: (success) => set({ success }),
+  setSubmitEnabled: (submitEnabled) => set({ submitEnabled }),
 }));

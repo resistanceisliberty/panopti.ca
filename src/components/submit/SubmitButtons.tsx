@@ -1,6 +1,5 @@
 import { OsmAuthButton } from './OsmAuthButton';
 import { useSubmitStore } from '../../store/submitStore';
-import { SUBMIT_ENABLED } from '../../osm/config';
 
 export function SubmitButtons() {
   const user = useSubmitStore((s) => s.user);
@@ -8,9 +7,10 @@ export function SubmitButtons() {
   const error = useSubmitStore((s) => s.error);
   const startAdd = useSubmitStore((s) => s.startAdd);
   const setError = useSubmitStore((s) => s.setError);
+  const submitEnabled = useSubmitStore((s) => s.submitEnabled);
   const showAdd = user && mode === 'idle';
 
-  if (!SUBMIT_ENABLED) return <div className="mt-3 text-xs text-dark-400">Camera submissions are temporarily disabled.</div>;
+  if (!submitEnabled) return <div className="mt-3 text-xs text-dark-400">Camera submissions are temporarily disabled.</div>;
   return (
     <div className="mt-3">
       <OsmAuthButton />

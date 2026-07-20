@@ -16,6 +16,9 @@ import { useEmbedMode } from '@/hooks/useEmbedMode';
 import { MapStyleControl } from '@/components/map/MapStyleControl';
 import { SubmitPanel } from '@/components/submit/SubmitPanel';
 import { SubmitToast } from '@/components/submit/SubmitToast';
+import { startSubmitFlagPolling } from '@/osm/flag';
+import { SUBMIT_ENABLED } from '@/osm/config';
+import { useSubmitStore } from '@/store/submitStore';
 import { TimelineBar } from '@/modes/timeline/TimelineBar';
 import { DensityFeaturePopup } from '@/modes/density/DensityFeaturePopup';
 import { Route, Compass, BarChart3, Menu, X, Network, Map as MapIcon } from 'lucide-react';
@@ -93,6 +96,10 @@ export function MapPage() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, [isEmbed]);
+
+  // Runtime killswitch: poll the remote flag and reflect it (AND the build-time flag).
+  useEffect(() => startSubmitFlagPolling((runtime) =>
+    useSubmitStore.getState().setSubmitEnabled(SUBMIT_ENABLED && runtime)), []);
 
   // Sync URL params with app mode on mount
   useEffect(() => {

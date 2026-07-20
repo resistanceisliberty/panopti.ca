@@ -10,13 +10,14 @@ import { cameraFromTags, type LocalOp } from '../../osm/localOverlay';
 import { useCameraStore } from '../../store';
 
 export function SubmitForm() {
-  const { mode, user, draft, point, editNode, busy, error } = useSubmitStore();
+  const { mode, user, draft, point, editNode, busy, error, submitEnabled } = useSubmitStore();
   const { patchDraft, cancel, setBusy, setError, setSuccess } = useSubmitStore.getState();
   if (!user) return null;
 
-  const canSubmit = !!point && Number.isFinite(point.lat) && Number.isFinite(point.lon) && draft.description.trim().length > 0 && !busy;
+  const canSubmit = submitEnabled && !!point && Number.isFinite(point.lat) && Number.isFinite(point.lon) && draft.description.trim().length > 0 && !busy;
 
   const run = async (fn: () => Promise<unknown>, successMsg: string, buildOp: (result: unknown) => LocalOp) => {
+    if (!useSubmitStore.getState().submitEnabled) { setError('Camera submissions are temporarily disabled.'); return; }
     setBusy(true); setError(null);
     try {
       const result = await fn();
@@ -77,7 +78,7 @@ export function SubmitForm() {
       <div className="flex gap-2">
         {mode === 'edit' && editNode && (
           <button className="rounded bg-red-700 px-3 py-1.5 text-sm text-white"
-            disabled={busy || !draft.description.trim()}
+            disabled={busy || !draft.description.trim() || !submitEnabled}
             onClick={() => { if (confirm('Delete this camera from OSM?')) run(
               () => submitDelete(editNode, draft.description, draft.source),
               'Deletion submitted to OpenStreetMap.',
