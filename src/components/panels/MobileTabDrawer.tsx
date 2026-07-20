@@ -15,6 +15,7 @@ import { DotDensityControls } from '../../modes/dots/DotDensityControls';
 import { DensityControls } from '../../modes/density/DensityControls';
 import { DensityLegend } from '../../modes/density/DensityLegend';
 import { MapPanelContent } from './MapPanel';
+import { SubmitButtons } from '../submit/SubmitButtons';
 
 /* ------------------------------------------------------------------ */
 /*  Tab definitions                                                    */
@@ -300,7 +301,12 @@ export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
         headerContent={headerContent}
         disableHeaderTap
       >
-        {snapPoint === 'full' && renderTabContent()}
+        {snapPoint === 'full' && (
+          <>
+            <SubmitButtons />
+            {renderTabContent()}
+          </>
+        )}
       </BottomSheet>
     </>
   );

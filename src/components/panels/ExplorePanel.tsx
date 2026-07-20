@@ -7,6 +7,7 @@ import { DotDensityControls } from '../../modes/dots/DotDensityControls';
 import { ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 import { MapTypeDropdown, VIZ_OPTIONS } from './MapTypeDropdown';
 import { CameraTypeToggle } from './MapPanel';
+import { SubmitButtons } from '../submit/SubmitButtons';
 
 export function ExplorePanel() {
   const [isMobile, setIsMobile] = useState(false);
@@ -117,6 +118,7 @@ export function ExplorePanel() {
             Visualize when ALPR cameras were mapped on <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OpenStreetMap</a> across Canada. Data sourced from <a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a> and OSM contributors. Use the timeline to scrub through when each camera was added to OSM. Switch between Heatmap and Dot Density layers below.
           </p>
           <MapTypeDropdown />
+          <SubmitButtons />
         </div>
 
         {/* Visualization Controls */}
