@@ -8,3 +8,7 @@ export const OSM = {
   scopes: 'read_prefs write_api',
   changesetCreatedBy: 'panopti.ca',
 } as const;
+
+// Killswitch: set VITE_SUBMIT_ENABLED=false to disable the submission tool (hides every
+// entry point). Enabled unless explicitly 'false'. Takes effect on the next build/deploy.
+export const SUBMIT_ENABLED = env.VITE_SUBMIT_ENABLED !== 'false';

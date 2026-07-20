@@ -47,6 +47,7 @@ import { useDensityStore } from '../../store/densityStore';
 import type { DensityFeatureProperties } from '../../types';
 import { useSubmitStore } from '../../store/submitStore';
 import { DirectionConeLayer } from '../submit/DirectionConeLayer';
+import { SUBMIT_ENABLED } from '../../osm/config';
 import { fetchNode } from '../../osm/api';
 import { draftFromNode } from '../../osm/fromNode';
 
@@ -1289,7 +1290,7 @@ function CameraPopupContent({ camera, onEdit }: { camera: ALPRCamera; onEdit: (c
         >
           View OSM
         </a>
-        {submitUser && (
+        {SUBMIT_ENABLED && submitUser && (
           <button
             onClick={() => onEdit(camera)}
             className="flex-1 px-3 py-2 text-xs text-center bg-accent hover:bg-accent/80 text-white rounded-lg transition-colors font-medium"
