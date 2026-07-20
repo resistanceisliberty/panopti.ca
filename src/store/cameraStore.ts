@@ -11,6 +11,7 @@ import {
   getCamerasInBoundsFromGrid,
   type SpatialGrid
 } from '../utils/geo';
+import { applyLocalOverlay, applyOp, addOp, type LocalOp } from '../osm/localOverlay';
 
 // ── Local-only: government CCTV nodes carry this brand label in the dataset ──
 const CCTV_BRAND = 'Government CCTVs';
@@ -31,6 +32,49 @@ export function getWeekMonday(isoTimestamp: string): string {
   const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
   const dd = String(d.getUTCDate()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}`;
+}
+
+// Derived state from a camera list — mirror of the load-path hydration, used by the
+// optimistic local overlay so an added/edited/deleted node reflects everywhere at once.
+function computeHydration(cameras: ALPRCamera[], cameraType: CameraTypeFilter) {
+  const monthlyCounts = new Map<string, number>();
+  let minDate = '9999-99', maxDate = '0000-00';
+  const weeklyCounts = new Map<string, number>();
+  let minWeek = 'z', maxWeek = '';
+  const dailyCounts = new Map<string, number>();
+  let minDay = 'z', maxDay = '';
+  for (let i = 0; i < cameras.length; i++) {
+    const ts = cameras[i].osmTimestamp;
+    if (!ts) continue;
+    const month = ts.slice(0, 7);
+    monthlyCounts.set(month, (monthlyCounts.get(month) || 0) + 1);
+    if (month < minDate) minDate = month;
+    if (month > maxDate) maxDate = month;
+    const monday = getWeekMonday(ts);
+    weeklyCounts.set(monday, (weeklyCounts.get(monday) || 0) + 1);
+    if (monday < minWeek) minWeek = monday;
+    if (monday > maxWeek) maxWeek = monday;
+    const day = ts.slice(0, 10);
+    dailyCounts.set(day, (dailyCounts.get(day) || 0) + 1);
+    if (day < minDay) minDay = day;
+    if (day > maxDay) maxDay = day;
+  }
+  return {
+    cameras,
+    filteredCameras: applyCameraTypeFilter(cameras, cameraType),
+    spatialGrid: buildSpatialGrid(cameras),
+    availableOperators: getUniqueOperators(cameras),
+    availableBrands: getUniqueBrands(cameras),
+    timelineMinDate: minDate === '9999-99' ? '2017-04' : minDate,
+    timelineMaxDate: maxDate === '0000-00' ? '2026-02' : maxDate,
+    timelineMonthlyCounts: monthlyCounts,
+    timelineMinWeek: minWeek === 'z' ? '2017-04-03' : minWeek,
+    timelineMaxWeek: maxWeek === '' ? '2026-02-09' : maxWeek,
+    timelineWeeklyCounts: weeklyCounts,
+    timelineMinDay: minDay === 'z' ? '2017-04-03' : minDay,
+    timelineMaxDay: maxDay === '' ? '2026-02-15' : maxDay,
+    timelineDailyCounts: dailyCounts,
+  };
 }
 
 // Explicit loading phase for better observability
@@ -71,6 +115,7 @@ interface CameraState {
 
   // Actions
   preloadCameras: () => void;
+  applyLocalSubmission: (op: LocalOp) => void;
   initializeCameras: () => Promise<void>;
   ensureCamerasLoaded: () => Promise<void>;
   retryCameraLoad: () => Promise<void>;
@@ -142,6 +187,16 @@ export const useCameraStore = create<CameraState>((set, get) => ({
     });
   },
 
+  // Optimistically reflect a successful OSM add/edit/delete: persist the op and rehydrate
+  // the store from the mutated list so it shows immediately. The next refresh reconciles.
+  applyLocalSubmission: (op) => {
+    addOp(op);
+    set((state) => ({
+      ...computeHydration(applyOp(state.cameras, op), state.cameraType),
+      dataVersion: state.dataVersion + 1,
+    }));
+  },
+
   initializeCameras: async () => {
     const { isInitialized, _initPromise } = get();
 
@@ -160,7 +215,7 @@ export const useCameraStore = create<CameraState>((set, get) => ({
         if (import.meta.env.DEV) {
           console.log('[CameraStore] Fetching cameras-ca.json...');
         }
-        const cameras = await loadBundledCameras();
+        const cameras = applyLocalOverlay(await loadBundledCameras());
         
         if (import.meta.env.DEV) {
           console.log(`[CameraStore] Fetch complete: ${cameras.length} cameras. Now hydrating...`);
@@ -297,7 +352,7 @@ export const useCameraStore = create<CameraState>((set, get) => ({
 
     const retryPromise = (async () => {
       try {
-        const cameras = await retryLoadCameras();
+        const cameras = applyLocalOverlay(await retryLoadCameras());
         
         set({ loadPhase: 'hydrating' });
         

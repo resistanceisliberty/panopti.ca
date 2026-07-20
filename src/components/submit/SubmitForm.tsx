@@ -5,6 +5,9 @@ import { SourceField } from './SourceField';
 import { TagEditor } from './TagEditor';
 import { submitAdd, submitEdit, submitDelete, OsmConflictError } from '../../osm/api';
 import { nearestWithin } from '../../osm/nearby';
+import { buildNodeTags } from '../../osm/tags';
+import { cameraFromTags, type LocalOp } from '../../osm/localOverlay';
+import { useCameraStore } from '../../store';
 
 export function SubmitForm() {
   const { mode, user, draft, point, editNode, busy, error } = useSubmitStore();
@@ -13,10 +16,16 @@ export function SubmitForm() {
 
   const canSubmit = !!point && Number.isFinite(point.lat) && Number.isFinite(point.lon) && draft.description.trim().length > 0 && !busy;
 
-  const run = async (fn: () => Promise<unknown>, successMsg: string) => {
+  const run = async (fn: () => Promise<unknown>, successMsg: string, buildOp: (result: unknown) => LocalOp) => {
     setBusy(true); setError(null);
-    try { await fn(); cancel(); setSuccess(successMsg); }
-    catch (e) {
+    try {
+      const result = await fn();
+      // The OSM write succeeded; a failure in the local overlay must not report it as failed
+      // (that could prompt a duplicate resubmit). Next refresh reflects it regardless.
+      try { useCameraStore.getState().applyLocalSubmission(buildOp(result)); }
+      catch (e) { console.error('[submit] local overlay update failed', e); }
+      cancel(); setSuccess(successMsg);
+    } catch (e) {
       setError(e instanceof OsmConflictError
         ? 'This camera changed on OSM — reload and retry.'
         : String(e));
@@ -69,17 +78,25 @@ export function SubmitForm() {
         {mode === 'edit' && editNode && (
           <button className="rounded bg-red-700 px-3 py-1.5 text-sm text-white"
             disabled={busy || !draft.description.trim()}
-            onClick={() => { if (confirm('Delete this camera from OSM?')) run(() => submitDelete(editNode, draft.description, draft.source), 'Deletion submitted to OpenStreetMap.'); }}>
+            onClick={() => { if (confirm('Delete this camera from OSM?')) run(
+              () => submitDelete(editNode, draft.description, draft.source),
+              'Deletion submitted to OpenStreetMap.',
+              () => ({ osmId: editNode.id, kind: 'delete', version: editNode.version + 1, ts: Date.now() })); }}>
             Delete
           </button>
         )}
         <button className="flex-1 rounded bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
           disabled={!canSubmit}
-          onClick={() => run(() =>
-            mode === 'edit' && editNode
+          onClick={() => run(
+            () => mode === 'edit' && editNode
               ? submitEdit(draft, editNode, point!.lat, point!.lon)
               : submitAdd(draft, point!.lat, point!.lon),
-            mode === 'edit' ? 'Edit submitted to OpenStreetMap.' : 'Camera submitted to OpenStreetMap.')}>
+            mode === 'edit' ? 'Edit submitted to OpenStreetMap.' : 'Camera submitted to OpenStreetMap.',
+            (result) => mode === 'edit' && editNode
+              ? { osmId: editNode.id, kind: 'edit', version: result as number, ts: Date.now(),
+                  camera: cameraFromTags(editNode.id, point!.lat, point!.lon, { ...editNode.tags, ...buildNodeTags(draft) }, result as number) }
+              : { osmId: result as number, kind: 'add', version: 1, ts: Date.now(),
+                  camera: cameraFromTags(result as number, point!.lat, point!.lon, buildNodeTags(draft), 1) })}>
           {busy ? 'Submitting…' : 'Submit to OSM'}
         </button>
       </div>
