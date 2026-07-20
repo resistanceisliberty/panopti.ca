@@ -7,7 +7,7 @@ export function TagEditor() {
   const tags = buildNodeTags(draft);
 
   const override = (k: string, v: string) => setExtra({ ...draft.extraTags, [k]: v });
-  const remove = (k: string) => { const e = { ...draft.extraTags }; delete e[k]; override(k, ''); setExtra({ ...e, [k]: '' }); };
+  const remove = (k: string) => override(k, '');
 
   return (
     <div className="space-y-1 rounded bg-dark-900/60 p-2 font-mono text-xs">

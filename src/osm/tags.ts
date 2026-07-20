@@ -42,7 +42,8 @@ export function buildNodeTags(d: SubmitDraft): OsmTags {
   const dirs = d.directions.map((s) => s.trim()).filter(Boolean);
   if (dirs.length) tags.direction = dirs.join(';');
 
-  return { ...tags, ...d.extraTags };
+  const merged: OsmTags = { ...tags, ...d.extraTags };
+  return Object.fromEntries(Object.entries(merged).filter(([, v]) => v.trim() !== ''));
 }
 
 export function buildChangesetTags(d: SubmitDraft): OsmTags {

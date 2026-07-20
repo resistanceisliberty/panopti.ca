@@ -10,7 +10,7 @@ export function SubmitPanel() {
   const { patchDraft, cancel, setBusy, setError } = useSubmitStore.getState();
   if (mode === 'idle' || !user) return null;
 
-  const canSubmit = !!point && draft.description.trim().length > 0 && !busy;
+  const canSubmit = !!point && Number.isFinite(point.lat) && Number.isFinite(point.lon) && draft.description.trim().length > 0 && !busy;
 
   const run = async (fn: () => Promise<unknown>) => {
     setBusy(true); setError(null);

@@ -55,6 +55,11 @@ describe('buildNodeTags', () => {
     expect(t.note).toBe('hi');
     expect(t.operator).toBe('Override');
   });
+
+  it('drops a tag blanked via extraTags (the TagEditor remove affordance)', () => {
+    const t = buildNodeTags({ ...base, extraTags: { man_made: '' } });
+    expect('man_made' in t).toBe(false);
+  });
 });
 
 describe('buildChangesetTags', () => {
