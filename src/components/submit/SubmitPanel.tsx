@@ -4,6 +4,7 @@ import { DirectionField } from './DirectionField';
 import { SourceField } from './SourceField';
 import { TagEditor } from './TagEditor';
 import { submitAdd, submitEdit, submitDelete, OsmConflictError } from '../../osm/api';
+import { nearestWithin } from '../../osm/nearby';
 
 export function SubmitPanel() {
   const { mode, user, draft, point, editNode, busy, error } = useSubmitStore();
@@ -59,6 +60,10 @@ export function SubmitPanel() {
       <TagEditor />
 
       {error && <div className="text-sm text-red-400">{error}</div>}
+
+      {mode === 'add' && point && nearestWithin(point, 25) && (
+        <div className="text-xs text-amber-400">A camera is already mapped within 25 m — check you're not duplicating.</div>
+      )}
 
       <div className="flex gap-2">
         {mode === 'edit' && editNode && (
