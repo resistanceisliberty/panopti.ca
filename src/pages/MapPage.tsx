@@ -15,6 +15,7 @@ import { useCameraStore, useMapStore, useAppModeStore } from '@/store';
 import { useEmbedMode } from '@/hooks/useEmbedMode';
 import { MapStyleControl } from '@/components/map/MapStyleControl';
 import { SubmitPanel } from '@/components/submit/SubmitPanel';
+import { SubmitToast } from '@/components/submit/SubmitToast';
 import { TimelineBar } from '@/modes/timeline/TimelineBar';
 import { DensityFeaturePopup } from '@/modes/density/DensityFeaturePopup';
 import { Route, Compass, BarChart3, Menu, X, Network, Map as MapIcon } from 'lucide-react';
@@ -425,6 +426,7 @@ export function MapPage() {
             {appMode === 'network' ? <NetworkAgencyCount /> : appMode !== 'map' ? <CameraStats /> : null}
             <MapStyleControl />
             <SubmitPanel />
+            <SubmitToast />
 
             {/* Density feature popup — floating stats card */}
             {appMode === 'density' && <DensityFeaturePopup />}

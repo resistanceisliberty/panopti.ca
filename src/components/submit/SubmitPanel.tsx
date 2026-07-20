@@ -8,15 +8,15 @@ import { nearestWithin } from '../../osm/nearby';
 
 export function SubmitPanel() {
   const { mode, user, draft, point, editNode, busy, error } = useSubmitStore();
-  const { patchDraft, cancel, setBusy, setError } = useSubmitStore.getState();
+  const { patchDraft, cancel, setBusy, setError, setSuccess } = useSubmitStore.getState();
   if (!user) return null;
   const open = mode !== 'idle';
 
   const canSubmit = !!point && Number.isFinite(point.lat) && Number.isFinite(point.lon) && draft.description.trim().length > 0 && !busy;
 
-  const run = async (fn: () => Promise<unknown>) => {
+  const run = async (fn: () => Promise<unknown>, successMsg: string) => {
     setBusy(true); setError(null);
-    try { await fn(); cancel(); }
+    try { await fn(); cancel(); setSuccess(successMsg); }
     catch (e) {
       setError(e instanceof OsmConflictError
         ? 'This camera changed on OSM — reload and retry.'
@@ -70,7 +70,7 @@ export function SubmitPanel() {
         {mode === 'edit' && editNode && (
           <button className="rounded bg-red-700 px-3 py-1.5 text-sm text-white"
             disabled={busy || !draft.description.trim()}
-            onClick={() => { if (confirm('Delete this camera from OSM?')) run(() => submitDelete(editNode, draft.description, draft.source)); }}>
+            onClick={() => { if (confirm('Delete this camera from OSM?')) run(() => submitDelete(editNode, draft.description, draft.source), 'Deletion submitted to OpenStreetMap.'); }}>
             Delete
           </button>
         )}
@@ -79,7 +79,8 @@ export function SubmitPanel() {
           onClick={() => run(() =>
             mode === 'edit' && editNode
               ? submitEdit(draft, editNode, point!.lat, point!.lon)
-              : submitAdd(draft, point!.lat, point!.lon))}>
+              : submitAdd(draft, point!.lat, point!.lon),
+            mode === 'edit' ? 'Edit submitted to OpenStreetMap.' : 'Camera submitted to OpenStreetMap.')}>
           {busy ? 'Submitting…' : 'Submit to OSM'}
         </button>
       </div>

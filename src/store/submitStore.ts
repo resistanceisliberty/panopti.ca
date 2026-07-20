@@ -19,6 +19,7 @@ interface SubmitState {
   editNode: OsmNode | null;
   busy: boolean;
   error: string | null;
+  success: string | null;
   setUser: (u: string | null) => void;
   startAdd: () => void;
   startEdit: (node: OsmNode, draft: SubmitDraft) => void;
@@ -28,6 +29,7 @@ interface SubmitState {
   setExtraTags: (tags: OsmTags) => void;
   setBusy: (b: boolean) => void;
   setError: (e: string | null) => void;
+  setSuccess: (s: string | null) => void;
 }
 
 export const useSubmitStore = create<SubmitState>((set) => ({
@@ -38,13 +40,15 @@ export const useSubmitStore = create<SubmitState>((set) => ({
   editNode: null,
   busy: false,
   error: null,
+  success: null,
   setUser: (user) => set({ user }),
-  startAdd: () => set({ mode: 'add', draft: emptyDraft(), point: null, editNode: null, error: null }),
-  startEdit: (editNode, draft) => set({ mode: 'edit', editNode, draft, point: { lat: editNode.lat, lon: editNode.lon }, error: null }),
+  startAdd: () => set({ mode: 'add', draft: emptyDraft(), point: null, editNode: null, error: null, success: null }),
+  startEdit: (editNode, draft) => set({ mode: 'edit', editNode, draft, point: { lat: editNode.lat, lon: editNode.lon }, error: null, success: null }),
   cancel: () => set({ mode: 'idle', point: null, editNode: null, error: null, busy: false }),
   setPoint: (point) => set({ point }),
   patchDraft: (patch) => set((s) => ({ draft: { ...s.draft, ...patch } })),
   setExtraTags: (extraTags) => set((s) => ({ draft: { ...s.draft, extraTags } })),
   setBusy: (busy) => set({ busy }),
   setError: (error) => set({ error }),
+  setSuccess: (success) => set({ success }),
 }));
