@@ -12,13 +12,13 @@ export function SubmitButtons() {
     <div className="mt-3">
       <OsmAuthButton />
       {user && (
-        <div className={`overflow-hidden transition-all duration-200 ease-out ${showAdd ? 'max-h-12 opacity-100 mt-2' : 'max-h-0 opacity-0 mt-0'}`}>
+        <div ref={(el) => { if (el) el.inert = !showAdd; }} className={`overflow-hidden transition-all duration-200 ease-out ${showAdd ? 'max-h-12 opacity-100 mt-2' : 'max-h-0 opacity-0 mt-0'}`}>
           <button className="w-full rounded bg-accent px-3 py-1.5 text-sm font-medium text-white" onClick={startAdd}>
             ＋ Add a camera
           </button>
         </div>
       )}
-      {mode === 'idle' && error && (
+      {user && mode === 'idle' && error && (
         <div className="mt-2 rounded-md bg-red-900/90 border border-red-700 px-3 py-1.5 text-xs text-red-100">
           {error} <button className="underline" onClick={() => setError(null)}>dismiss</button>
         </div>

@@ -16,7 +16,8 @@ function dest(lat: number, lon: number, bearing: number, dist: number): [number,
 
 function wedge(lat: number, lon: number, bearing: number): GeoJSON.Feature {
   const ring: [number, number][] = [[lon, lat]];
-  for (let a = -FOV / 2; a <= FOV / 2 + 0.001; a += 4) ring.push(dest(lat, lon, bearing + a, CONE_M));
+  const step = FOV / 16; // even divisions so the arc hits the exact ±FOV/2 edges
+  for (let a = -FOV / 2; a <= FOV / 2 + 1e-6; a += step) ring.push(dest(lat, lon, bearing + a, CONE_M));
   ring.push([lon, lat]);
   return { type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [ring] } };
 }

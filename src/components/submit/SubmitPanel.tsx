@@ -26,7 +26,7 @@ export function SubmitPanel() {
   };
 
   return (
-    <div className={`absolute right-4 top-20 z-40 w-[420px] max-w-[calc(100vw-2rem)] space-y-3 overflow-y-auto overflow-x-hidden rounded-lg bg-dark-800 p-4 shadow-xl transition-all duration-200 ease-out ${open ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4 pointer-events-none'}`} style={{ maxHeight: '80vh' }}>
+    <div ref={(el) => { if (el) el.inert = !open; }} className={`absolute right-4 top-20 z-40 w-[420px] max-w-[calc(100vw-2rem)] space-y-3 overflow-y-auto overflow-x-hidden rounded-lg bg-dark-800 p-4 shadow-xl transition-all duration-200 ease-out ${open ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4 pointer-events-none'}`} style={{ maxHeight: '80vh' }}>
       <div className="flex items-center justify-between">
         <h2 className="font-semibold text-white">{mode === 'edit' ? 'Edit camera' : 'Add a camera'}</h2>
         <button className="text-dark-300" onClick={cancel}>Cancel</button>
