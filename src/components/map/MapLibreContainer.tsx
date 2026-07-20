@@ -706,9 +706,13 @@ export const MapLibreView = forwardRef<MapLibreViewHandle, MapLibreViewProps>(
 
   // Open the submission panel pre-filled from an existing OSM node (popup "Edit" action)
   const handleEditCamera = useCallback(async (camera: ALPRCamera) => {
-    const node = await fetchNode(camera.osmId);
-    useSubmitStore.getState().startEdit(node, draftFromNode(node));
-    setPopupInfo(null);
+    try {
+      const node = await fetchNode(camera.osmId);
+      useSubmitStore.getState().startEdit(node, draftFromNode(node));
+      setPopupInfo(null);
+    } catch {
+      useSubmitStore.getState().setError('Could not load this camera from OSM — it may have been deleted, or you are signed in to a different OSM server.');
+    }
   }, []);
 
   // Cursor handling - crosshair when adding waypoints or picking location
