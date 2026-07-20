@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { it, expect, vi, beforeEach } from 'vitest';
 import { loadVendors, __resetVendorCache } from './vendors';
 
 beforeEach(() => { __resetVendorCache(); vi.restoreAllMocks(); });

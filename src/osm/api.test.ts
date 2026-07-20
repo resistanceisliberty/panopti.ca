@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { it, expect, vi, beforeEach } from 'vitest';
 import { fetchNode, submitAdd, OsmConflictError } from './api';
 import type { SubmitDraft } from './types';
 
