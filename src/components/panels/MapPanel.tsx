@@ -7,6 +7,7 @@ import { BottomSheet, type SnapPoint } from '../common/BottomSheet';
 import { HeatmapControls } from '../../modes/heatmap/HeatmapControls';
 import { HeatmapLegend } from '../../modes/heatmap/HeatmapLegend';
 import { ChevronLeft, ChevronRight, ChevronDown, Map as MapIcon, Search, ExternalLink } from 'lucide-react';
+import { SubmitButtons } from '../submit/SubmitButtons';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const SURVEILLANCE_ZONES = [
@@ -872,13 +873,14 @@ export function MapPanel() {
           <p className="text-xs text-dark-400 leading-relaxed mt-2">
             Spot an ALPR or government CCTV camera that&apos;s not on the map? Anyone can add it to OpenStreetMap &mdash; it&apos;ll show up here after the next refresh.
           </p>
+          <SubmitButtons />
           <a
             href="https://panopti.ca/report"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 mt-3 px-3 py-1.5 rounded-lg bg-accent/10 hover:bg-accent/20 border border-accent/20 text-accent text-xs font-semibold transition-colors"
+            className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-lg bg-accent/10 hover:bg-accent/20 border border-accent/20 text-accent text-xs font-semibold transition-colors"
           >
-            How to contribute
+            How to contribute (Legacy)
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>

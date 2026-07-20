@@ -3,7 +3,7 @@ import { Source, Layer } from 'react-map-gl/maplibre';
 import { useSubmitStore } from '../../store/submitStore';
 
 const CONE_M = 45; // wedge length, metres
-const FOV = 40;    // total spread, degrees
+const FOV = 65;    // total spread, degrees (wider flare at the tip)
 
 // Forward geodesic: point at `bearing`° (cw from N) and `dist` m from lat/lon.
 function dest(lat: number, lon: number, bearing: number, dist: number): [number, number] {
