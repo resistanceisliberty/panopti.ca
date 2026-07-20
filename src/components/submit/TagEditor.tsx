@@ -5,10 +5,27 @@ const EDITABLE = new Set(['operator', 'operator:wikidata', 'direction', 'manufac
 
 export function TagEditor() {
   const draft = useSubmitStore((s) => s.draft);
-  const setExtra = useSubmitStore((s) => s.setExtraTags);
+  const patch = useSubmitStore((s) => s.patchDraft);
   const tags = buildNodeTags(draft);
 
-  const override = (k: string, v: string) => setExtra({ ...draft.extraTags, [k]: v });
+  // Editable raw values write to the structured draft fields (single source of truth),
+  // so clearing then re-adding a value via the friendly fields works.
+  const override = (k: string, v: string) => {
+    const m = draft.manufacturer;
+    switch (k) {
+      case 'operator': patch({ operator: v }); break;
+      case 'operator:wikidata': patch({ operatorWikidata: v }); break;
+      case 'direction': patch({ directions: v ? v.split(';') : [] }); break;
+      case 'manufacturer':
+        patch({ manufacturer: v.trim()
+          ? { kind: 'custom', manufacturer: v, wikidata: m.kind === 'none' ? undefined : m.wikidata }
+          : { kind: 'none' } });
+        break;
+      case 'manufacturer:wikidata':
+        if (m.kind !== 'none') patch({ manufacturer: { ...m, wikidata: v.trim() || undefined } });
+        break;
+    }
+  };
 
   return (
     <div className="space-y-1 rounded bg-dark-900/60 p-2 font-mono text-xs">

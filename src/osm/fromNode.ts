@@ -1,6 +1,9 @@
 import type { OsmNode, SubmitDraft } from './types';
 import { emptyDraft } from '../store/submitStore';
 
+// Tags the structured fields own; kept out of extraTags so editing a field isn't masked.
+const STRUCTURED = new Set(['operator', 'operator:wikidata', 'direction', 'manufacturer', 'manufacturer:wikidata', 'camera:mount']);
+
 export function draftFromNode(node: OsmNode): SubmitDraft {
   const t = { ...node.tags };
   const isCctv = t['surveillance:type'] === 'camera' || t['operator:type'] === 'government';
@@ -10,7 +13,12 @@ export function draftFromNode(node: OsmNode): SubmitDraft {
   d.operatorWikidata = t['operator:wikidata'] ?? '';
   d.directions = t.direction ? t.direction.split(';') : [];
   d.cameraMount = t['camera:mount'] ?? '';
-  // Everything stays in extraTags so nothing is lost; structured fields overlay it.
-  d.extraTags = t;
+  // Only unmodeled tags stay in extraTags (view-only, preserved); the structured keys
+  // are driven solely by the draft fields above so edits to them aren't masked. An
+  // orphaned manufacturer:wikidata (no manufacturer tag) isn't captured by a field, so
+  // keep it in extraTags rather than dropping it.
+  d.extraTags = Object.fromEntries(Object.entries(t).filter(
+    ([k]) => !STRUCTURED.has(k) || (k === 'manufacturer:wikidata' && !t.manufacturer)
+  ));
   return d;
 }
