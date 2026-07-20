@@ -23,6 +23,7 @@ if (typeof window !== 'undefined' && !window.requestIdleCallback) {
 // Lazy load pages for code splitting
 const MapPage = lazy(() => import('./pages/MapPage').then(m => ({ default: m.MapPage })));
 const NotFound = lazy(() => import('./pages/NotFound').then(m => ({ default: m.NotFound })));
+const OAuthCallback = lazy(() => import('./pages/OAuthCallback').then(m => ({ default: m.OAuthCallback })));
 
 function PageLoader() {
   return (
@@ -102,6 +103,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/analysis" element={<MapPage />} />
               <Route path="/network" element={<MapPage />} />
               <Route path="/route" element={<MapPage />} />
+              <Route path="/oauth/callback" element={<OAuthCallback />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
