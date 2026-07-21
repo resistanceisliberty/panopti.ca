@@ -152,6 +152,6 @@ export const useAppModeStore = create<AppModeState>((set) => ({
       densitySettings: { ...state.densitySettings, ...settings },
     })),
 
-  mapTileStyle: 'light',
+  mapTileStyle: 'dark',
   setMapTileStyle: (style) => set({ mapTileStyle: style }),
 }));
