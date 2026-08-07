@@ -162,6 +162,7 @@ export const STRINGS = {
     // Camera popups & stats (CameraPopupContent, CameraStats)
     popup_gov_cctv: 'Government CCTV',
     popup_alpr_camera: 'ALPR Camera',
+    popup_alpr_camera_alt: 'ALPR camera',
     popup_id_prefix: 'ID:',
     popup_view_photo: 'View example photo',
     popup_operated_by: 'Operated by',
@@ -341,6 +342,7 @@ export const STRINGS = {
     // Camera popups & stats (CameraPopupContent, CameraStats)
     popup_gov_cctv: 'CCTV gouvernemental',
     popup_alpr_camera: 'Caméra ALPR',
+    popup_alpr_camera_alt: 'Caméra ALPR',
     popup_id_prefix: 'ID :',
     popup_view_photo: "Voir une photo d'exemple",
     popup_operated_by: 'Exploité par',

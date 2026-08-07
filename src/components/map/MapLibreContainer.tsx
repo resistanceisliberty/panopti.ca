@@ -1223,7 +1223,7 @@ function CameraPopupContent({ camera, onEdit }: { camera: ALPRCamera; onEdit: (c
         <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0">
           {imageUrl ? (
             <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full" title={t('popup_view_photo')}>
-              <img src={imageUrl} alt={camera.brand ?? t('popup_alpr_camera')} className="w-full h-full object-cover" />
+              <img src={imageUrl} alt={camera.brand ?? t('popup_alpr_camera_alt')} className="w-full h-full object-cover" />
             </a>
           ) : (
             <div className="w-full h-full bg-accent/20 flex items-center justify-center">
