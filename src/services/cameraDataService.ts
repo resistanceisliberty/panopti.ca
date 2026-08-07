@@ -1,4 +1,5 @@
 import type { ALPRCamera } from '../types';
+import { t } from '../i18n';
 
 /**
  * Camera data is fetched from the data Worker at data.dontgetflocked.com
@@ -68,7 +69,7 @@ export async function loadBundledCameras(): Promise<ALPRCamera[]> {
         });
         
         if (!response.ok) {
-          throw new Error(`Failed to load camera data: ${response.status}`);
+          throw new Error(`${t('x_error_load_camera_data')}: ${response.status}`);
         }
         
         const data = await response.json();
@@ -79,7 +80,7 @@ export async function loadBundledCameras(): Promise<ALPRCamera[]> {
         if (data.type === 'FeatureCollection' && Array.isArray(data.features)) {
           // GeoJSON format from data Worker
           if (data.features.length === 0) {
-            throw new Error('Camera data file is empty');
+            throw new Error(t('x_error_empty_camera_data'));
           }
           cameras = new Array(data.features.length);
           for (let i = 0; i < data.features.length; i++) {
@@ -107,7 +108,7 @@ export async function loadBundledCameras(): Promise<ALPRCamera[]> {
         } else if (Array.isArray(data)) {
           // Legacy flat array format (backwards compatibility during migration)
           if (data.length === 0) {
-            throw new Error('Camera data file is empty');
+            throw new Error(t('x_error_empty_camera_data'));
           }
           cameras = new Array(data.length);
           for (let i = 0; i < data.length; i++) {
@@ -132,7 +133,7 @@ export async function loadBundledCameras(): Promise<ALPRCamera[]> {
             };
           }
         } else {
-          throw new Error('Invalid camera data format');
+          throw new Error(t('x_error_invalid_camera_format'));
         }
         
         const loadTime = (performance.now() - startTime).toFixed(0);
@@ -161,7 +162,7 @@ export async function loadBundledCameras(): Promise<ALPRCamera[]> {
     isLoading = false;
     loadPromise = null;
     cachedCameras = null;
-    throw lastError || new Error('Failed to load camera data after multiple attempts');
+    throw lastError || new Error(t('x_error_load_camera_data_retries'));
   })();
   
   return loadPromise;

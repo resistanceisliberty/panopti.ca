@@ -287,6 +287,10 @@ export const STRINGS = {
     x_unit_minutes_short: 'm',
     x_unit_hours: 'h',
     x_error_fetch_cameras: 'Failed to fetch cameras',
+    x_error_load_camera_data: 'Failed to load camera data',
+    x_error_empty_camera_data: 'Camera data file is empty',
+    x_error_invalid_camera_format: 'Invalid camera data format',
+    x_error_load_camera_data_retries: 'Failed to load camera data after multiple attempts',
   },
   fr: {
     lang_switch_to_fr: 'Passer au français',
@@ -576,6 +580,10 @@ export const STRINGS = {
     x_unit_minutes_short: 'm',
     x_unit_hours: 'h',
     x_error_fetch_cameras: 'Échec de la récupération des caméras',
+    x_error_load_camera_data: 'Échec du chargement des données des caméras',
+    x_error_empty_camera_data: 'Le fichier de données des caméras est vide',
+    x_error_invalid_camera_format: 'Format de données des caméras invalide',
+    x_error_load_camera_data_retries: 'Échec du chargement des données des caméras après plusieurs tentatives',
   },
 } as const;
 

@@ -181,11 +181,7 @@ export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
         return (
           <div className="pb-8">
             <p className="text-xs text-dark-400 mb-3 leading-relaxed">
-              Visualize ALPR camera density across Canada. Data from{' '}
-              <a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a>
-              {' '}&amp;{' '}
-              <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OSM</a>
-              {' '}contributors. Switch layers below.
+              {t('tl_intro_mobile_pre')}<a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OSM</a>{t('tl_intro_mobile_mid')}<a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a>{t('tl_intro_mobile_post')}
             </p>
 
             <div className="mb-3">
