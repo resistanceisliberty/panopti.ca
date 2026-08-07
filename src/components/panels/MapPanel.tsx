@@ -8,27 +8,28 @@ import { HeatmapControls } from '../../modes/heatmap/HeatmapControls';
 import { HeatmapLegend } from '../../modes/heatmap/HeatmapLegend';
 import { ChevronLeft, ChevronRight, ChevronDown, Map as MapIcon, Search, ExternalLink } from 'lucide-react';
 import { SubmitButtons } from '../submit/SubmitButtons';
+import { useT, type StringKey } from '@/i18n';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const SURVEILLANCE_ZONES = [
-  { value: 'traffic', label: 'Traffic' },
-  { value: 'town', label: 'Town' },
-  { value: 'parking', label: 'Parking' },
-  { value: 'other', label: 'Other' },
-] as const;
+  { value: 'traffic', labelKey: 'panel_zone_traffic' },
+  { value: 'town', labelKey: 'panel_zone_town' },
+  { value: 'parking', labelKey: 'panel_zone_parking' },
+  { value: 'other', labelKey: 'panel_zone_other' },
+] as const satisfies readonly { value: string; labelKey: StringKey }[];
 
 const MOUNT_TYPES = [
-  { value: 'pole', label: 'Pole' },
-  { value: 'wall', label: 'Wall' },
-  { value: 'street_light', label: 'Street Light' },
-  { value: 'other', label: 'Other' },
-] as const;
+  { value: 'pole', labelKey: 'panel_mount_pole' },
+  { value: 'wall', labelKey: 'panel_mount_wall' },
+  { value: 'street_light', labelKey: 'panel_mount_street_light' },
+  { value: 'other', labelKey: 'panel_mount_other' },
+] as const satisfies readonly { value: string; labelKey: StringKey }[];
 
-const CAMERA_VIEW_OPTIONS: { id: MapVisualization; label: string; description: string }[] = [
-  { id: 'auto', label: 'Auto', description: 'Zoom-based transitions' },
-  { id: 'heatmap', label: 'Heatmap', description: 'Density blobs' },
-  { id: 'clusters', label: 'Clusters', description: 'Grouped markers' },
-  { id: 'individual', label: 'Individual', description: 'All camera points' },
+const CAMERA_VIEW_OPTIONS: { id: MapVisualization; labelKey: StringKey; descKey: StringKey }[] = [
+  { id: 'auto', labelKey: 'panel_view_auto', descKey: 'panel_view_auto_desc' },
+  { id: 'heatmap', labelKey: 'panel_view_heatmap', descKey: 'panel_view_heatmap_desc' },
+  { id: 'clusters', labelKey: 'panel_view_clusters', descKey: 'panel_view_clusters_desc' },
+  { id: 'individual', labelKey: 'panel_view_individual', descKey: 'panel_view_individual_desc' },
 ];
 
 const BRAND_COLORS = [
@@ -88,19 +89,20 @@ function SubLabel({ children }: { children: React.ReactNode }) {
 }
 
 // ─── Camera Type Scope Toggle (ALPR / Government CCTV) ───────────────────────
-const CAMERA_TYPE_OPTIONS: { id: 'all' | 'alpr' | 'cctv'; label: string }[] = [
-  { id: 'alpr', label: 'ALPRs' },
-  { id: 'cctv', label: 'Gov CCTVs' },
-  { id: 'all', label: 'Both' },
+const CAMERA_TYPE_OPTIONS: { id: 'all' | 'alpr' | 'cctv'; labelKey: StringKey }[] = [
+  { id: 'alpr', labelKey: 'panel_type_alpr' },
+  { id: 'cctv', labelKey: 'panel_type_cctv' },
+  { id: 'all', labelKey: 'panel_type_both' },
 ];
 
 export function CameraTypeToggle() {
+  const t = useT();
   const cameraType = useCameraStore((s) => s.cameraType);
   const setCameraType = useCameraStore((s) => s.setCameraType);
 
   return (
     <div className="px-6 pt-4">
-      <SubLabel>Show</SubLabel>
+      <SubLabel>{t('panel_show_label')}</SubLabel>
       <div className="grid grid-cols-3 gap-1 p-1 bg-dark-800 rounded-lg border border-dark-700/50">
         {CAMERA_TYPE_OPTIONS.map((o) => {
           const active = cameraType === o.id;
@@ -115,7 +117,7 @@ export function CameraTypeToggle() {
                   : 'text-dark-300 hover:text-white hover:bg-dark-700/50'
               }`}
             >
-              {o.label}
+              {t(o.labelKey)}
             </button>
           );
         })}
@@ -124,11 +126,11 @@ export function CameraTypeToggle() {
       <div className="flex items-center gap-4 mt-2.5 text-[11px] text-dark-400">
         <span className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: '#0080BC' }} />
-          ALPR
+          {t('panel_legend_alpr')}
         </span>
         <span className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: '#F59E0B' }} />
-          Gov CCTVs
+          {t('panel_legend_cctv')}
         </span>
       </div>
     </div>
@@ -145,14 +147,17 @@ function CameraViewSelector({
   activeView: ActiveView;
   onChange: (viz: MapVisualization) => void;
 }) {
+  const t = useT();
+  const activeViewOption = CAMERA_VIEW_OPTIONS.find((o) => o.id === activeView);
+
   return (
     <div>
-      <SubLabel>Camera View</SubLabel>
+      <SubLabel>{t('panel_camera_view_label')}</SubLabel>
       <div className="grid grid-cols-2 gap-1.5">
-        {CAMERA_VIEW_OPTIONS.map(({ id, label, description }) => {
+        {CAMERA_VIEW_OPTIONS.map(({ id, labelKey, descKey }) => {
           const isSelected = visualization === id;
-          const autoSuffix = id === 'auto' && isSelected
-            ? ` (${activeView.charAt(0).toUpperCase() + activeView.slice(1)})`
+          const autoSuffix = id === 'auto' && isSelected && activeViewOption
+            ? ` (${t(activeViewOption.labelKey)})`
             : '';
 
           return (
@@ -174,9 +179,9 @@ function CameraViewSelector({
               </div>
               <div className="min-w-0">
                 <span className={`text-xs font-medium leading-none ${isSelected ? 'text-white' : 'text-dark-300'}`}>
-                  {label}{autoSuffix}
+                  {t(labelKey)}{autoSuffix}
                 </span>
-                <p className="text-[10px] text-dark-500 leading-tight mt-0.5">{description}</p>
+                <p className="text-[10px] text-dark-500 leading-tight mt-0.5">{t(descKey)}</p>
               </div>
             </button>
           );
@@ -198,12 +203,13 @@ function OverlayToggle({
   onToggle: () => void;
   loading?: boolean;
 }) {
+  const t = useT();
   return (
     <button
       onClick={onToggle}
       role="switch"
       aria-checked={enabled}
-      aria-label={`Toggle ${label}`}
+      aria-label={`${t('panel_overlay_toggle_aria')} ${label}`}
       className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg transition-colors hover:bg-dark-800/60"
     >
       <div className="flex items-center gap-2">
@@ -245,6 +251,7 @@ function SearchableMultiSelect({
   maxVisible?: number;
   note?: string;
 }) {
+  const t = useT();
   const [search, setSearch] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -281,7 +288,7 @@ function SearchableMultiSelect({
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={`Search ${label.toLowerCase()}...`}
+              placeholder={`${t('panel_search_prefix')} ${label.toLowerCase()}...`}
               className="w-full pl-8 pr-3 py-1.5 text-xs bg-dark-800 border border-dark-600 rounded-lg text-white placeholder:text-dark-500 focus:outline-none focus:border-accent/50"
             />
           </div>
@@ -290,7 +297,7 @@ function SearchableMultiSelect({
 
           <div className="max-h-60 overflow-y-auto space-y-0.5 scrollbar-thin">
             {filtered.length === 0 ? (
-              <p className="text-xs text-dark-500 py-2 text-center">No results</p>
+              <p className="text-xs text-dark-500 py-2 text-center">{t('panel_no_results')}</p>
             ) : (
               filtered.map((item) => {
                 const isChecked = selected.includes(item);
@@ -337,10 +344,11 @@ function CheckboxGroup({
   onToggle,
 }: {
   label: string;
-  options: readonly { value: string; label: string }[];
+  options: readonly { value: string; labelKey: StringKey }[];
   selected: string[];
   onToggle: (value: string) => void;
 }) {
+  const t = useT();
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -365,7 +373,7 @@ function CheckboxGroup({
 
       {isExpanded && (
         <div className="mt-1 mb-3 space-y-0.5">
-          {options.map(({ value, label: optLabel }) => {
+          {options.map(({ value, labelKey }) => {
             const isChecked = selected.includes(value);
             return (
               <button
@@ -390,7 +398,7 @@ function CheckboxGroup({
                     </svg>
                   )}
                 </div>
-                <span className="text-xs">{optLabel}</span>
+                <span className="text-xs">{t(labelKey)}</span>
               </button>
             );
           })}
@@ -402,6 +410,7 @@ function CheckboxGroup({
 
 // ─── MapPanelContent ────────────────────────────────────────────────────────
 export function MapPanelContent() {
+  const t = useT();
   const filters = useCameraStore((s) => s.filters);
   const availableBrands = useCameraStore((s) => s.availableBrands);
   const availableOperators = useCameraStore((s) => s.availableOperators);
@@ -465,7 +474,7 @@ export function MapPanelContent() {
   const filteredCameras = useCameraStore((s) => s.filteredCameras);
 
   const viewportStats = useMemo(() => {
-    if (!bounds) return { count: 0, uniqueBrands: 0, brands: [] as { name: string; count: number }[] };
+    if (!bounds) return { count: 0, uniqueBrands: 0, brands: [] as { name: string; count: number; labelKey?: StringKey }[] };
 
     const inView = filteredCameras.filter(
       (c) => c.lat >= bounds.south && c.lat <= bounds.north && c.lon >= bounds.west && c.lon <= bounds.east
@@ -580,7 +589,7 @@ export function MapPanelContent() {
 
     // Sort descending, top 3 named brands + Other + Unknown = max 5 rows
     const sorted = Array.from(brandCounts.entries()).sort((a, b) => b[1] - a[1]);
-    const brands: { name: string; count: number }[] = [];
+    const brands: { name: string; count: number; labelKey?: StringKey }[] = [];
     let otherCount = 0;
 
     for (let i = 0; i < sorted.length; i++) {
@@ -591,10 +600,10 @@ export function MapPanelContent() {
       }
     }
     if (otherCount > 0) {
-      brands.push({ name: 'Other', count: otherCount });
+      brands.push({ name: 'Other', count: otherCount, labelKey: 'panel_brand_other' });
     }
     if (unbrandedCount > 0) {
-      brands.push({ name: 'Unknown', count: unbrandedCount });
+      brands.push({ name: 'Unknown', count: unbrandedCount, labelKey: 'panel_brand_unknown' });
     }
 
     return { count: inView.length, uniqueBrands, brands: brands.slice(0, 5) };
@@ -617,7 +626,7 @@ export function MapPanelContent() {
             </span>
           </div>
           <p className="text-[11px] text-dark-500 uppercase tracking-[1.5px] mt-1">
-            cameras in view
+            {t('panel_cameras_in_view')}
           </p>
         </div>
       </div>
@@ -627,10 +636,10 @@ export function MapPanelContent() {
         <div className="px-6 pb-4">
           <div className="flex items-center justify-between mb-2.5">
             <span className="text-[10px] font-semibold text-dark-500 uppercase tracking-[0.08em]">
-              Brands in View
+              {t('panel_brands_in_view')}
             </span>
             <span className="text-[10px] text-dark-500">
-              {viewportStats.uniqueBrands} brand{viewportStats.uniqueBrands !== 1 ? 's' : ''}
+              {viewportStats.uniqueBrands} {t('panel_stat_brand')}{viewportStats.uniqueBrands !== 1 ? 's' : ''}
             </span>
           </div>
           <div className="space-y-2">
@@ -640,7 +649,7 @@ export function MapPanelContent() {
               return (
                 <div key={brand.name}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-dark-200">{brand.name}</span>
+                    <span className="text-xs text-dark-200">{brand.labelKey ? t(brand.labelKey) : brand.name}</span>
                     <span className="text-sm font-medium text-white tabular-nums">
                       {brand.count.toLocaleString()}
                     </span>
@@ -665,7 +674,7 @@ export function MapPanelContent() {
       <div className="h-px bg-dark-700/50 mx-6" />
 
       {/* Section: Layers */}
-      <Section title="Layers">
+      <Section title={t('panel_section_layers')}>
         <CameraViewSelector
           visualization={visualization}
           activeView={activeView}
@@ -673,22 +682,22 @@ export function MapPanelContent() {
         />
 
         <div className="mt-4 pt-4 border-t border-dark-700/30">
-          <SubLabel>Overlays</SubLabel>
+          <SubLabel>{t('panel_overlays_label')}</SubLabel>
           <div className="space-y-0.5">
             <OverlayToggle
-              label="State Boundaries"
+              label={t('panel_overlay_state')}
               enabled={overlays.stateBoundaries}
               onToggle={() => handleBoundaryToggle('stateBoundaries', 'state')}
               loading={boundaryLoading.state === 'loading'}
             />
             <OverlayToggle
-              label="County Boundaries"
+              label={t('panel_overlay_county')}
               enabled={overlays.countyBoundaries}
               onToggle={() => handleBoundaryToggle('countyBoundaries', 'county')}
               loading={boundaryLoading.county === 'loading'}
             />
             <OverlayToggle
-              label="Municipal Boundaries"
+              label={t('panel_overlay_municipal')}
               enabled={overlays.municipalBoundaries}
               onToggle={() => handleBoundaryToggle('municipalBoundaries', 'municipal')}
               loading={boundaryLoading.municipal === 'loading'}
@@ -698,29 +707,29 @@ export function MapPanelContent() {
       </Section>
 
       {/* Section: Filters */}
-      <Section title="Filters" badge={appliedFilterCount} defaultOpen={false}>
+      <Section title={t('panel_section_filters')} badge={appliedFilterCount} defaultOpen={false}>
         <div className="space-y-1">
           <SearchableMultiSelect
-            label="Brand"
+            label={t('panel_filter_brand')}
             items={availableBrands}
             selected={pendingFilters.brands}
             onToggle={(v) => togglePendingFilter('brands', v)}
           />
           <SearchableMultiSelect
-            label="Operator"
+            label={t('panel_filter_operator')}
             items={availableOperators}
             selected={pendingFilters.operators}
             onToggle={(v) => togglePendingFilter('operators', v)}
-            note="~28% of cameras have operator data"
+            note={t('panel_operator_note')}
           />
           <CheckboxGroup
-            label="Surveillance Zone"
+            label={t('panel_filter_surveillance_zone')}
             options={SURVEILLANCE_ZONES}
             selected={pendingFilters.surveillanceZones}
             onToggle={(v) => togglePendingFilter('surveillanceZones', v)}
           />
           <CheckboxGroup
-            label="Mount Type"
+            label={t('panel_filter_mount_type')}
             options={MOUNT_TYPES}
             selected={pendingFilters.mountTypes}
             onToggle={(v) => togglePendingFilter('mountTypes', v)}
@@ -733,7 +742,7 @@ export function MapPanelContent() {
             onClick={resetAllFilters}
             className="flex-1 px-3 py-2 rounded-lg text-[11px] font-medium text-dark-400 hover:text-dark-200 hover:bg-dark-800 transition-colors"
           >
-            Reset
+            {t('panel_reset')}
           </button>
           <button
             onClick={applyPendingFilters}
@@ -744,14 +753,14 @@ export function MapPanelContent() {
                 : 'bg-dark-800 text-dark-600 cursor-not-allowed'
             }`}
           >
-            Apply{pendingChangeCount > 0 ? ` (${pendingChangeCount})` : ''}
+            {t('panel_apply')}{pendingChangeCount > 0 ? ` (${pendingChangeCount})` : ''}
           </button>
         </div>
       </Section>
 
       {/* Section: Heatmap Settings */}
       {activeView === 'heatmap' && (
-        <Section title="Heatmap Settings">
+        <Section title={t('panel_section_heatmap_settings')}>
           <HeatmapControls />
           <div className="mt-4">
             <HeatmapLegend />
@@ -765,6 +774,7 @@ export function MapPanelContent() {
 
 // ─── MapPanel (exported) ────────────────────────────────────────────────────
 export function MapPanel() {
+  const t = useT();
   const [isMobile, setIsMobile] = useState(false);
   const [snapPoint, setSnapPoint] = useState<SnapPoint>('minimized');
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -815,14 +825,14 @@ export function MapPanel() {
                   <p className="text-sm font-semibold text-white">panopti.ca</p>
                   {activeFilterCount > 0 && (
                     <span className="px-1.5 py-0.5 rounded-full bg-accent/10 text-accent text-xs font-semibold">
-                      {activeFilterCount} filter{activeFilterCount !== 1 ? 's' : ''}
+                      {activeFilterCount} {t('panel_stat_filter')}{activeFilterCount !== 1 ? 's' : ''}
                     </span>
                   )}
                 </div>
                 <p className="text-xs text-dark-400">
                   {filteredCount === cameraCount
-                    ? `${cameraCount.toLocaleString()} cameras`
-                    : `${filteredCount.toLocaleString()} / ${cameraCount.toLocaleString()} cameras`}
+                    ? `${cameraCount.toLocaleString()} ${t('panel_stat_cameras_label')}`
+                    : `${filteredCount.toLocaleString()} / ${cameraCount.toLocaleString()} ${t('panel_stat_cameras_label')}`}
                 </p>
               </div>
             </div>
@@ -837,7 +847,7 @@ export function MapPanel() {
             <MapPanelContent />
             <div className="mt-6 pt-4 border-t border-dark-700/50">
               <p className="text-[10px] text-dark-500 text-center">
-                Maps by{' '}
+                {t('panel_footer_maps_by')}{' '}
                 <a href="https://openroadlabs.org" target="_blank" rel="noopener noreferrer" className="hover:text-dark-300 transition-colors">OpenRoad Labs LLC</a>
               </p>
             </div>
@@ -859,7 +869,7 @@ export function MapPanel() {
         <div className="flex-shrink-0 px-6 py-5 border-b border-dark-700/50">
           <h2 className="text-lg font-display font-semibold text-white mb-1">panopti.ca</h2>
           <p className="text-xs text-dark-400 leading-relaxed">
-            Crowdsourced ALPR surveillance map for Canada. Data from{' '}
+            {t('panel_header_desc_pre')}
             <a
               href="https://www.openstreetmap.org"
               target="_blank"
@@ -867,11 +877,11 @@ export function MapPanel() {
               className="text-accent hover:underline"
             >
               OpenStreetMap
-            </a>{' '}
-            contributors.
+            </a>
+            {t('panel_header_desc_post')}
           </p>
           <p className="text-xs text-dark-400 leading-relaxed mt-2">
-            Spot an ALPR or government CCTV camera that&apos;s not on the map? Anyone can add it to OpenStreetMap &mdash; it&apos;ll show up here after the next refresh.
+            {t('panel_header_contribute_prompt')}
           </p>
           <SubmitButtons />
           <a
@@ -880,7 +890,7 @@ export function MapPanel() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-lg bg-accent/10 hover:bg-accent/20 border border-accent/20 text-accent text-xs font-semibold transition-colors"
           >
-            How to contribute (Legacy)
+            {t('panel_contribute_legacy')}
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>
@@ -893,7 +903,7 @@ export function MapPanel() {
         {/* Footer */}
         <div className="flex-shrink-0 px-6 py-3 border-t border-dark-700/50 bg-dark-800/50">
           <p className="text-[10px] text-dark-500 text-center">
-            Maps by{' '}
+            {t('panel_footer_maps_by')}{' '}
             <a href="https://openroadlabs.org" target="_blank" rel="noopener noreferrer" className="hover:text-dark-300 transition-colors">OpenRoad Labs LLC</a>
           </p>
         </div>
@@ -905,7 +915,7 @@ export function MapPanel() {
         className={`absolute z-50 top-1/2 -translate-y-1/2 ${
           hasAnimated ? 'transition-all duration-300' : ''
         } ${isCollapsed ? 'left-0' : 'left-[400px]'} w-6 h-16 bg-dark-800 hover:bg-dark-700 border border-dark-600 border-l-0 rounded-r-lg flex items-center justify-center group`}
-        aria-label={isCollapsed ? 'Expand panel' : 'Collapse panel'}
+        aria-label={isCollapsed ? t('panel_expand_aria') : t('panel_collapse_aria')}
       >
         {isCollapsed ? (
           <ChevronRight className="w-4 h-4 text-dark-300 group-hover:text-white transition-colors" />
