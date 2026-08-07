@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAppModeStore } from '../../store';
 import type { MapTileStyleId } from '../../store/appModeStore';
 import { Layers, Type } from 'lucide-react';
+import { useT, type StringKey } from '@/i18n';
 
 type BaseMapType = 'dark' | 'light' | 'white' | 'black' | 'grayscale';
 
@@ -19,15 +20,16 @@ function fromTileStyleId(id: MapTileStyleId): { base: BaseMapType; labels: boole
   return { base: id as BaseMapType, labels: true };
 }
 
-const BASE_OPTIONS: { id: BaseMapType; label: string }[] = [
-  { id: 'dark', label: 'Dark' },
-  { id: 'light', label: 'Light' },
-  { id: 'white', label: 'White' },
-  { id: 'black', label: 'Black' },
-  { id: 'grayscale', label: 'Grayscale' },
+const BASE_OPTIONS: { id: BaseMapType; labelKey: StringKey }[] = [
+  { id: 'dark', labelKey: 'ctrl_style_dark' },
+  { id: 'light', labelKey: 'ctrl_style_light' },
+  { id: 'white', labelKey: 'ctrl_style_white' },
+  { id: 'black', labelKey: 'ctrl_style_black' },
+  { id: 'grayscale', labelKey: 'ctrl_style_grayscale' },
 ];
 
 export function MapStyleControl() {
+  const t = useT();
   const { mapTileStyle, setMapTileStyle } = useAppModeStore();
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -74,7 +76,7 @@ export function MapStyleControl() {
                 <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
                   base === opt.id ? 'bg-accent' : 'bg-dark-600'
                 }`} />
-                <span className="text-xs font-medium">{opt.label}</span>
+                <span className="text-xs font-medium">{t(opt.labelKey)}</span>
               </button>
             ))}
           </div>
@@ -89,7 +91,7 @@ export function MapStyleControl() {
             >
               <div className="flex items-center gap-2">
                 <Type className="w-3 h-3 text-dark-400" />
-                <span className="text-xs text-dark-300">Labels</span>
+                <span className="text-xs text-dark-300">{t('ctrl_style_labels')}</span>
               </div>
               <div
                 className={`relative w-8 h-[18px] rounded-full transition-colors ${
@@ -108,12 +110,12 @@ export function MapStyleControl() {
       {/* Trigger button — matches zoom control styling exactly */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        aria-label="Change map style"
+        aria-label={t('ctrl_style_change_aria')}
         aria-expanded={isOpen}
         className={`w-[40px] h-[40px] flex items-center justify-center rounded-md transition-colors
           bg-dark-800 border border-dark-600
           ${isOpen ? 'text-accent' : 'text-dark-300 hover:bg-dark-700'}`}
-        title="Map style"
+        title={t('ctrl_style_title')}
       >
         <Layers className="w-4 h-4" />
       </button>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { smartSearch, toLocation, type GeocodingResult } from '../../services/geocodingService';
 import type { Location } from '../../types';
+import { useT } from '@/i18n';
 
 interface AddressSearchProps {
   value: Location | null;
@@ -59,13 +60,14 @@ const TypeIcons: Record<GeocodingResult['type'], JSX.Element> = {
 export function AddressSearch({
   value,
   onChange,
-  placeholder = 'Search address, city, or place...',
+  placeholder,
   label,
   icon = 'origin',
   onFocus,
   onPickFromMap,
   isPickingFromMap = false,
 }: AddressSearchProps) {
+  const t = useT();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GeocodingResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -189,12 +191,12 @@ export function AddressSearch({
         return; // Ignore aborted requests
       }
       console.error('Search error:', err);
-      setError('Search failed. Please try again.');
+      setError(t('ctrl_search_error'));
       setResults([]);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   // Handle input change - just update query, don't search
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -329,7 +331,7 @@ export function AddressSearch({
             if (results.length > 0) setIsOpen(true);
             onFocus?.();
           }}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t('ctrl_search_placeholder')}
           autoComplete="off"
           autoCorrect="off"
           autoCapitalize="off"
@@ -346,9 +348,9 @@ export function AddressSearch({
             <button
               onClick={handleClear}
               type="button"
-              aria-label="Clear address"
+              aria-label={t('ctrl_search_clear')}
               className="p-1.5 text-dark-400 hover:text-white transition-colors"
-              title="Clear"
+              title={t('ctrl_search_clear')}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
@@ -359,10 +361,10 @@ export function AddressSearch({
           <button
             onClick={handleSubmit}
             type="button"
-            aria-label="Search address"
+            aria-label={t('ctrl_search_submit_aria')}
             disabled={isLoading || query.trim().length < 2}
             className="p-2 bg-accent hover:bg-accent-hover disabled:bg-dark-700 disabled:text-dark-400 text-white rounded-md transition-colors"
-            title="Search (Enter)"
+            title={t('ctrl_search_submit_title')}
           >
             {isLoading ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -382,7 +384,7 @@ export function AddressSearch({
           <button
             onClick={handleUseMyLocation}
             type="button"
-            aria-label="Use my location"
+            aria-label={t('ctrl_search_use_location_aria')}
             disabled={geoState === 'loading'}
             className={`flex items-center gap-1.5 text-xs transition-all ${
               geoState === 'loading'
@@ -397,14 +399,14 @@ export function AddressSearch({
             {geoState === 'loading' ? (
               <>
                 <div className="w-3 h-3 border-[1.5px] border-accent/30 border-t-accent rounded-full animate-spin" />
-                <span>Getting location...</span>
+                <span>{t('ctrl_search_use_location_loading')}</span>
               </>
             ) : geoState === 'success' ? (
               <>
                 <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                 </svg>
-                <span>Location set!</span>
+                <span>{t('ctrl_search_use_location_success')}</span>
               </>
             ) : geoState === 'error' ? (
               <>
@@ -412,10 +414,10 @@ export function AddressSearch({
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
                 </svg>
                 <span>
-                  {geoError === 'denied' ? 'Location denied' :
-                   geoError === 'timeout' ? 'Timed out' :
-                   geoError === 'not-supported' ? 'Not supported' :
-                   'Unavailable'}
+                  {geoError === 'denied' ? t('ctrl_search_geo_denied') :
+                   geoError === 'timeout' ? t('ctrl_search_geo_timeout') :
+                   geoError === 'not-supported' ? t('ctrl_search_geo_not_supported') :
+                   t('ctrl_search_geo_unavailable')}
                 </span>
               </>
             ) : (
@@ -423,7 +425,7 @@ export function AddressSearch({
                 <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z" />
                 </svg>
-                <span>Use my location</span>
+                <span>{t('ctrl_search_use_location_aria')}</span>
               </>
             )}
           </button>
@@ -436,7 +438,7 @@ export function AddressSearch({
             <button
               onClick={onPickFromMap}
               type="button"
-              aria-label="Pick location on map"
+              aria-label={t('ctrl_search_pick_map_aria')}
               className={`flex items-center gap-1.5 text-xs transition-all ${
                 isPickingFromMap
                   ? 'text-accent'
@@ -446,7 +448,7 @@ export function AddressSearch({
               <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z" />
               </svg>
-              <span>{isPickingFromMap ? 'Click on map...' : 'Choose on map'}</span>
+              <span>{isPickingFromMap ? t('ctrl_search_picking_active') : t('ctrl_search_pick_map_label')}</span>
             </button>
           )}
         </div>
@@ -466,7 +468,7 @@ export function AddressSearch({
       {isOpen && results.length > 0 && (
         <div
           role="listbox"
-          aria-label="Search results"
+          aria-label={t('ctrl_search_results_aria')}
           className="absolute z-50 w-full mt-2 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl overflow-hidden animate-fade-in"
         >
           <ul className="max-h-80 overflow-y-auto">
@@ -508,8 +510,8 @@ export function AddressSearch({
                     result.type === 'zip' ? 'bg-accent/10 text-accent' :
                     'bg-dark-600 text-dark-400'
                   }`}>
-                    {result.type === 'poi' ? 'Place' :
-                     result.type === 'coordinates' ? 'GPS' :
+                    {result.type === 'poi' ? t('ctrl_search_type_place') :
+                     result.type === 'coordinates' ? t('ctrl_search_type_gps') :
                      result.type}
                   </span>
                 </button>
@@ -520,7 +522,7 @@ export function AddressSearch({
           {/* Search tip footer */}
           <div className="px-4 py-2.5 bg-dark-900/50 border-t border-dark-700/50 flex items-center justify-between">
             <span className="text-xs text-dark-200">
-              ↑↓ to navigate · Enter to select
+              {t('ctrl_search_footer_hint')}
             </span>
             <span className="text-xs text-dark-400">
               OpenStreetMap

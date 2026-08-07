@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useMapStore } from '../../store';
 import { smartSearch, toLocation, type GeocodingResult } from '../../services/geocodingService';
+import { useT } from '@/i18n';
 
 // Result type icons as inline SVGs for instant rendering
 const TypeIcons: Record<GeocodingResult['type'], JSX.Element> = {
@@ -53,6 +54,7 @@ function getIconColor(type: GeocodingResult['type']): string {
 }
 
 export function MapSearch() {
+  const t = useT();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<GeocodingResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -220,9 +222,9 @@ export function MapSearch() {
             if (results.length > 0) setIsOpen(true);
           }}
           onBlur={() => setIsFocused(false)}
-          placeholder="Search address, city, or zip..."
+          placeholder={t('ctrl_search_placeholder')}
           autoComplete="off"
-          aria-label="Search locations"
+          aria-label={t('ctrl_search_input_aria')}
           className="w-full pl-12 pr-24 py-3.5 bg-dark-800 border border-dark-600 rounded-md text-white placeholder-dark-500 text-base text-left focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/20 transition-all"
         />
 
@@ -232,9 +234,9 @@ export function MapSearch() {
             <button
               onClick={handleClear}
               type="button"
-              aria-label="Clear search"
+              aria-label={t('ctrl_search_clear')}
               className="p-1.5 text-gray-400 hover:text-white hover:bg-dark-700 rounded-lg transition-colors"
-              title="Clear"
+              title={t('ctrl_search_clear')}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
@@ -246,9 +248,9 @@ export function MapSearch() {
             onClick={handleSubmit}
             type="button"
             disabled={isLoading || query.trim().length < 2}
-            aria-label="Search"
+            aria-label={t('ctrl_search_submit_aria')}
             className="p-2 bg-accent hover:bg-accent-hover disabled:bg-dark-700 disabled:text-dark-400 text-white rounded-md transition-colors"
-            title="Search (Enter)"
+            title={t('ctrl_search_submit_title')}
           >
             {isLoading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -287,7 +289,7 @@ export function MapSearch() {
           </ul>
           {/* Keyboard hints */}
           <div className="px-4 py-2 bg-dark-800/50 border-t border-dark-700/30 text-xs text-gray-500">
-            ↑↓ to navigate · Enter to select
+            {t('ctrl_search_footer_hint')}
           </div>
         </div>
       )}
