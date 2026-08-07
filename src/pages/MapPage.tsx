@@ -9,7 +9,7 @@ import { MapPanel } from '@/components/panels/MapPanel';
 import { MobileTabDrawer } from '@/components/panels/MobileTabDrawer';
 import { DensityLegendBar } from '@/components/map/DensityLegendBar';
 import { NetworkAgencyCount } from '@/components/map/NetworkAgencyCount';
-import { Seo, ShareButton } from '@/components/common';
+import { Seo, ShareButton, LangToggle } from '@/components/common';
 import { parseViewportFromURL, writeViewportParams } from '@/utils/urlParams';
 import { useCameraStore, useMapStore, useAppModeStore } from '@/store';
 import { useEmbedMode } from '@/hooks/useEmbedMode';
@@ -23,13 +23,14 @@ import { TimelineBar } from '@/modes/timeline/TimelineBar';
 import { DensityFeaturePopup } from '@/modes/density/DensityFeaturePopup';
 import { Route, Compass, BarChart3, Menu, X, Network, Map as MapIcon } from 'lucide-react';
 import type { AppMode } from '@/store';
+import { useT, type StringKey } from '@/i18n';
 
-const MODE_LABELS: Record<AppMode, { icon: typeof Route; label: string }> = {
-  map: { icon: MapIcon, label: 'Map' },
-  route: { icon: Route, label: 'Route' },
-  explore: { icon: Compass, label: 'Timeline' },
-  density: { icon: BarChart3, label: 'Analysis' },
-  network: { icon: Network, label: 'Network' },
+const MODE_LABELS: Record<AppMode, { icon: typeof Route; labelKey: StringKey }> = {
+  map: { icon: MapIcon, labelKey: 'shell_nav_map' },
+  route: { icon: Route, labelKey: 'shell_nav_route' },
+  explore: { icon: Compass, labelKey: 'shell_nav_timeline' },
+  density: { icon: BarChart3, labelKey: 'shell_nav_analysis' },
+  network: { icon: Network, labelKey: 'shell_nav_network' },
 };
 
 // Modes exposed in the UI. 'explore' is the Timeline view — it runs purely off
@@ -40,7 +41,8 @@ const VISIBLE_MODES: AppMode[] = ['map', 'explore'];
 const showModeNav = VISIBLE_MODES.length > 1;
 
 export function MapPage() {
-  const { 
+  const t = useT();
+  const {
     ensureCamerasLoaded,
     retryCameraLoad,
     isInitialized,
@@ -279,8 +281,8 @@ export function MapPage() {
 
   const seo = (
     <Seo
-      title="panopti.ca — ALPR Camera Map for Canada"
-      description="Explore crowdsourced ALPR (automatic licence plate reader) camera locations across Canada, mapped on OpenStreetMap."
+      title={t('shell_seo_title')}
+      description={t('shell_seo_description')}
       path="/"
     />
   );
@@ -304,9 +306,9 @@ export function MapPage() {
         {/* DeFlock credit banner - hidden in embed mode */}
         {!isEmbed && (
           <div className="shrink-0 bg-dark-800 border-b border-dark-700 px-3 py-1.5 text-center text-[11px] sm:text-xs text-dark-300 leading-snug z-50">
-            Built on{' '}
+            {t('shell_credit_built_on')}{' '}
             <a href="https://github.com/FoggedLens/deflock" target="_blank" rel="noopener noreferrer" className="text-accent font-semibold hover:underline">DeFlock</a>
-            , the original ALPR-mapping project — for United States ALPR data, visit{' '}
+            {t('shell_credit_tail')}{' '}
             <a href="https://deflock.org/" target="_blank" rel="noopener noreferrer" className="text-accent font-semibold hover:underline">deflock.org</a>.
           </div>
         )}
@@ -328,7 +330,7 @@ export function MapPage() {
 
               {/* Desktop: Mode tabs - editorial underline style */}
               {showModeNav && (
-              <nav className="hidden lg:flex items-center gap-6" aria-label="App modes">
+              <nav className="hidden lg:flex items-center gap-6" aria-label={t('shell_aria_app_modes')}>
                 {VISIBLE_MODES.map((mode) => (
                   <button
                     key={mode}
@@ -340,7 +342,7 @@ export function MapPage() {
                     }`}
                     aria-current={appMode === mode ? 'page' : undefined}
                   >
-                    {MODE_LABELS[mode].label}
+                    {t(MODE_LABELS[mode].labelKey)}
                     {appMode === mode && (
                       <span className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-accent" />
                     )}
@@ -352,12 +354,12 @@ export function MapPage() {
               {/* Mobile: Camera count + hamburger */}
               <div className="lg:hidden flex items-center gap-2">
                 <span className="text-xs text-dark-400">
-                  <span className="text-dark-200 font-semibold tabular-nums">{viewCameraCount.toLocaleString()}</span> in view
+                  <span className="text-dark-200 font-semibold tabular-nums">{viewCameraCount.toLocaleString()}</span> {t('shell_in_view')}
                 </span>
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                   className="inline-flex items-center justify-center w-10 h-10 text-dark-300 hover:text-dark-100 transition-colors duration-150"
-                  aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+                  aria-label={mobileMenuOpen ? t('shell_aria_close_menu') : t('shell_aria_open_menu')}
                   aria-expanded={mobileMenuOpen}
                 >
                   {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -366,6 +368,7 @@ export function MapPage() {
 
               <div className="hidden lg:flex items-center gap-4 flex-shrink-0">
                 <ShareButton variant="header" />
+                <LangToggle />
               </div>
             </div>
           </div>
@@ -376,11 +379,11 @@ export function MapPage() {
         {!isEmbed && mobileMenuOpen && (
           <nav
             className="lg:hidden absolute top-12 left-0 right-0 z-[60] bg-dark-800 border-b border-dark-600"
-            aria-label="Mobile navigation"
+            aria-label={t('shell_aria_mobile_nav')}
           >
             <div className="px-4 py-2 space-y-0.5">
               {showModeNav && VISIBLE_MODES.map((mode) => {
-                const { icon: Icon, label } = MODE_LABELS[mode];
+                const { icon: Icon, labelKey } = MODE_LABELS[mode];
                 return (
                 <button
                   key={mode}
@@ -396,13 +399,14 @@ export function MapPage() {
                   aria-current={appMode === mode ? 'page' : undefined}
                 >
                   <Icon className="w-4 h-4" aria-hidden="true" />
-                  <span>{label}</span>
+                  <span>{t(labelKey)}</span>
                 </button>
                 );
               })}
             </div>
             <div className="border-t border-dark-600 mt-1 pt-1 px-4 pb-2 space-y-0.5">
               <ShareButton variant="menu-item" />
+              <LangToggle className="w-full flex items-center px-3 py-2.5" />
             </div>
           </nav>
         )}
@@ -421,7 +425,7 @@ export function MapPage() {
 
           {/* Map */}
           <main className="flex-1 relative w-full lg:w-auto">
-            <h1 className="sr-only">panopti.ca — ALPR Camera Map for Canada</h1>
+            <h1 className="sr-only">{t('shell_h1_title')}</h1>
             <MapLibreView
               ref={mapRef}
               mapKey={mapKey}

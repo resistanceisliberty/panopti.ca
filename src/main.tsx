@@ -4,7 +4,12 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { ErrorBoundary } from './components/common';
 import { useCameraStore } from './store/cameraStore';
+import { useLangStore } from './i18n';
 import './index.css';
+
+// Match <html lang> to the stored language choice before first paint —
+// otherwise a returning French visitor briefly sees lang="en".
+document.documentElement.lang = useLangStore.getState().lang;
 
 // Polyfill for Safari (doesn't support requestIdleCallback)
 if (typeof window !== 'undefined' && !window.requestIdleCallback) {

@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom';
 import { Map, ArrowLeft } from 'lucide-react';
 import { Seo, LegacyMapLink } from '@/components/common';
+import { useT } from '@/i18n';
 
 export function NotFound() {
+  const t = useT();
   return (
     <>
       <Seo
-        title="Page Not Found | panopti.ca"
-        description="The page you requested could not be found."
+        title={t('shell_404_seo_title')}
+        description={t('shell_404_seo_description')}
         noIndex
       />
       <div className="min-h-screen bg-dark-900 flex items-center justify-center p-4">
@@ -29,11 +31,11 @@ export function NotFound() {
           </h1>
 
           <p className="text-xl text-dark-200 mb-2">
-            Page Not Found
+            {t('shell_404_heading')}
           </p>
 
           <p className="text-dark-400 mb-8">
-            Looks like this route doesn't exist.
+            {t('shell_404_body')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -42,7 +44,7 @@ export function NotFound() {
               className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-md bg-accent hover:bg-accent-hover text-white font-semibold transition-colors"
             >
               <Map className="w-5 h-5" />
-              Go to Map
+              {t('shell_404_go_to_map')}
             </Link>
             <LegacyMapLink variant="button" />
           </div>
@@ -52,7 +54,7 @@ export function NotFound() {
             className="mt-6 inline-flex items-center gap-2 text-dark-400 hover:text-dark-200 transition-colors text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
-            Go back
+            {t('shell_404_go_back')}
           </button>
         </div>
       </div>
