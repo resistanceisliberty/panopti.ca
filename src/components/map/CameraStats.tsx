@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
 import { useMapStore, useCameraStore } from '../../store';
+import { useT } from '@/i18n';
 
 const CCTV_BRAND = 'Government CCTVs';
 
 export function CameraStats() {
+  const t = useT();
   const bounds = useMapStore(s => s.bounds);
   const getCamerasInBounds = useCameraStore(s => s.getCamerasInBounds);
   const cameras = useCameraStore(s => s.cameras);
@@ -41,7 +43,7 @@ export function CameraStats() {
             {isLoading ? (
               <div className="flex items-baseline gap-2">
                 <span className="text-lg font-display font-medium text-dark-300">
-                  Loading...
+                  {t('popup_stats_loading')}
                 </span>
               </div>
             ) : (
@@ -50,7 +52,7 @@ export function CameraStats() {
                   {viewCameraCount.toLocaleString()}
                 </span>
                 <span className="text-sm text-dark-200">
-                  in view
+                  {t('popup_stat_in_view')}
                 </span>
               </div>
             )}
@@ -60,7 +62,7 @@ export function CameraStats() {
         {/* Totals — combined, then split by type (matches the timeline toggle) */}
         <div className="mt-3 pt-3 border-t border-dark-700/50 space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-dark-200">Total Canada</span>
+            <span className="text-xs text-dark-200">{t('popup_stat_total_canada')}</span>
             <span className="text-sm font-medium text-dark-100 tabular-nums">
               {isLoading ? <span className="text-dark-400">—</span> : cameraCount.toLocaleString()}
             </span>
@@ -68,7 +70,7 @@ export function CameraStats() {
           <div className="flex items-center justify-between">
             <span className="text-xs text-dark-300 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: '#0080BC' }} />
-              ALPRs
+              {t('popup_stat_alprs')}
             </span>
             <span className="text-xs font-medium text-dark-200 tabular-nums">
               {isLoading ? <span className="text-dark-400">—</span> : alprTotal.toLocaleString()}
@@ -77,7 +79,7 @@ export function CameraStats() {
           <div className="flex items-center justify-between">
             <span className="text-xs text-dark-300 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: '#F59E0B' }} />
-              Gov CCTVs
+              {t('popup_stat_gov_cctvs')}
             </span>
             <span className="text-xs font-medium text-dark-200 tabular-nums">
               {isLoading ? <span className="text-dark-400">—</span> : cctvTotal.toLocaleString()}

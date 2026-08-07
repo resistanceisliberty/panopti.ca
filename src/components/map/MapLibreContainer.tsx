@@ -49,6 +49,7 @@ import { useSubmitStore } from '../../store/submitStore';
 import { DirectionConeLayer } from '../submit/DirectionConeLayer';
 import { fetchNode } from '../../osm/api';
 import { draftFromNode } from '../../osm/fromNode';
+import { useT } from '@/i18n';
 
 import type { ALPRCamera, Location } from '../../types';
 
@@ -1203,6 +1204,7 @@ function wikimediaImageUrl(tag: string): string {
 
 // Popup content component - Dark theme
 function CameraPopupContent({ camera, onEdit }: { camera: ALPRCamera; onEdit: (camera: ALPRCamera) => void }) {
+  const t = useT();
   const osmUrl = `https://www.openstreetmap.org/${camera.osmType}/${camera.osmId}`;
   const submitUser = useSubmitStore((s) => s.user);
   const submitEnabled = useSubmitStore((s) => s.submitEnabled);
@@ -1220,8 +1222,8 @@ function CameraPopupContent({ camera, onEdit }: { camera: ALPRCamera; onEdit: (c
       <div className="flex items-center gap-3 mb-3 pb-3 border-b border-dark-600">
         <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0">
           {imageUrl ? (
-            <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full" title="View example photo">
-              <img src={imageUrl} alt={camera.brand ?? 'ALPR camera'} className="w-full h-full object-cover" />
+            <a href={imageUrl} target="_blank" rel="noopener noreferrer" className="block w-full h-full" title={t('popup_view_photo')}>
+              <img src={imageUrl} alt={camera.brand ?? t('popup_alpr_camera')} className="w-full h-full object-cover" />
             </a>
           ) : (
             <div className="w-full h-full bg-accent/20 flex items-center justify-center">
@@ -1232,49 +1234,49 @@ function CameraPopupContent({ camera, onEdit }: { camera: ALPRCamera; onEdit: (c
           )}
         </div>
         <div>
-          <h3 className="font-display font-semibold text-white text-base">{camera.brand === 'Government CCTVs' ? 'Government CCTV' : 'ALPR Camera'}</h3>
-          <p className="text-xs text-dark-400">ID: {camera.osmId}</p>
+          <h3 className="font-display font-semibold text-white text-base">{camera.brand === 'Government CCTVs' ? t('popup_gov_cctv') : t('popup_alpr_camera')}</h3>
+          <p className="text-xs text-dark-400">{t('popup_id_prefix')} {camera.osmId}</p>
         </div>
       </div>
 
       <div className="space-y-2 text-xs">
         {camera.operator && (
           <div className="flex justify-between gap-4">
-            <span className="text-dark-400">Operated by</span>
+            <span className="text-dark-400">{t('popup_operated_by')}</span>
             <span className="text-white font-medium truncate max-w-[120px]">{camera.operator}</span>
           </div>
         )}
 
         {camera.brand && camera.brand !== 'Government CCTVs' && (
           <div className="flex justify-between gap-4">
-            <span className="text-dark-400">Made by</span>
+            <span className="text-dark-400">{t('popup_made_by')}</span>
             <span className="text-dark-200 truncate max-w-[140px]">{camera.brand}</span>
           </div>
         )}
 
         {camera.directionCardinal && (
           <div className="flex justify-between gap-4">
-            <span className="text-dark-400">Direction</span>
+            <span className="text-dark-400">{t('popup_direction')}</span>
             <span className="text-dark-200">{camera.directionCardinal}</span>
           </div>
         )}
 
         {camera.surveillanceZone && (
           <div className="flex justify-between gap-4">
-            <span className="text-dark-400">Zone</span>
+            <span className="text-dark-400">{t('popup_zone')}</span>
             <span className="text-dark-200 capitalize">{camera.surveillanceZone}</span>
           </div>
         )}
 
         {camera.mountType && (
           <div className="flex justify-between gap-4">
-            <span className="text-dark-400">Mount</span>
+            <span className="text-dark-400">{t('popup_mount')}</span>
             <span className="text-dark-200 capitalize">{camera.mountType.replace('_', ' ')}</span>
           </div>
         )}
 
         <div className="flex justify-between gap-4">
-          <span className="text-dark-400">Coords</span>
+          <span className="text-dark-400">{t('popup_coords')}</span>
           <span className="text-dark-300 font-mono text-xs">
             {camera.lat.toFixed(5)}, {camera.lon.toFixed(5)}
           </span>
@@ -1288,14 +1290,14 @@ function CameraPopupContent({ camera, onEdit }: { camera: ALPRCamera; onEdit: (c
           rel="noopener noreferrer"
           className="flex-1 px-3 py-2 text-xs text-center bg-dark-600 hover:bg-dark-500 text-dark-200 rounded-lg transition-colors font-medium"
         >
-          View OSM
+          {t('popup_view_osm')}
         </a>
         {submitEnabled && submitUser && (
           <button
             onClick={() => onEdit(camera)}
             className="flex-1 px-3 py-2 text-xs text-center bg-accent hover:bg-accent/80 text-white rounded-lg transition-colors font-medium"
           >
-            Edit
+            {t('popup_edit')}
           </button>
         )}
       </div>
