@@ -1,8 +1,13 @@
 import { create } from 'zustand';
 import type { Lang } from './strings';
 
-const initial: Lang =
-  typeof localStorage !== 'undefined' && localStorage.getItem('lang') === 'fr' ? 'fr' : 'en';
+function readInitial(): Lang {
+  try {
+    return typeof localStorage !== 'undefined' && localStorage.getItem('lang') === 'fr' ? 'fr' : 'en';
+  } catch {
+    return 'en';
+  }
+}
 
 interface LangState {
   lang: Lang;
@@ -10,9 +15,13 @@ interface LangState {
 }
 
 export const useLangStore = create<LangState>((set) => ({
-  lang: initial,
+  lang: readInitial(),
   setLang: (lang) => {
-    if (typeof localStorage !== 'undefined') localStorage.setItem('lang', lang);
+    try {
+      if (typeof localStorage !== 'undefined') localStorage.setItem('lang', lang);
+    } catch {
+      // storage inaccessible (e.g. blocked in embedded iframe) — continue with in-memory state
+    }
     if (typeof document !== 'undefined') document.documentElement.lang = lang;
     set({ lang });
   },

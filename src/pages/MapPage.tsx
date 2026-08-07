@@ -477,7 +477,7 @@ export function MapPage() {
                   <div className="flex items-center gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-accent shadow-[0_0_8px_rgba(56,189,248,0.3)]"></div>
-                      <span className="text-dark-100">ALPR Camera</span>
+                      <span className="text-dark-100">{t('shell_legend_alpr_camera')}</span>
                     </div>
                   </div>
                 </div>

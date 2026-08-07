@@ -27,6 +27,7 @@ export const STRINGS = {
     shell_404_body: "Looks like this route doesn't exist.",
     shell_404_go_to_map: 'Go to Map',
     shell_404_go_back: 'Go back',
+    shell_legend_alpr_camera: 'ALPR Camera',
 
     // Map controls: style switcher + address search (AddressSearch / MapSearch share these)
     ctrl_style_dark: 'Dark',
@@ -320,6 +321,7 @@ export const STRINGS = {
     shell_404_body: "Il semble que cette page n'existe pas.",
     shell_404_go_to_map: 'Aller à la carte',
     shell_404_go_back: 'Retour',
+    shell_legend_alpr_camera: 'Caméra ALPR',
 
     // Map controls: style switcher + address search (AddressSearch / MapSearch share these)
     ctrl_style_dark: 'Sombre',
