@@ -18,6 +18,7 @@ import { MapPanelContent } from './MapPanel';
 import { SubmitButtons } from '../submit/SubmitButtons';
 import { SubmitForm } from '../submit/SubmitForm';
 import { useSubmitStore } from '../../store/submitStore';
+import { useT, type StringKey } from '../../i18n';
 
 /* ------------------------------------------------------------------ */
 /*  Tab definitions                                                    */
@@ -25,12 +26,12 @@ import { useSubmitStore } from '../../store/submitStore';
 
 interface TabDef {
   mode: AppMode;
-  label: string;
+  labelKey: StringKey;
 }
 
 // Canada build: camera map only. Other modes depend on US-only datasets.
 const TABS: TabDef[] = [
-  { mode: 'map', label: 'Map' },
+  { mode: 'map', labelKey: 'x_tab_map' },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -42,6 +43,7 @@ interface MobileTabDrawerProps {
 }
 
 export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
+  const t = useT();
   const [snapPoint, setSnapPoint] = useState<SnapPoint>('minimized');
   const [didAutoExpand, setDidAutoExpand] = useState(false);
 
@@ -110,7 +112,7 @@ export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
 
   const headerContent = (
     <div className="grid grid-cols-1 gap-1">
-      {TABS.map(({ mode, label }) => {
+      {TABS.map(({ mode, labelKey }) => {
         const isActive = appMode === mode;
         return (
           <button
@@ -122,7 +124,7 @@ export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
                 : 'bg-zinc-800/60 text-zinc-400 border border-zinc-700 active:bg-zinc-700'
             }`}
           >
-            {label}
+            {t(labelKey)}
           </button>
         );
       })}
@@ -142,7 +144,7 @@ export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
             <MapPanelContent />
             <div className="mt-6 pt-4 border-t border-dark-700/50">
               <p className="text-[10px] text-dark-500 text-center">
-                Maps by{' '}
+                {t('panel_footer_maps_by')}{' '}
                 <a href="https://openroadlabs.org" target="_blank" rel="noopener noreferrer" className="hover:text-dark-300 transition-colors">OpenRoad Labs LLC</a>
               </p>
             </div>
@@ -201,7 +203,7 @@ export function MobileTabDrawer({ onModeChange }: MobileTabDrawerProps) {
             {/* Footer */}
             <div className="mt-6 pt-4 border-t border-dark-700/50">
               <p className="text-[10px] text-dark-500 text-center">
-                Maps by{' '}
+                {t('panel_footer_maps_by')}{' '}
                 <a href="https://openroadlabs.org" target="_blank" rel="noopener noreferrer" className="hover:text-dark-300 transition-colors">OpenRoad Labs LLC</a>
               </p>
             </div>

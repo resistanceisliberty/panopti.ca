@@ -12,6 +12,7 @@ import {
   type SpatialGrid
 } from '../utils/geo';
 import { applyLocalOverlay, applyOp, addOp, type LocalOp } from '../osm/localOverlay';
+import { t } from '../i18n';
 
 // ── Local-only: government CCTV nodes carry this brand label in the dataset ──
 const CCTV_BRAND = 'Government CCTVs';
@@ -296,7 +297,7 @@ export const useCameraStore = create<CameraState>((set, get) => ({
       } catch (error) {
         console.error('[CameraStore] Failed to load cameras:', error);
         set({
-          error: error instanceof Error ? error.message : 'Failed to fetch cameras',
+          error: error instanceof Error ? error.message : t('x_error_fetch_cameras'),
           isLoading: false,
           isPreloading: false,
           loadPhase: 'error',
@@ -423,7 +424,7 @@ export const useCameraStore = create<CameraState>((set, get) => ({
       } catch (error) {
         console.error('[CameraStore] Retry failed:', error);
         set({
-          error: error instanceof Error ? error.message : 'Failed to fetch cameras',
+          error: error instanceof Error ? error.message : t('x_error_fetch_cameras'),
           isLoading: false,
           isPreloading: false,
           loadPhase: 'error',

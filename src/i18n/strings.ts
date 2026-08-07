@@ -276,6 +276,17 @@ export const STRINGS = {
     submit_tags_label: 'Tags to submit (operator, manufacturer & direction values are editable):',
     submit_toast_refresh_note: "Thanks! The map here refreshes from OpenStreetMap periodically, so your change will show up on the next refresh (usually within a few hours).",
     submit_toast_dismiss_aria: 'Dismiss',
+
+    // Cross-cutting: mobile tab bar, bottom sheet dialog, unit suffixes, store/service errors
+    x_tab_map: 'Map',
+    x_bottomsheet_aria: 'Panel',
+    x_unit_meters: 'm',
+    x_unit_miles: 'mi',
+    x_unit_seconds: 'sec',
+    x_unit_minutes: 'min',
+    x_unit_minutes_short: 'm',
+    x_unit_hours: 'h',
+    x_error_fetch_cameras: 'Failed to fetch cameras',
   },
   fr: {
     lang_switch_to_fr: 'Passer au français',
@@ -554,6 +565,17 @@ export const STRINGS = {
     submit_tags_label: 'Balises à soumettre (les valeurs operator, manufacturer et direction sont modifiables) :',
     submit_toast_refresh_note: "Merci! La carte ici se met à jour périodiquement à partir d'OpenStreetMap, alors votre modification apparaîtra lors de la prochaine mise à jour (habituellement dans quelques heures).",
     submit_toast_dismiss_aria: 'Fermer',
+
+    // Cross-cutting: mobile tab bar, bottom sheet dialog, unit suffixes, store/service errors
+    x_tab_map: 'Carte',
+    x_bottomsheet_aria: 'Panneau',
+    x_unit_meters: 'm',
+    x_unit_miles: 'mi',
+    x_unit_seconds: 's',
+    x_unit_minutes: 'min',
+    x_unit_minutes_short: 'm',
+    x_unit_hours: 'h',
+    x_error_fetch_cameras: 'Échec de la récupération des caméras',
   },
 } as const;
 

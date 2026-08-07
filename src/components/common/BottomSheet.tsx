@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useCallback, useRef } from 'react';
 import { motion, useMotionValue, useTransform, animate, PanInfo } from 'framer-motion';
+import { useT } from '../../i18n';
 
 export type SnapPoint = 'minimized' | 'peek' | 'full';
 
@@ -31,6 +32,8 @@ export function BottomSheet({
   peekHeight = DEFAULT_PEEK_HEIGHT,
   fullHeight = DEFAULT_FULL_HEIGHT,
 }: BottomSheetProps) {
+  const t = useT();
+
   // Calculate actual pixel heights
   const getSnapPointHeight = useCallback((point: SnapPoint): number => {
     const vh = window.innerHeight;
@@ -215,7 +218,7 @@ export function BottomSheet({
       <motion.div
         className="fixed bottom-0 left-0 right-0 z-[60] lg:hidden bg-dark-900 rounded-t-xl flex flex-col"
         role="dialog"
-        aria-label="Panel"
+        aria-label={t('x_bottomsheet_aria')}
         style={{
           height,
           maxHeight: '95vh',

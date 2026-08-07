@@ -1,4 +1,5 @@
 import type { ALPRCamera } from '../types';
+import { t } from '../i18n';
 
 const EARTH_RADIUS_METERS = 6371000;
 
@@ -128,10 +129,10 @@ function toRadians(degrees: number): number {
  */
 export function formatDistance(meters: number): string {
   if (meters < 1000) {
-    return `${Math.round(meters)} m`;
+    return `${Math.round(meters)} ${t('x_unit_meters')}`;
   }
   const miles = meters / 1609.34;
-  return `${miles.toFixed(1)} mi`;
+  return `${miles.toFixed(1)} ${t('x_unit_miles')}`;
 }
 
 /**
@@ -139,13 +140,13 @@ export function formatDistance(meters: number): string {
  */
 export function formatDuration(seconds: number): string {
   if (seconds < 60) {
-    return `${Math.round(seconds)} sec`;
+    return `${Math.round(seconds)} ${t('x_unit_seconds')}`;
   }
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) {
-    return `${minutes} min`;
+    return `${minutes} ${t('x_unit_minutes')}`;
   }
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
-  return `${hours}h ${remainingMinutes}m`;
+  return `${hours}${t('x_unit_hours')} ${remainingMinutes}${t('x_unit_minutes_short')}`;
 }
