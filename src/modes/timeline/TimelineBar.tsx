@@ -3,6 +3,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useCameraStore } from '../../store';
 import { useMapStore } from '../../store/mapStore';
 import { useAppModeStore } from '../../store/appModeStore';
+import { useT, useLangStore } from '../../i18n';
 import { Play, Pause } from 'lucide-react';
 import {
   DAY_MS,
@@ -17,6 +18,8 @@ import { applyCameraTypeFilter, getWeekMonday } from '../../store/cameraStore';
 const VISIBLE_START = '2024-01-01';
 
 export function TimelineBar() {
+  const t = useT();
+  const lang = useLangStore((s) => s.lang);
   const {
     cameras,
     cameraType,
@@ -366,7 +369,7 @@ export function TimelineBar() {
       ? Math.max(0, Math.min(100, ((clampedIndex - visibleStartIndex) / visibleRange) * 100))
       : 0;
 
-  const dateLabel = formatDateFixed(dayIndexToDate(clampedIndex, timelineMinDay));
+  const dateLabel = formatDateFixed(dayIndexToDate(clampedIndex, timelineMinDay), lang);
 
   return (
     <div className="flex items-center gap-2 lg:gap-3 h-full px-3 lg:px-4 select-none">
@@ -374,7 +377,7 @@ export function TimelineBar() {
       <button
         onClick={handlePlayPause}
         className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 active:bg-white/20 transition-colors"
-        aria-label={isPlaying ? 'Pause' : 'Play'}
+        aria-label={isPlaying ? t('tl_pause_aria') : t('tl_play_aria')}
       >
         {isPlaying ? (
           <Pause className="w-3.5 h-3.5 text-white/90" />
@@ -430,7 +433,7 @@ export function TimelineBar() {
         onClick={handleSpeedCycle}
         className="hidden lg:inline-flex flex-shrink-0 items-center justify-center px-2 py-1 rounded-md bg-white/8 hover:bg-white/12 active:bg-white/16 border border-white/[0.06] text-xs font-medium text-white/50 hover:text-white/70 transition-colors tabular-nums"
       >
-        {playSpeed}d/s
+        {playSpeed}{t('tl_speed_unit')}
       </button>
     </div>
   );

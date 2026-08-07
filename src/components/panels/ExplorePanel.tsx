@@ -8,8 +8,10 @@ import { ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 import { MapTypeDropdown, VIZ_OPTIONS } from './MapTypeDropdown';
 import { CameraTypeToggle } from './MapPanel';
 import { SubmitButtons } from '../submit/SubmitButtons';
+import { useT } from '../../i18n';
 
 export function ExplorePanel() {
+  const t = useT();
   const [isMobile, setIsMobile] = useState(false);
   const [snapPoint, setSnapPoint] = useState<SnapPoint>('minimized');
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -42,7 +44,8 @@ export function ExplorePanel() {
     }
   };
 
-  const vizLabel = VIZ_OPTIONS.find((o) => o.id === mapVisualization)?.label ?? 'Explore';
+  const activeViz = VIZ_OPTIONS.find((o) => o.id === mapVisualization);
+  const vizLabel = activeViz ? t(activeViz.labelKey) : t('tl_viz_fallback');
 
   // Mobile: Bottom Sheet
   if (isMobile) {
@@ -64,7 +67,7 @@ export function ExplorePanel() {
               </div>
               <div className="text-left">
                 <p className="text-sm font-semibold text-white">{vizLabel}</p>
-                <p className="text-xs text-dark-400">{cameraCount.toLocaleString()} cameras</p>
+                <p className="text-xs text-dark-400">{cameraCount.toLocaleString()} {t('tl_camera_count_label')}</p>
               </div>
             </div>
             <svg className="w-5 h-5 text-dark-400" viewBox="0 0 24 24" fill="currentColor">
@@ -77,7 +80,7 @@ export function ExplorePanel() {
           <div className="pb-8">
             <CameraTypeToggle />
             <p className="text-xs text-dark-400 mb-3 leading-relaxed">
-              Visualize when ALPR cameras were mapped on <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OSM</a> across Canada. Data from <a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a> &amp; OSM contributors. Use the timeline to scrub through when each camera was added. Switch layers below.
+              {t('tl_intro_mobile_pre')}<a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OSM</a>{t('tl_intro_mobile_mid')}<a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a>{t('tl_intro_mobile_post')}
             </p>
 
             {/* Map type dropdown */}
@@ -95,7 +98,7 @@ export function ExplorePanel() {
 
             <div className="mt-6 pt-4 border-t border-dark-700/50">
               <p className="text-[10px] text-dark-500 text-center">
-                Maps by{' '}
+                {t('panel_footer_maps_by')}{' '}
                 <a href="https://openroadlabs.org" target="_blank" rel="noopener noreferrer" className="hover:text-dark-300 transition-colors">OpenRoad Labs LLC</a>
               </p>
             </div>
@@ -113,9 +116,9 @@ export function ExplorePanel() {
       } ${isCollapsed ? 'w-0 overflow-hidden' : 'w-[400px]'}`}>
         {/* Header */}
         <div className="flex-shrink-0 px-6 py-5 border-b border-dark-700/50">
-          <h2 className="text-lg font-display font-semibold text-white mb-2">Timeline</h2>
+          <h2 className="text-lg font-display font-semibold text-white mb-2">{t('tl_panel_heading')}</h2>
           <p className="text-xs text-dark-400 mb-3 leading-relaxed">
-            Visualize when ALPR cameras were mapped on <a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OpenStreetMap</a> across Canada. Data sourced from <a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a> and OSM contributors. Use the timeline to scrub through when each camera was added to OSM. Switch between Heatmap and Dot Density layers below.
+            {t('tl_intro_desktop_pre')}<a href="https://www.openstreetmap.org" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">OpenStreetMap</a>{t('tl_intro_desktop_mid')}<a href="https://deflock.me" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">DeFlock</a>{t('tl_intro_desktop_post')}
           </p>
           <MapTypeDropdown />
           <SubmitButtons />
@@ -137,7 +140,7 @@ export function ExplorePanel() {
         {/* Footer */}
         <div className="flex-shrink-0 px-6 py-3 border-t border-dark-700/50 bg-dark-800/50">
           <p className="text-[10px] text-dark-500 text-center">
-            Maps by{' '}
+            {t('panel_footer_maps_by')}{' '}
             <a href="https://openroadlabs.org" target="_blank" rel="noopener noreferrer" className="hover:text-dark-300 transition-colors">OpenRoad Labs LLC</a>
           </p>
         </div>
@@ -149,7 +152,7 @@ export function ExplorePanel() {
         className={`absolute z-50 top-1/2 -translate-y-1/2 ${
           hasAnimated ? 'transition-all duration-300' : ''
         } ${isCollapsed ? 'left-0' : 'left-[400px]'} w-6 h-16 bg-dark-800 hover:bg-dark-700 border border-dark-600 border-l-0 rounded-r-lg flex items-center justify-center group`}
-        aria-label={isCollapsed ? 'Expand panel' : 'Collapse panel'}
+        aria-label={isCollapsed ? t('panel_expand_aria') : t('panel_collapse_aria')}
       >
         {isCollapsed ? (
           <ChevronRight className="w-4 h-4 text-dark-300 group-hover:text-white transition-colors" />

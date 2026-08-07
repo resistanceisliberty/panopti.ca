@@ -1,8 +1,9 @@
 import type { ColorSchemeId } from '../../store/appModeStore';
+import type { StringKey } from '../../i18n';
 
 export interface ColorScheme {
   id: ColorSchemeId;
-  name: string;
+  nameKey: StringKey;
   stops: [number, string][];
   // CSS gradient for preview swatches
   gradient: string;
@@ -11,7 +12,7 @@ export interface ColorScheme {
 export const COLOR_SCHEMES: Record<ColorSchemeId, ColorScheme> = {
   neon: {
     id: 'neon',
-    name: 'Neon',
+    nameKey: 'tl_scheme_neon_name',
     stops: [
       [0, 'rgba(0,0,0,0)'],
       [0.2, '#1e3a5f'],
@@ -24,7 +25,7 @@ export const COLOR_SCHEMES: Record<ColorSchemeId, ColorScheme> = {
   },
   thermal: {
     id: 'thermal',
-    name: 'Thermal',
+    nameKey: 'tl_scheme_thermal_name',
     stops: [
       [0, 'rgba(0,0,0,0)'],
       [0.2, '#4a148c'],
@@ -37,7 +38,7 @@ export const COLOR_SCHEMES: Record<ColorSchemeId, ColorScheme> = {
   },
   inferno: {
     id: 'inferno',
-    name: 'Inferno',
+    nameKey: 'tl_scheme_inferno_name',
     stops: [
       [0, 'rgba(0,0,0,0)'],
       [0.2, '#1a0000'],
@@ -50,7 +51,7 @@ export const COLOR_SCHEMES: Record<ColorSchemeId, ColorScheme> = {
   },
   classic: {
     id: 'classic',
-    name: 'Classic',
+    nameKey: 'tl_scheme_classic_name',
     stops: [
       [0, 'rgba(0,0,0,0)'],
       [0.2, '#0d47a1'],
@@ -63,7 +64,7 @@ export const COLOR_SCHEMES: Record<ColorSchemeId, ColorScheme> = {
   },
   plasma: {
     id: 'plasma',
-    name: 'Plasma',
+    nameKey: 'tl_scheme_plasma_name',
     stops: [
       [0, 'rgba(0,0,0,0)'],
       [0.05, '#0d0887'],
@@ -76,7 +77,7 @@ export const COLOR_SCHEMES: Record<ColorSchemeId, ColorScheme> = {
   },
   viridis: {
     id: 'viridis',
-    name: 'Viridis',
+    nameKey: 'tl_scheme_viridis_name',
     stops: [
       [0, 'rgba(0,0,0,0)'],
       [0.05, '#440154'],

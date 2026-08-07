@@ -1,5 +1,12 @@
+import type { Lang } from '../../i18n';
+
 export const DAY_MS = 24 * 60 * 60 * 1000;
-export const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** Month abbreviations by language. French uses standard short forms (no capitalization). */
+export const MONTH_NAMES: Record<Lang, string[]> = {
+  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  fr: ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'],
+};
 
 /** Convert day index (0-based from minDay) to YYYY-MM-DD string */
 export function dayIndexToDate(index: number, minDay: string): string {
@@ -18,22 +25,25 @@ export function dateToDayIndex(date: string, minDay: string): number {
   return Math.round((d2 - d1) / DAY_MS);
 }
 
-/** Format YYYY-MM-DD as "MMM DD, YYYY" */
-export function formatDate(date: string): string {
+/** Format YYYY-MM-DD as "MMM DD, YYYY" (en) or "DD MMM YYYY" (fr) */
+export function formatDate(date: string, lang: Lang = 'en'): string {
   const [year, month, day] = date.split('-').map(Number);
-  return `${MONTH_NAMES[month - 1]} ${day}, ${year}`;
+  const mon = MONTH_NAMES[lang][month - 1];
+  return lang === 'fr' ? `${day} ${mon} ${year}` : `${mon} ${day}, ${year}`;
 }
 
-/** Format YYYY-MM-DD as "MMM DD, YYYY" with zero-padded day for fixed width */
-export function formatDateFixed(date: string): string {
+/** Format YYYY-MM-DD as "MMM DD, YYYY" (en) or "DD MMM YYYY" (fr), zero-padded day for fixed width */
+export function formatDateFixed(date: string, lang: Lang = 'en'): string {
   const [year, month, day] = date.split('-').map(Number);
-  return `${MONTH_NAMES[month - 1]} ${String(day).padStart(2, '0')}, ${year}`;
+  const mon = MONTH_NAMES[lang][month - 1];
+  const dd = String(day).padStart(2, '0');
+  return lang === 'fr' ? `${dd} ${mon} ${year}` : `${mon} ${dd}, ${year}`;
 }
 
 /** Format YYYY-MM-DD as "MMM YYYY" (for range labels) */
-export function formatMonthYear(date: string): string {
+export function formatMonthYear(date: string, lang: Lang = 'en'): string {
   const [year, month] = date.split('-').map(Number);
-  return `${MONTH_NAMES[month - 1]} ${year}`;
+  return `${MONTH_NAMES[lang][month - 1]} ${year}`;
 }
 
 /** Total days between two YYYY-MM-DD dates */

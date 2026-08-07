@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useAppModeStore } from '../../store';
 import type { MapVisualizationType } from '../../store/appModeStore';
+import { useT, type StringKey } from '../../i18n';
 import { Layers, ChevronDown } from 'lucide-react';
 
-export const VIZ_OPTIONS: { id: MapVisualizationType; label: string; description: string }[] = [
-  { id: 'heatmap', label: 'Heatmap', description: 'Smooth density blobs' },
-  { id: 'dots', label: 'Dot Density', description: 'Plain dots, stacking opacity' },
+export const VIZ_OPTIONS: { id: MapVisualizationType; labelKey: StringKey; descKey: StringKey }[] = [
+  { id: 'heatmap', labelKey: 'tl_viz_heatmap_label', descKey: 'tl_viz_heatmap_desc' },
+  { id: 'dots', labelKey: 'tl_viz_dots_label', descKey: 'tl_viz_dots_desc' },
 ];
 
 export function MapTypeDropdown() {
+  const t = useT();
   const { mapVisualization, setMapVisualization } = useAppModeStore();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -25,8 +27,8 @@ export function MapTypeDropdown() {
             <Layers className="w-4 h-4 text-accent" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-medium text-white">{active.label}</p>
-            <p className="text-xs text-dark-400">{active.description}</p>
+            <p className="text-sm font-medium text-white">{t(active.labelKey)}</p>
+            <p className="text-xs text-dark-400">{t(active.descKey)}</p>
           </div>
         </div>
         <ChevronDown className={`w-4 h-4 text-dark-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -53,8 +55,8 @@ export function MapTypeDropdown() {
               <div>
                 <p className={`text-sm font-medium ${
                   option.id === mapVisualization ? 'text-white' : 'text-dark-200'
-                }`}>{option.label}</p>
-                <p className="text-xs text-dark-500">{option.description}</p>
+                }`}>{t(option.labelKey)}</p>
+                <p className="text-xs text-dark-500">{t(option.descKey)}</p>
               </div>
             </button>
           ))}

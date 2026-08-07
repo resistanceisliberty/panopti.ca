@@ -1,12 +1,13 @@
 import { useAppModeStore } from '../../store';
+import { useT, type StringKey } from '../../i18n';
 
-const DOT_COLORS = [
-  { id: '#4DA6FF', name: 'Blue', preview: '#4DA6FF' },
-  { id: '#f97316', name: 'Orange', preview: '#f97316' },
-  { id: '#eab308', name: 'Yellow', preview: '#eab308' },
-  { id: '#22c55e', name: 'Green', preview: '#22c55e' },
-  { id: '#06b6d4', name: 'Cyan', preview: '#06b6d4' },
-  { id: '#ffffff', name: 'White', preview: '#ffffff' },
+const DOT_COLORS: { id: string; nameKey: StringKey; preview: string }[] = [
+  { id: '#4DA6FF', nameKey: 'tl_dot_blue', preview: '#4DA6FF' },
+  { id: '#f97316', nameKey: 'tl_dot_orange', preview: '#f97316' },
+  { id: '#eab308', nameKey: 'tl_dot_yellow', preview: '#eab308' },
+  { id: '#22c55e', nameKey: 'tl_dot_green', preview: '#22c55e' },
+  { id: '#06b6d4', nameKey: 'tl_dot_cyan', preview: '#06b6d4' },
+  { id: '#ffffff', nameKey: 'tl_dot_white', preview: '#ffffff' },
 ];
 
 function SliderControl({
@@ -48,6 +49,7 @@ function SliderControl({
 }
 
 export function DotDensityControls() {
+  const t = useT();
   const { dotDensitySettings, updateDotDensitySettings } = useAppModeStore();
 
   return (
@@ -55,7 +57,7 @@ export function DotDensityControls() {
       {/* Dot Color */}
       <div>
         <span className="block text-xs font-medium text-dark-400 uppercase tracking-wider mb-3">
-          Dot Color
+          {t('tl_dot_color_label')}
         </span>
         <div className="grid grid-cols-3 gap-2">
           {DOT_COLORS.map((c) => {
@@ -75,7 +77,7 @@ export function DotDensityControls() {
                   style={{ backgroundColor: c.preview }}
                 />
                 <span className={`text-xs font-medium ${isActive ? 'text-white' : 'text-dark-300'}`}>
-                  {c.name}
+                  {t(c.nameKey)}
                 </span>
               </button>
             );
@@ -86,7 +88,7 @@ export function DotDensityControls() {
       {/* Sliders */}
       <div className="space-y-5">
         <SliderControl
-          label="Dot Size"
+          label={t('tl_dot_size_label')}
           value={dotDensitySettings.radius}
           min={1}
           max={6}
@@ -95,7 +97,7 @@ export function DotDensityControls() {
           formatValue={(v) => `${v}px`}
         />
         <SliderControl
-          label="Dot Opacity"
+          label={t('tl_dot_opacity_label')}
           value={dotDensitySettings.opacity}
           min={0.05}
           max={0.5}
@@ -114,12 +116,9 @@ export function DotDensityControls() {
             </svg>
           </div>
           <div>
-            <p className="text-sm text-dark-300 font-medium mb-1">About Dot Density</p>
+            <p className="text-sm text-dark-300 font-medium mb-1">{t('tl_about_dots_heading')}</p>
             <p className="text-xs text-dark-400 leading-relaxed">
-              Each camera is one semi-transparent dot. Where cameras cluster together,
-              overlapping dots stack to appear brighter and more opaque — revealing
-              density through visual accumulation. Lower the opacity for stronger contrast
-              between sparse and dense areas.
+              {t('tl_about_dots_body')}
             </p>
           </div>
         </div>

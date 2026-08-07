@@ -1,6 +1,7 @@
 import { useCameraStore, useAppModeStore } from '../../store';
 import type { ColorSchemeId } from '../../store/appModeStore';
 import { COLOR_SCHEMES } from './colorSchemes';
+import { useT } from '../../i18n';
 
 function SliderControl({
   label,
@@ -43,6 +44,7 @@ function SliderControl({
 const SCHEME_IDS: ColorSchemeId[] = ['neon', 'thermal', 'inferno', 'classic', 'plasma', 'viridis'];
 
 function SchemeGrid({ value, onChange }: { value: ColorSchemeId; onChange: (id: ColorSchemeId) => void }) {
+  const t = useT();
   return (
     <div className="grid grid-cols-2 gap-2">
       {SCHEME_IDS.map((id) => {
@@ -63,7 +65,7 @@ function SchemeGrid({ value, onChange }: { value: ColorSchemeId; onChange: (id: 
               style={{ background: scheme.gradient }}
             />
             <span className={`text-xs font-medium ${isActive ? 'text-white' : 'text-dark-300'}`}>
-              {scheme.name}
+              {t(scheme.nameKey)}
             </span>
           </button>
         );
@@ -73,6 +75,7 @@ function SchemeGrid({ value, onChange }: { value: ColorSchemeId; onChange: (id: 
 }
 
 export function HeatmapControls() {
+  const t = useT();
   const { cameras } = useCameraStore();
   const { heatmapSettings, updateHeatmapSettings } = useAppModeStore();
 
@@ -81,17 +84,17 @@ export function HeatmapControls() {
       {/* Color Scheme */}
       <div className="space-y-4">
         <span className="block text-xs font-medium text-dark-400 uppercase tracking-wider">
-          Color Scheme
+          {t('tl_color_scheme_label')}
         </span>
         <div>
-          <span className="block text-xs font-medium text-dark-300 mb-2">ALPRs</span>
+          <span className="block text-xs font-medium text-dark-300 mb-2">{t('tl_scheme_alprs_label')}</span>
           <SchemeGrid
             value={heatmapSettings.colorScheme}
             onChange={(id) => updateHeatmapSettings({ colorScheme: id })}
           />
         </div>
         <div>
-          <span className="block text-xs font-medium text-dark-300 mb-2">Government CCTVs</span>
+          <span className="block text-xs font-medium text-dark-300 mb-2">{t('tl_scheme_cctv_label')}</span>
           <SchemeGrid
             value={heatmapSettings.cctvColorScheme}
             onChange={(id) => updateHeatmapSettings({ cctvColorScheme: id })}
@@ -102,7 +105,7 @@ export function HeatmapControls() {
       {/* Sliders */}
       <div className="space-y-5">
         <SliderControl
-          label="Intensity"
+          label={t('tl_intensity_label')}
           value={heatmapSettings.intensity}
           min={0.1}
           max={3.0}
@@ -110,7 +113,7 @@ export function HeatmapControls() {
           onChange={(v) => updateHeatmapSettings({ intensity: v })}
         />
         <SliderControl
-          label="Radius"
+          label={t('tl_radius_label')}
           value={heatmapSettings.radius}
           min={1}
           max={80}
@@ -119,7 +122,7 @@ export function HeatmapControls() {
           formatValue={(v) => `${v}px`}
         />
         <SliderControl
-          label="Opacity"
+          label={t('tl_opacity_label')}
           value={heatmapSettings.opacity}
           min={0.1}
           max={1.0}
@@ -138,11 +141,9 @@ export function HeatmapControls() {
             </svg>
           </div>
           <div>
-            <p className="text-sm text-dark-300 font-medium mb-1">About Heatmap</p>
+            <p className="text-sm text-dark-300 font-medium mb-1">{t('tl_about_heatmap_heading')}</p>
             <p className="text-xs text-dark-400 leading-relaxed">
-              Visualizes the density of {cameras.length.toLocaleString()} ALPR cameras across Canada.
-              Brighter areas indicate higher camera concentration. At higher zoom levels,
-              the heatmap fades to reveal individual camera markers.
+              {t('tl_about_heatmap_pre')}{cameras.length.toLocaleString()}{t('tl_about_heatmap_post')}
             </p>
           </div>
         </div>
