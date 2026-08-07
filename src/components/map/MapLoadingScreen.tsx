@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { CameraLoadPhase } from '@/store/cameraStore';
 import { LegacyMapLink } from '@/components/common';
+import { useT } from '@/i18n';
 
 interface MapLoadingScreenProps {
   cameraProgress: CameraLoadPhase;
@@ -26,6 +27,7 @@ export function MapLoadingScreen({
   camerasReady = false,
   markersReady = false,
 }: MapLoadingScreenProps) {
+  const t = useT();
   const [dots, setDots] = useState('');
 
   // Calculate progress percentage across ALL phases (camera + map render)
@@ -44,14 +46,14 @@ export function MapLoadingScreen({
 
   // Get current phase label — includes map rendering phase
   const getPhaseLabel = () => {
-    if (error) return 'Error';
-    if (camerasReady && !markersReady) return 'Rendering map';
+    if (error) return t('load_phase_error');
+    if (camerasReady && !markersReady) return t('load_phase_rendering');
     switch (cameraProgress) {
-      case 'idle': return 'Initializing';
-      case 'fetching': return 'Fetching cameras';
-      case 'hydrating': return 'Preparing map data';
-      case 'ready': return 'Rendering map';
-      default: return 'Loading';
+      case 'idle': return t('load_phase_initializing');
+      case 'fetching': return t('load_phase_fetching');
+      case 'hydrating': return t('load_phase_preparing');
+      case 'ready': return t('load_phase_rendering');
+      default: return t('load_phase_default');
     }
   };
 
@@ -87,7 +89,7 @@ export function MapLoadingScreen({
             {/* Loading indicator in header */}
             <div className="flex items-center gap-2 bg-dark-800 rounded-full px-3 py-1.5">
               <div className="w-3 h-3 border-2 border-dark-600 border-t-accent rounded-full animate-spin"></div>
-              <span className="text-sm text-dark-300">Loading{dots}</span>
+              <span className="text-sm text-dark-300">{t('load_loading')}{dots}</span>
             </div>
 
             <div className="hidden lg:flex items-center gap-4 flex-shrink-0" />
@@ -129,7 +131,7 @@ export function MapLoadingScreen({
             </div>
             <div>
               <h2 className="text-xl font-display font-bold text-white mb-2">
-                Failed to Load Camera Data
+                {t('load_error_heading')}
               </h2>
               <p className="text-dark-300 text-sm">
                 {error}
@@ -140,7 +142,7 @@ export function MapLoadingScreen({
                 onClick={onRetry}
                 className="w-full px-6 py-3 bg-accent hover:bg-accent-hover text-white font-semibold rounded-md transition-colors"
               >
-                Try Again
+                {t('load_error_retry')}
               </button>
               <LegacyMapLink variant="button" className="flex-none" />
             </div>
@@ -170,13 +172,13 @@ export function MapLoadingScreen({
               {/* Stage indicators */}
               <div className="flex justify-between text-xs text-dark-400 mb-2">
                 <span className={cameraProgress === 'fetching' && !fetchDone ? 'text-accent' : fetchDone ? 'text-success' : ''}>
-                  Fetch
+                  {t('load_stage_fetch')}
                 </span>
                 <span className={cameraProgress === 'hydrating' && !prepareDone ? 'text-accent' : prepareDone ? 'text-success' : ''}>
-                  Prepare
+                  {t('load_stage_prepare')}
                 </span>
                 <span className={renderActive ? 'text-accent' : markersReady ? 'text-success' : ''}>
-                  Render
+                  {t('load_stage_render')}
                 </span>
               </div>
 
@@ -191,7 +193,7 @@ export function MapLoadingScreen({
               {/* Camera count */}
               {cameraCount > 0 && (
                 <p className="text-center text-xs text-dark-400 mt-2">
-                  {cameraCount.toLocaleString()} cameras loaded
+                  {cameraCount.toLocaleString()} {t('load_cameras_loaded')}
                 </p>
               )}
             </div>
@@ -200,13 +202,13 @@ export function MapLoadingScreen({
             {watchdogWarning && (
               <div className="mt-2 px-4 py-3 bg-amber-900/30 rounded-xl border border-amber-500/30 max-w-sm">
                 <p className="text-xs text-amber-300 text-center mb-2">
-                  Map source didn't initialize properly
+                  {t('load_watchdog_warning')}
                 </p>
                 <button
                   onClick={onRetry}
                   className="w-full px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-lg transition-colors"
                 >
-                  Retry
+                  {t('load_watchdog_retry')}
                 </button>
               </div>
             )}

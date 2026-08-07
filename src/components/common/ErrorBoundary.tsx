@@ -1,5 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { LegacyMapLink } from './LegacyMapLink';
+import { t } from '@/i18n';
 
 interface Props {
   children: ReactNode;
@@ -50,17 +51,17 @@ export class ErrorBoundary extends Component<Props, State> {
             </div>
             
             <h1 className="text-xl font-display font-bold text-white mb-2">
-              Something went wrong
+              {t('load_boundary_heading')}
             </h1>
-            
+
             <p className="text-dark-300 mb-6 text-sm">
-              An unexpected error occurred. This has been logged and we'll look into it.
+              {t('load_boundary_body')}
             </p>
-            
+
             {this.state.error && (
               <details className="mb-6 text-left">
                 <summary className="text-sm text-dark-400 cursor-pointer hover:text-dark-200">
-                  Error details
+                  {t('load_boundary_details_summary')}
                 </summary>
                 <pre className="mt-2 p-3 bg-dark-900 rounded-lg text-xs text-danger overflow-auto max-h-32">
                   {this.state.error.message}
@@ -73,13 +74,13 @@ export class ErrorBoundary extends Component<Props, State> {
                 onClick={this.handleReset}
                 className="flex-1 py-3 bg-dark-700 hover:bg-dark-600 text-white font-medium rounded-md transition-colors"
               >
-                Try Again
+                {t('load_boundary_retry')}
               </button>
               <button
                 onClick={() => window.location.href = '/'}
                 className="flex-1 py-3 bg-accent hover:bg-accent-hover text-white font-medium rounded-md transition-colors"
               >
-                Go Home
+                {t('load_boundary_go_home')}
               </button>
               <LegacyMapLink variant="button" />
             </div>
