@@ -8,8 +8,10 @@ import { nearestWithin } from '../../osm/nearby';
 import { buildNodeTags } from '../../osm/tags';
 import { cameraFromTags, type LocalOp } from '../../osm/localOverlay';
 import { useCameraStore } from '../../store';
+import { useT } from '@/i18n';
 
 export function SubmitForm() {
+  const t = useT();
   const { mode, user, draft, point, editNode, busy, error, submitEnabled } = useSubmitStore();
   const { patchDraft, cancel, setBusy, setError, setSuccess } = useSubmitStore.getState();
   if (!user) return null;
@@ -17,7 +19,7 @@ export function SubmitForm() {
   const canSubmit = submitEnabled && !!point && Number.isFinite(point.lat) && Number.isFinite(point.lon) && draft.description.trim().length > 0 && !busy;
 
   const run = async (fn: () => Promise<unknown>, successMsg: string, buildOp: (result: unknown) => LocalOp) => {
-    if (!useSubmitStore.getState().submitEnabled) { setError('Camera submissions are temporarily disabled.'); return; }
+    if (!useSubmitStore.getState().submitEnabled) { setError(t('submit_error_submissions_disabled')); return; }
     setBusy(true); setError(null);
     try {
       const result = await fn();
@@ -28,7 +30,7 @@ export function SubmitForm() {
       cancel(); setSuccess(successMsg);
     } catch (e) {
       setError(e instanceof OsmConflictError
-        ? 'This camera changed on OSM — reload and retry.'
+        ? t('submit_error_conflict')
         : String(e));
       setBusy(false);
     }
@@ -37,15 +39,15 @@ export function SubmitForm() {
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-white">{mode === 'edit' ? 'Edit camera' : 'Add a camera'}</h2>
-        <button className="text-dark-300" onClick={cancel}>Cancel</button>
+        <h2 className="font-semibold text-white">{mode === 'edit' ? t('submit_heading_edit') : t('submit_heading_add')}</h2>
+        <button className="text-dark-300" onClick={cancel}>{t('submit_cancel')}</button>
       </div>
 
       <div className="flex gap-2">
         <button className={`flex-1 rounded p-1.5 text-sm ${draft.deviceType === 'alpr' ? 'bg-accent text-white' : 'bg-dark-700 text-dark-200'}`}
-          onClick={() => patchDraft({ deviceType: 'alpr' })}>ALPR</button>
+          onClick={() => patchDraft({ deviceType: 'alpr' })}>{t('submit_type_alpr')}</button>
         <button className={`flex-1 rounded p-1.5 text-sm ${draft.deviceType === 'cctv' ? 'bg-accent text-white' : 'bg-dark-700 text-dark-200'}`}
-          onClick={() => patchDraft({ deviceType: 'cctv' })}>Gov CCTV</button>
+          onClick={() => patchDraft({ deviceType: 'cctv' })}>{t('submit_type_cctv')}</button>
       </div>
 
       {point ? (
@@ -55,16 +57,16 @@ export function SubmitForm() {
           <input className="w-full rounded bg-dark-800 p-1" value={point.lon}
             onChange={(e) => useSubmitStore.getState().setPoint({ lat: point.lat, lon: Number(e.target.value) })} />
         </div>
-      ) : <div className="text-xs text-amber-400">Tap the map to place the point, or type coordinates after placing.</div>}
+      ) : <div className="text-xs text-amber-400">{t('submit_place_point_hint')}</div>}
 
       {draft.deviceType === 'alpr' && <ManufacturerField />}
-      <input className="w-full rounded bg-dark-800 p-2 text-dark-100" placeholder="Operator (optional)"
+      <input className="w-full rounded bg-dark-800 p-2 text-dark-100" placeholder={t('submit_ph_operator')}
         value={draft.operator} onChange={(e) => patchDraft({ operator: e.target.value })} />
-      <input className="w-full rounded bg-dark-800 p-2 text-dark-100" placeholder="operator:wikidata (optional)"
+      <input className="w-full rounded bg-dark-800 p-2 text-dark-100" placeholder={t('submit_ph_operator_wikidata')}
         value={draft.operatorWikidata} onChange={(e) => patchDraft({ operatorWikidata: e.target.value })} />
       <DirectionField />
       <SourceField />
-      <textarea className="w-full rounded bg-dark-800 p-2 text-dark-100" placeholder="Description (required — becomes the OSM changeset comment)"
+      <textarea className="w-full rounded bg-dark-800 p-2 text-dark-100" placeholder={t('submit_ph_description')}
         value={draft.description} onChange={(e) => patchDraft({ description: e.target.value })} />
 
       <TagEditor />
@@ -72,18 +74,18 @@ export function SubmitForm() {
       {error && <div className="text-sm text-red-400">{error}</div>}
 
       {mode === 'add' && point && nearestWithin(point, 25) && (
-        <div className="text-xs text-amber-400">A camera is already mapped within 25 m — check you're not duplicating.</div>
+        <div className="text-xs text-amber-400">{t('submit_duplicate_warning')}</div>
       )}
 
       <div className="flex gap-2">
         {mode === 'edit' && editNode && (
           <button className="rounded bg-red-700 px-3 py-1.5 text-sm text-white"
             disabled={busy || !draft.description.trim() || !submitEnabled}
-            onClick={() => { if (confirm('Delete this camera from OSM?')) run(
+            onClick={() => { if (confirm(t('submit_confirm_delete'))) run(
               () => submitDelete(editNode, draft.description, draft.source),
-              'Deletion submitted to OpenStreetMap.',
+              t('submit_success_delete'),
               () => ({ osmId: editNode.id, kind: 'delete', version: editNode.version + 1, ts: Date.now() })); }}>
-            Delete
+            {t('submit_delete_button')}
           </button>
         )}
         <button className="flex-1 rounded bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
@@ -92,18 +94,18 @@ export function SubmitForm() {
             () => mode === 'edit' && editNode
               ? submitEdit(draft, editNode, point!.lat, point!.lon)
               : submitAdd(draft, point!.lat, point!.lon),
-            mode === 'edit' ? 'Edit submitted to OpenStreetMap.' : 'Camera submitted to OpenStreetMap.',
+            mode === 'edit' ? t('submit_success_edit') : t('submit_success_add'),
             (result) => mode === 'edit' && editNode
               ? { osmId: editNode.id, kind: 'edit', version: result as number, ts: Date.now(),
                   camera: cameraFromTags(editNode.id, point!.lat, point!.lon, { ...editNode.tags, ...buildNodeTags(draft) }, result as number) }
               : { osmId: result as number, kind: 'add', version: 1, ts: Date.now(),
                   camera: cameraFromTags(result as number, point!.lat, point!.lon, buildNodeTags(draft), 1) })}>
-          {busy ? 'Submitting…' : 'Submit to OSM'}
+          {busy ? t('submit_submitting') : t('submit_button')}
         </button>
       </div>
 
       <p className="text-xs text-dark-400">
-        The changes you upload as <strong>{user}</strong> will be visible on all maps that use OpenStreetMap data.
+        {t('submit_disclaimer_pre')}<strong>{user}</strong>{t('submit_disclaimer_post')}
       </p>
     </div>
   );

@@ -1,4 +1,5 @@
 import type { OsmTags, SubmitDraft } from './types';
+import type { StringKey } from '../i18n';
 
 const ALPR_BASE: OsmTags = {
   man_made: 'surveillance',
@@ -15,13 +16,13 @@ const CCTV_BASE: OsmTags = {
 };
 
 export const SOURCE_PRESETS = [
-  { label: 'Survey', value: 'survey' },
-  { label: 'Local Knowledge', value: 'local knowledge' },
-  { label: 'Aerial Imagery', value: 'aerial imagery' },
-  { label: 'GPS', value: 'GPS' },
-  { label: 'Street-Level Photos', value: 'street-level photos' },
-  { label: 'OpenStreetMap Notes', value: 'openstreetmap notes' },
-];
+  { labelKey: 'submit_source_survey', value: 'survey' },
+  { labelKey: 'submit_source_local_knowledge', value: 'local knowledge' },
+  { labelKey: 'submit_source_aerial_imagery', value: 'aerial imagery' },
+  { labelKey: 'submit_source_gps', value: 'GPS' },
+  { labelKey: 'submit_source_street_level_photos', value: 'street-level photos' },
+  { labelKey: 'submit_source_osm_notes', value: 'openstreetmap notes' },
+] as const satisfies readonly { labelKey: StringKey; value: string }[];
 
 function put(tags: OsmTags, key: string, value?: string) {
   const v = value?.trim();

@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { useSubmitStore } from '../../store/submitStore';
+import { useT } from '@/i18n';
 
 export function SubmitToast() {
+  const t = useT();
   const success = useSubmitStore((s) => s.success);
   const setSuccess = useSubmitStore((s) => s.setSuccess);
   const open = !!success;
@@ -24,9 +26,9 @@ export function SubmitToast() {
         <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-400" />
         <div className="text-sm text-dark-100">
           <p className="font-medium">{success}</p>
-          <p className="mt-1 text-xs text-dark-400">Thanks! The map here refreshes from OpenStreetMap periodically, so your change will show up on the next refresh (usually within a few hours).</p>
+          <p className="mt-1 text-xs text-dark-400">{t('submit_toast_refresh_note')}</p>
         </div>
-        <button className="text-dark-400 hover:text-dark-200" onClick={() => setSuccess(null)} aria-label="Dismiss">✕</button>
+        <button className="text-dark-400 hover:text-dark-200" onClick={() => setSuccess(null)} aria-label={t('submit_toast_dismiss_aria')}>✕</button>
       </div>
     </div>
   );
