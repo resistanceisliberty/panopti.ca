@@ -292,6 +292,11 @@ export const STRINGS = {
     x_error_empty_camera_data: 'Camera data file is empty',
     x_error_invalid_camera_format: 'Invalid camera data format',
     x_error_load_camera_data_retries: 'Failed to load camera data after multiple attempts',
+
+    // Municipal election notice (map-mode overlay)
+    elect_notice_pre: 'Municipal election: see where',
+    elect_notice_post: 'candidates stand on ALPRs →',
+    elect_notice_dismiss: 'Dismiss election notice',
   },
   fr: {
     lang_switch_to_fr: 'Passer au français',
@@ -586,6 +591,11 @@ export const STRINGS = {
     x_error_empty_camera_data: 'Le fichier de données des caméras est vide',
     x_error_invalid_camera_format: 'Format de données des caméras invalide',
     x_error_load_camera_data_retries: 'Échec du chargement des données des caméras après plusieurs tentatives',
+
+    // Municipal election notice (map-mode overlay)
+    elect_notice_pre: 'Élections municipales : découvrez la position des candidats de',
+    elect_notice_post: 'sur les ALPR →',
+    elect_notice_dismiss: "Fermer l'avis électoral",
   },
 } as const;
 

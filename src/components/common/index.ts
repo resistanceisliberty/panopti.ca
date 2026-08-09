@@ -7,4 +7,5 @@ export { LegacyMapLink } from './LegacyMapLink';
 export { ShareButton } from './ShareButton';
 export { ShareModal } from './ShareModal';
 export { LangToggle } from './LangToggle';
+export { ElectionNotice } from './ElectionNotice';
 

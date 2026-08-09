@@ -9,7 +9,7 @@ import { MapPanel } from '@/components/panels/MapPanel';
 import { MobileTabDrawer } from '@/components/panels/MobileTabDrawer';
 import { DensityLegendBar } from '@/components/map/DensityLegendBar';
 import { NetworkAgencyCount } from '@/components/map/NetworkAgencyCount';
-import { Seo, ShareButton, LangToggle } from '@/components/common';
+import { Seo, ShareButton, LangToggle, ElectionNotice } from '@/components/common';
 import { parseViewportFromURL, writeViewportParams } from '@/utils/urlParams';
 import { useCameraStore, useMapStore, useAppModeStore } from '@/store';
 import { useEmbedMode } from '@/hooks/useEmbedMode';
@@ -467,6 +467,13 @@ export function MapPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Municipal election notice — sits directly above the map mode legend */}
+            {appMode === 'map' && (
+              <div className="absolute bottom-20 left-4 z-20 hidden lg:block">
+                <ElectionNotice />
               </div>
             )}
 

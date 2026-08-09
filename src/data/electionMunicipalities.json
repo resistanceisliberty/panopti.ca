@@ -1,0 +1,4 @@
+[
+  { "id": "london-on", "name": { "en": "London", "fr": "London" }, "coords": [-81.2497, 42.9849], "radiusKm": 25 },
+  { "id": "montreal-qc", "name": { "en": "Montreal", "fr": "Montréal" }, "coords": [-73.5674, 45.5019], "radiusKm": 30 }
+]
