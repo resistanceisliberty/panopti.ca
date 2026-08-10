@@ -26,16 +26,16 @@ export function ElectionNotice() {
   const url = `https://panopti.ca${lang === 'fr' ? '/fr' : ''}/candidates/${muni.id}`;
   const name = muni.name[lang];
   return (
-    <div className="pointer-events-auto flex items-center gap-2 rounded-lg bg-dark-800/95 border border-dark-600 px-3 py-2 text-sm text-dark-100 shadow-lg">
-      <span aria-hidden>🗳️</span>
-      <a href={url} className="underline hover:text-white">
+    <div className="pointer-events-auto flex items-center gap-2 rounded-lg bg-dark-800/95 border border-dark-600 px-3 py-2 text-sm text-dark-100 shadow-lg max-w-[calc(100vw-1.5rem)] lg:max-w-sm">
+      <span aria-hidden className="shrink-0">🗳️</span>
+      <a href={url} className="underline hover:text-white truncate min-w-0">
         {t('elect_notice_pre')} {name} {t('elect_notice_post')}
       </a>
       <button
         type="button"
         aria-label={t('elect_notice_dismiss')}
         onClick={() => setDismissed((d) => [...d, muni.id])}
-        className="ml-1 text-dark-300 hover:text-white"
+        className="ml-1 text-dark-300 hover:text-white shrink-0"
       >
         ×
       </button>

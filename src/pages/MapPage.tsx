@@ -470,9 +470,11 @@ export function MapPage() {
               </div>
             )}
 
-            {/* Municipal election notice — sits directly above the map mode legend */}
+            {/* Municipal election notice — sits above the map mode legend on desktop;
+                on mobile it's fixed above the MobileTabDrawer (92px clears its minimized
+                height, matching the offset used for the maplibre controls in index.css) */}
             {appMode === 'map' && (
-              <div className="absolute bottom-20 left-4 z-20 hidden lg:block">
+              <div className="fixed lg:absolute bottom-[92px] lg:bottom-20 left-3 lg:left-4 z-[51] lg:z-20">
                 <ElectionNotice />
               </div>
             )}
