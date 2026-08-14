@@ -21,7 +21,7 @@ import { SUBMIT_ENABLED } from '@/osm/config';
 import { useSubmitStore } from '@/store/submitStore';
 import { TimelineBar } from '@/modes/timeline/TimelineBar';
 import { DensityFeaturePopup } from '@/modes/density/DensityFeaturePopup';
-import { Route, Compass, BarChart3, Menu, X, Network, Map as MapIcon } from 'lucide-react';
+import { Route, Compass, BarChart3, Menu, X, Network, Map as MapIcon, ArrowUpRight } from 'lucide-react';
 import type { AppMode } from '@/store';
 import { useT, type StringKey } from '@/i18n';
 
@@ -348,6 +348,13 @@ export function MapPage() {
                     )}
                   </button>
                 ))}
+                <a
+                  href="https://panopti.ca/candidates"
+                  className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1 text-sm font-semibold uppercase tracking-widest text-dark-900 hover:opacity-90 transition-opacity duration-150"
+                >
+                  {t('shell_nav_candidates')}
+                  <ArrowUpRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </a>
               </nav>
               )}
 
@@ -403,6 +410,14 @@ export function MapPage() {
                 </button>
                 );
               })}
+              <a
+                href="https://panopti.ca/candidates"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-accent"
+              >
+                <ArrowUpRight className="w-4 h-4" aria-hidden="true" />
+                <span>{t('shell_nav_candidates')}</span>
+              </a>
             </div>
             <div className="border-t border-dark-600 mt-1 pt-1 px-4 pb-2 space-y-0.5">
               <ShareButton variant="menu-item" />
