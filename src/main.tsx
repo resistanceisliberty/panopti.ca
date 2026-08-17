@@ -29,6 +29,7 @@ if (typeof window !== 'undefined' && !window.requestIdleCallback) {
 const MapPage = lazy(() => import('./pages/MapPage').then(m => ({ default: m.MapPage })));
 const NotFound = lazy(() => import('./pages/NotFound').then(m => ({ default: m.NotFound })));
 const OAuthCallback = lazy(() => import('./pages/OAuthCallback').then(m => ({ default: m.OAuthCallback })));
+const AdminFlock = lazy(() => import('./pages/AdminFlock').then(m => ({ default: m.AdminFlock })));
 
 function PageLoader() {
   return (
@@ -109,6 +110,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/network" element={<MapPage />} />
               <Route path="/route" element={<MapPage />} />
               <Route path="/oauth/callback" element={<OAuthCallback />} />
+              <Route path="/admin/flock" element={<AdminFlock />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

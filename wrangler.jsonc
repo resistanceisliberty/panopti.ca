@@ -4,5 +4,12 @@
   "assets": {
     "directory": "./dist",
     "not_found_handling": "single-page-application"
+  },
+  "kv_namespaces": [
+    { "binding": "FLAGS", "id": "4003eb490c7b482eaa23b4d2c2a074c5" },
+    { "binding": "FLOCK_QUEUE", "id": "f694e210a9b54b9fa89f50c168b3d8fc" }
+  ],
+  "vars": {
+    "ADMIN_OSM_USERS": "ResistanceIsLiberty"
   }
 }

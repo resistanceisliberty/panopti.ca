@@ -7,6 +7,7 @@ import { submitAdd, submitEdit, submitDelete, OsmConflictError } from '../../osm
 import { nearestWithin } from '../../osm/nearby';
 import { buildNodeTags } from '../../osm/tags';
 import { cameraFromTags, type LocalOp } from '../../osm/localOverlay';
+import { postFlockReview } from '../../osm/flockReview';
 import { useCameraStore } from '../../store';
 import { useT } from '@/i18n';
 
@@ -19,9 +20,9 @@ export function SubmitForm() {
   const manufacturerName = draft.manufacturer.kind === 'none' ? '' : draft.manufacturer.manufacturer;
   // No Flock deployment is officially confirmed in Canada — warn, and require a source before a Flock-tagged add.
   const isFlock = draft.deviceType === 'alpr' && /flock/i.test(manufacturerName);
-  const hasSource = draft.source.kind === 'preset'
-    || ((draft.source.kind === 'url' || draft.source.kind === 'other') && draft.source.value.trim().length > 0);
-  const flockNeedsSource = mode === 'add' && isFlock && !hasSource;
+  // Flock adds must have a *typed* source (a link or free-text note) — a preset dropdown pick isn't enough.
+  const hasTypedSource = (draft.source.kind === 'url' || draft.source.kind === 'other') && draft.source.value.trim().length > 0;
+  const flockNeedsSource = mode === 'add' && isFlock && !hasTypedSource;
   const canSubmit = submitEnabled && !!point && Number.isFinite(point.lat) && Number.isFinite(point.lon) && draft.description.trim().length > 0 && !busy && !flockNeedsSource;
 
   const run = async (fn: () => Promise<unknown>, successMsg: string, buildOp: (result: unknown) => LocalOp) => {
@@ -39,6 +40,19 @@ export function SubmitForm() {
         ? t('submit_error_conflict')
         : String(e));
       setBusy(false);
+    }
+  };
+
+  // Flock adds are held for admin review — never written straight to OSM.
+  const submitFlockForReview = async () => {
+    if (!useSubmitStore.getState().submitEnabled) { setError(t('submit_error_submissions_disabled')); return; }
+    if (!point) return;
+    setBusy(true); setError(null);
+    try {
+      await postFlockReview(draft, point.lat, point.lon, user);
+      cancel(); setSuccess(t('submit_success_flock_review'));
+    } catch (e) {
+      setError(String(e)); setBusy(false);
     }
   };
 
@@ -105,7 +119,7 @@ export function SubmitForm() {
         )}
         <button className="flex-1 rounded bg-accent px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
           disabled={!canSubmit}
-          onClick={() => run(
+          onClick={() => (mode === 'add' && isFlock) ? submitFlockForReview() : run(
             () => mode === 'edit' && editNode
               ? submitEdit(draft, editNode, point!.lat, point!.lon)
               : submitAdd(draft, point!.lat, point!.lon),
@@ -115,7 +129,7 @@ export function SubmitForm() {
                   camera: cameraFromTags(editNode.id, point!.lat, point!.lon, { ...editNode.tags, ...buildNodeTags(draft) }, result as number) }
               : { osmId: result as number, kind: 'add', version: 1, ts: Date.now(),
                   camera: cameraFromTags(result as number, point!.lat, point!.lon, buildNodeTags(draft), 1) })}>
-          {busy ? t('submit_submitting') : t('submit_button')}
+          {busy ? t('submit_submitting') : (mode === 'add' && isFlock ? t('submit_button_review') : t('submit_button'))}
         </button>
       </div>
 
