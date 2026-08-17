@@ -4,16 +4,17 @@ import maplibregl from 'maplibre-gl';
 import { useMapStore } from '../../../store';
 import { DIRECTIONAL_ZONE, CAMERA_DETECTION, ZONE_SAFETY_MULTIPLIERS } from '../../../services/routingConfig';
 import type { ALPRCamera } from '../../../types';
+import { classifyCamera } from '../../../store/cameraStore';
 
-// Brand-based marker colors: ALPRs in blue, government CCTV in amber
-// (blue/amber is a colorblind-safe pair).
-const CCTV_BRAND = 'Government CCTVs';
+// Marker colors by camera type: ALPRs in blue, traffic/CCTV in amber
+// (blue/amber is a colorblind-safe pair). Type is computed per node (see
+// classifyCamera) and carried on the feature as `ctype`.
 const COLORS = {
   alpr: { core: '#0080BC', glow: '#4DA6FF', stroke: '#93CBFF', coneLine: '#0080BC' },
   cctv: { core: '#F59E0B', glow: '#FBBF24', stroke: '#FCD34D', coneLine: '#D97706' },
 };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const IS_CCTV: any = ['==', ['get', 'brand'], CCTV_BRAND];
+const IS_CCTV: any = ['==', ['get', 'ctype'], 'cctv'];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const byBrand = (cctvVal: string, alprVal: string): any => ['case', IS_CCTV, cctvVal, alprVal];
 
@@ -86,6 +87,7 @@ function camerasToGeoJSON(cameras: ALPRCamera[]): GeoJSON.FeatureCollection {
       properties: {
         osmId: camera.osmId,
         osmType: camera.osmType,
+        ctype: classifyCamera(camera),
         operator: camera.operator || '',
         brand: camera.brand || '',
         direction: camera.direction ?? null,

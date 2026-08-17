@@ -35,6 +35,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { useShallow } from 'zustand/react/shallow';
 import { useMapStore, useCameraStore, useRouteStore, useAppModeStore } from '../../store';
+import { classifyCamera } from '../../store/cameraStore';
 import type { MapTileStyleId } from '../../store/appModeStore';
 import { useMapModeStore, getActiveViewForZoom } from '../../store/mapModeStore';
 import { HeatmapLayers, HEATMAP_LAYER_IDS } from './layers/HeatmapLayers';
@@ -120,6 +121,7 @@ function camerasToGeoJSON(cameras: ALPRCamera[]): GeoJSON.FeatureCollection {
       properties: {
         osmId: camera.osmId,
         osmType: camera.osmType,
+        ctype: classifyCamera(camera),
         operator: camera.operator || '',
         brand: camera.brand || '',
         direction: camera.direction ?? null,
@@ -1206,6 +1208,12 @@ function wikimediaImageUrl(tag: string): string {
 function CameraPopupContent({ camera, onEdit }: { camera: ALPRCamera; onEdit: (camera: ALPRCamera) => void }) {
   const t = useT();
   const osmUrl = `https://www.openstreetmap.org/${camera.osmType}/${camera.osmId}`;
+  const brandStr = camera.brand || '';
+  // Flock-tagged nodes: no Flock deployment is officially confirmed in Canada, so flag as unverified.
+  const isFlock = /flock/i.test(brandStr);
+  // Toll ALPRs (407 ETR = RTX Corp; A-25 bridge = Transports Québec) — plate readers, but not Flock.
+  const isToll = /rtx corporation/i.test(brandStr) ||
+    (classifyCamera(camera) === 'alpr' && /transports\s*qu[ée]bec|minist[eè]re des transports du qu[ée]bec/i.test(camera.operator || ''));
   const submitUser = useSubmitStore((s) => s.user);
   const submitEnabled = useSubmitStore((s) => s.submitEnabled);
 
@@ -1234,10 +1242,21 @@ function CameraPopupContent({ camera, onEdit }: { camera: ALPRCamera; onEdit: (c
           )}
         </div>
         <div>
-          <h3 className="font-display font-semibold text-white text-base">{camera.brand === 'Government CCTVs' ? t('popup_gov_cctv') : t('popup_alpr_camera')}</h3>
+          <h3 className="font-display font-semibold text-white text-base">{classifyCamera(camera) === 'cctv' ? t('popup_gov_cctv') : t('popup_alpr_camera')}</h3>
           <p className="text-xs text-dark-400">{t('popup_id_prefix')} {camera.osmId}</p>
         </div>
       </div>
+
+      {isFlock && (
+        <div className="mb-3 rounded-md px-3 py-2.5" style={{ background: 'rgba(239,68,68,0.16)', border: '1px solid rgba(239,68,68,0.55)' }}>
+          <p className="text-[13px] font-bold leading-snug" style={{ color: '#FCA5A5' }}>{t('popup_flock_disclaimer')}</p>
+        </div>
+      )}
+      {isToll && (
+        <div className="mb-3 rounded-md px-3 py-2" style={{ background: 'rgba(0,128,188,0.14)', border: '1px solid rgba(0,128,188,0.5)' }}>
+          <p className="text-xs font-semibold leading-snug" style={{ color: '#7EC8E8' }}>{t('popup_toll_disclaimer')}</p>
+        </div>
+      )}
 
       <div className="space-y-2 text-xs">
         {camera.operator && (

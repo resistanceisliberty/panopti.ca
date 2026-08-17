@@ -17,9 +17,19 @@ import { t } from '../i18n';
 // ── Local-only: government CCTV nodes carry this brand label in the dataset ──
 const CCTV_BRAND = 'Government CCTVs';
 export type CameraTypeFilter = 'all' | 'alpr' | 'cctv';
+// A node counts as a confirmed ALPR if it has a real vendor brand, OR is unbranded
+// but carries an operator (police service, toll/transport authority, etc.). Unbranded
+// nodes with NO operator are municipal traffic/CCTV cameras, not ALPRs — as is the
+// explicit "Government CCTVs" brand. This keeps ALPR the default view and moves plain
+// traffic cams out of it. (See OSM discussion #146534 on over-rendering.)
+export function classifyCamera(c: Pick<ALPRCamera, 'brand' | 'operator'>): 'alpr' | 'cctv' {
+  if (c.brand === CCTV_BRAND) return 'cctv';
+  if (!c.brand && !c.operator) return 'cctv';
+  return 'alpr';
+}
 export function applyCameraTypeFilter(list: ALPRCamera[], type: CameraTypeFilter): ALPRCamera[] {
-  if (type === 'alpr') return list.filter((c) => c.brand !== CCTV_BRAND);
-  if (type === 'cctv') return list.filter((c) => c.brand === CCTV_BRAND);
+  if (type === 'alpr') return list.filter((c) => classifyCamera(c) === 'alpr');
+  if (type === 'cctv') return list.filter((c) => classifyCamera(c) === 'cctv');
   return list;
 }
 

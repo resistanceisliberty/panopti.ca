@@ -16,7 +16,13 @@ export function SubmitForm() {
   const { patchDraft, cancel, setBusy, setError, setSuccess } = useSubmitStore.getState();
   if (!user) return null;
 
-  const canSubmit = submitEnabled && !!point && Number.isFinite(point.lat) && Number.isFinite(point.lon) && draft.description.trim().length > 0 && !busy;
+  const manufacturerName = draft.manufacturer.kind === 'none' ? '' : draft.manufacturer.manufacturer;
+  // No Flock deployment is officially confirmed in Canada — warn, and require a source before a Flock-tagged add.
+  const isFlock = draft.deviceType === 'alpr' && /flock/i.test(manufacturerName);
+  const hasSource = draft.source.kind === 'preset'
+    || ((draft.source.kind === 'url' || draft.source.kind === 'other') && draft.source.value.trim().length > 0);
+  const flockNeedsSource = mode === 'add' && isFlock && !hasSource;
+  const canSubmit = submitEnabled && !!point && Number.isFinite(point.lat) && Number.isFinite(point.lon) && draft.description.trim().length > 0 && !busy && !flockNeedsSource;
 
   const run = async (fn: () => Promise<unknown>, successMsg: string, buildOp: (result: unknown) => LocalOp) => {
     if (!useSubmitStore.getState().submitEnabled) { setError(t('submit_error_submissions_disabled')); return; }
@@ -60,6 +66,11 @@ export function SubmitForm() {
       ) : <div className="text-xs text-amber-400">{t('submit_place_point_hint')}</div>}
 
       {draft.deviceType === 'alpr' && <ManufacturerField />}
+      {isFlock && (
+        <div className="rounded-md px-3 py-2.5" style={{ background: 'rgba(239,68,68,0.16)', border: '1px solid rgba(239,68,68,0.55)' }}>
+          <p className="text-[13px] font-bold leading-snug" style={{ color: '#FCA5A5' }}>{t('submit_flock_notice')}</p>
+        </div>
+      )}
       <input className="w-full rounded bg-dark-800 p-2 text-dark-100" placeholder={t('submit_ph_operator')}
         value={draft.operator} onChange={(e) => patchDraft({ operator: e.target.value })} />
       <input className="w-full rounded bg-dark-800 p-2 text-dark-100" placeholder={t('submit_ph_operator_wikidata')}
@@ -75,6 +86,10 @@ export function SubmitForm() {
 
       {mode === 'add' && point && nearestWithin(point, 25) && (
         <div className="text-xs text-amber-400">{t('submit_duplicate_warning')}</div>
+      )}
+
+      {flockNeedsSource && (
+        <div className="text-xs font-semibold" style={{ color: '#FCA5A5' }}>{t('submit_flock_source_required')}</div>
       )}
 
       <div className="flex gap-2">

@@ -133,6 +133,9 @@ export function CameraTypeToggle() {
           {t('panel_legend_cctv')}
         </span>
       </div>
+      <div className="mt-3 rounded-md px-3 py-2.5" style={{ background: 'rgba(245,158,11,0.14)', border: '1px solid rgba(245,158,11,0.5)' }}>
+        <p className="text-[13px] font-semibold leading-snug" style={{ color: '#FCD34D' }}>{t('panel_data_disclaimer')}</p>
+      </div>
     </div>
   );
 }

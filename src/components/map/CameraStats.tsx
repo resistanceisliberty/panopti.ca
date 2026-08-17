@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
 import { useMapStore, useCameraStore } from '../../store';
+import { classifyCamera } from '../../store/cameraStore';
 import { useT } from '@/i18n';
-
-const CCTV_BRAND = 'Government CCTVs';
 
 export function CameraStats() {
   const t = useT();
@@ -14,7 +13,7 @@ export function CameraStats() {
 
   // Dataset totals split by type — matches the ALPR/CCTV timeline toggle.
   const cctvTotal = useMemo(
-    () => cameras.reduce((n, c) => (c.brand === CCTV_BRAND ? n + 1 : n), 0),
+    () => cameras.reduce((n, c) => (classifyCamera(c) === 'cctv' ? n + 1 : n), 0),
     [cameras]
   );
   const alprTotal = cameraCount - cctvTotal;

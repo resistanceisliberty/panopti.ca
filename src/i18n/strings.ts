@@ -108,10 +108,11 @@ export const STRINGS = {
     // Map mode panel (MapPanel, SearchableMultiSelect, CheckboxGroup)
     panel_show_label: 'Show',
     panel_type_alpr: 'ALPRs',
-    panel_type_cctv: 'Gov CCTVs',
+    panel_type_cctv: 'Traffic/CCTV',
     panel_type_both: 'Both',
     panel_legend_alpr: 'ALPR',
-    panel_legend_cctv: 'Gov CCTVs',
+    panel_legend_cctv: 'Traffic/CCTV',
+    panel_data_disclaimer: 'Community-submitted OpenStreetMap data — not an official or vendor list, and unverified. Spot an error? Fix it on OSM.',
     panel_camera_view_label: 'Camera View',
     panel_view_auto: 'Auto',
     panel_view_auto_desc: 'Zoom-based transitions',
@@ -162,9 +163,11 @@ export const STRINGS = {
     panel_collapse_aria: 'Collapse panel',
 
     // Camera popups & stats (CameraPopupContent, CameraStats)
-    popup_gov_cctv: 'Government CCTV',
+    popup_gov_cctv: 'Traffic / CCTV camera',
     popup_alpr_camera: 'ALPR Camera',
     popup_alpr_camera_alt: 'ALPR camera',
+    popup_flock_disclaimer: 'No Flock cameras have been officially confirmed in Canada. This node was community-added and is unverified — treat it as unreliable pending further investigation.',
+    popup_toll_disclaimer: 'This is a toll-road ALPR (e.g. Highway 407 or the A-25 bridge), used for tolling — not a Flock surveillance camera.',
     popup_id_prefix: 'ID:',
     popup_view_photo: 'View example photo',
     popup_operated_by: 'Operated by',
@@ -179,7 +182,7 @@ export const STRINGS = {
     popup_stat_in_view: 'in view',
     popup_stat_total_canada: 'Total Canada',
     popup_stat_alprs: 'ALPRs',
-    popup_stat_gov_cctvs: 'Gov CCTVs',
+    popup_stat_gov_cctvs: 'Traffic/CCTV',
 
     // Timeline / Explore mode (ExplorePanel, TimelineBar, MapTypeDropdown, HeatmapControls, HeatmapLegend, colorSchemes, DotDensityControls)
     tl_intro_mobile_pre: 'Visualize when ALPR cameras were mapped on ',
@@ -241,6 +244,8 @@ export const STRINGS = {
     submit_ph_operator_wikidata: 'operator:wikidata (optional)',
     submit_ph_description: 'Description (required — becomes the OSM changeset comment)',
     submit_duplicate_warning: "A camera is already mapped within 25 m — check you're not duplicating.",
+    submit_flock_notice: "No Flock camera has been officially confirmed operating in Canada. Only add a Flock-tagged camera if you've personally verified it — and you must cite a source below before submitting.",
+    submit_flock_source_required: 'A source is required to add a Flock-tagged camera. Choose or enter one under Source above.',
     submit_confirm_delete: 'Delete this camera from OSM?',
     submit_success_delete: 'Deletion submitted to OpenStreetMap.',
     submit_delete_button: 'Delete',
@@ -408,10 +413,11 @@ export const STRINGS = {
     // Map mode panel (MapPanel, SearchableMultiSelect, CheckboxGroup)
     panel_show_label: 'Afficher',
     panel_type_alpr: 'ALPR',
-    panel_type_cctv: 'CCTV gouv.',
+    panel_type_cctv: 'Circ./CCTV',
     panel_type_both: 'Les deux',
     panel_legend_alpr: 'ALPR',
-    panel_legend_cctv: 'CCTV gouv.',
+    panel_legend_cctv: 'Circ./CCTV',
+    panel_data_disclaimer: 'Données OpenStreetMap soumises par la communauté — ni liste officielle ni liste d\'un fournisseur, non vérifiées. Une erreur? Corrigez-la sur OSM.',
     panel_camera_view_label: 'Affichage des caméras',
     panel_view_auto: 'Auto',
     panel_view_auto_desc: 'Transitions selon le zoom',
@@ -462,9 +468,11 @@ export const STRINGS = {
     panel_collapse_aria: 'Réduire le panneau',
 
     // Camera popups & stats (CameraPopupContent, CameraStats)
-    popup_gov_cctv: 'CCTV gouvernemental',
+    popup_gov_cctv: 'Caméra de circulation / CCTV',
     popup_alpr_camera: 'Caméra ALPR',
     popup_alpr_camera_alt: 'Caméra ALPR',
+    popup_flock_disclaimer: 'Aucune caméra Flock n\'a été officiellement confirmée au Canada. Ce nœud a été ajouté par la communauté et n\'est pas vérifié — considérez-le comme peu fiable en attendant une vérification plus approfondie.',
+    popup_toll_disclaimer: 'Il s\'agit d\'un ALPR de péage (p. ex. l\'autoroute 407 ou le pont de l\'A-25), utilisé pour le péage — ce n\'est pas une caméra de surveillance Flock.',
     popup_id_prefix: 'ID :',
     popup_view_photo: "Voir une photo d'exemple",
     popup_operated_by: 'Exploité par',
@@ -479,7 +487,7 @@ export const STRINGS = {
     popup_stat_in_view: 'visibles',
     popup_stat_total_canada: 'Total Canada',
     popup_stat_alprs: 'ALPR',
-    popup_stat_gov_cctvs: 'CCTV gouv.',
+    popup_stat_gov_cctvs: 'Circ./CCTV',
 
     // Timeline / Explore mode (ExplorePanel, TimelineBar, MapTypeDropdown, HeatmapControls, HeatmapLegend, colorSchemes, DotDensityControls)
     tl_intro_mobile_pre: 'Visualisez le moment où les caméras ALPR ont été cartographiées sur ',
@@ -541,6 +549,8 @@ export const STRINGS = {
     submit_ph_operator_wikidata: 'operator:wikidata (facultatif)',
     submit_ph_description: "Description (obligatoire — devient le commentaire de l'ensemble de modifications OSM)",
     submit_duplicate_warning: "Une caméra est déjà cartographiée à moins de 25 m — vérifiez que vous ne faites pas de doublon.",
+    submit_flock_notice: "Aucune caméra Flock n'a été officiellement confirmée en service au Canada. N'ajoutez une caméra étiquetée Flock que si vous l'avez vérifiée en personne — et vous devez citer une source ci-dessous avant de soumettre.",
+    submit_flock_source_required: "Une source est requise pour ajouter une caméra étiquetée Flock. Choisissez-en une ou saisissez-en une sous « Source » ci-dessus.",
     submit_confirm_delete: "Supprimer cette caméra d'OSM?",
     submit_success_delete: 'Suppression soumise à OpenStreetMap.',
     submit_delete_button: 'Supprimer',
