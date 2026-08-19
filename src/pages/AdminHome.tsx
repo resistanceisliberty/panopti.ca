@@ -4,16 +4,20 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AdminSubmissions } from './AdminSubmissions';
 import { AdminFlock } from './AdminFlock';
+import { AdminReports } from './AdminReports';
 
 const TABS = [
   { key: 'submissions', label: 'Submissions feed', path: '/admin/submissions' },
+  { key: 'reports', label: 'Node reports', path: '/admin/reports' },
   { key: 'flock', label: 'Flock review', path: '/admin/flock' },
 ] as const;
 
 export function AdminHome() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const active = pathname.endsWith('/flock') ? 'flock' : 'submissions';
+  const active = pathname.endsWith('/flock') ? 'flock'
+    : pathname.endsWith('/reports') ? 'reports'
+    : 'submissions';
 
   return (
     <div className="bg-dark-900">
@@ -26,7 +30,7 @@ export function AdminHome() {
           </button>
         ))}
       </nav>
-      {active === 'flock' ? <AdminFlock /> : <AdminSubmissions />}
+      {active === 'flock' ? <AdminFlock /> : active === 'reports' ? <AdminReports /> : <AdminSubmissions />}
     </div>
   );
 }

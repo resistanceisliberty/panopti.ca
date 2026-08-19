@@ -36,6 +36,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { useShallow } from 'zustand/react/shallow';
 import { useMapStore, useCameraStore, useRouteStore, useAppModeStore } from '../../store';
 import { classifyCamera } from '../../store/cameraStore';
+import { ReportNodeButton } from './ReportNodeButton';
 import type { MapTileStyleId } from '../../store/appModeStore';
 import { useMapModeStore, getActiveViewForZoom } from '../../store/mapModeStore';
 import { HeatmapLayers, HEATMAP_LAYER_IDS } from './layers/HeatmapLayers';
@@ -1320,6 +1321,8 @@ function CameraPopupContent({ camera, onEdit }: { camera: ALPRCamera; onEdit: (c
           </button>
         )}
       </div>
+
+      <ReportNodeButton key={camera.osmId} camera={camera} />
     </div>
   );
 }
