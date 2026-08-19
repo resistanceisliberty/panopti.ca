@@ -115,7 +115,7 @@ export function AdminSubmissions() {
       </header>
 
       <div className="lg:flex">
-        <div className="h-[42vh] lg:h-[calc(100vh-5.5rem)] lg:w-3/5 lg:sticky lg:top-0 bg-dark-800">
+        <div className="h-[42vh] lg:h-[calc(100vh-2.75rem)] lg:w-3/5 lg:sticky lg:top-11 bg-dark-800">
           <Map ref={mapRef} initialViewState={{ longitude: -96, latitude: 56, zoom: 3 }}
             style={{ width: '100%', height: '100%' }} mapStyle={BASEMAP} onLoad={fit}
             onClick={() => setSelectedId(null)}>
