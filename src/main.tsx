@@ -30,6 +30,7 @@ const MapPage = lazy(() => import('./pages/MapPage').then(m => ({ default: m.Map
 const NotFound = lazy(() => import('./pages/NotFound').then(m => ({ default: m.NotFound })));
 const OAuthCallback = lazy(() => import('./pages/OAuthCallback').then(m => ({ default: m.OAuthCallback })));
 const AdminFlock = lazy(() => import('./pages/AdminFlock').then(m => ({ default: m.AdminFlock })));
+const AdminSubmissions = lazy(() => import('./pages/AdminSubmissions').then(m => ({ default: m.AdminSubmissions })));
 
 function PageLoader() {
   return (
@@ -111,6 +112,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="/route" element={<MapPage />} />
               <Route path="/oauth/callback" element={<OAuthCallback />} />
               <Route path="/admin/flock" element={<AdminFlock />} />
+              <Route path="/admin/submissions" element={<AdminSubmissions />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
