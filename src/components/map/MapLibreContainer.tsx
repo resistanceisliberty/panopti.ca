@@ -1,5 +1,4 @@
 import { useRef, useCallback, useEffect, useState, useMemo, memo, useImperativeHandle, forwardRef } from 'react';
-import { md5 } from 'js-md5';
 import Map, {
   Source,
   Layer,
@@ -1199,10 +1198,11 @@ function getVendorImageUrl(brand: string): Promise<string | null> {
 }
 
 function wikimediaImageUrl(tag: string): string {
+  // Special:FilePath?width= redirects to the nearest valid thumbnail bucket. Hand-building the
+  // upload.wikimedia.org …/300px- path 400s on large images, whose MediaWiki thumbnail buckets
+  // exclude arbitrary widths like 300px (only 250/330 resolved for the Bloor & Spadina photo).
   const clean = tag.replace(/^File:/, '').replace(/ /g, '_');
-  const hash = md5(clean) as string;
-  const encoded = encodeURIComponent(clean);
-  return `https://upload.wikimedia.org/wikipedia/commons/thumb/${hash[0]}/${hash.slice(0, 2)}/${encoded}/300px-${encoded}`;
+  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(clean)}?width=300`;
 }
 
 // Popup content component - Dark theme
