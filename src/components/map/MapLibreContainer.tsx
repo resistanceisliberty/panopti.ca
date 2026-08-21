@@ -130,6 +130,7 @@ function camerasToGeoJSON(cameras: ALPRCamera[]): GeoJSON.FeatureCollection {
         mountType: camera.mountType || '',
         ref: camera.ref || '',
         startDate: camera.startDate || '',
+        wikimediaCommons: camera.wikimediaCommons || '',
         lat: camera.lat,
         lon: camera.lon,
         ts: camera.osmTimestamp ? new Date(camera.osmTimestamp).getTime() : 0,
