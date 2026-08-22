@@ -4,5 +4,8 @@
   { "id": "sault-ste-marie-on", "name": { "en": "Sault Ste. Marie", "fr": "Sault Ste. Marie" }, "coords": [-84.3477, 46.5136], "radiusKm": 20 },
   { "id": "sudbury-on", "name": { "en": "Greater Sudbury", "fr": "Grand Sudbury" }, "coords": [-80.9930, 46.4917], "radiusKm": 30 },
   { "id": "surrey-bc", "name": { "en": "Surrey", "fr": "Surrey" }, "coords": [-122.8490, 49.1913], "radiusKm": 20 },
-  { "id": "kitchener-on", "name": { "en": "Kitchener", "fr": "Kitchener" }, "coords": [-80.4925, 43.4516], "radiusKm": 20 }
+  { "id": "kitchener-on", "name": { "en": "Kitchener", "fr": "Kitchener" }, "coords": [-80.4925, 43.4516], "radiusKm": 20 },
+  { "id": "toronto-on", "name": { "en": "Toronto", "fr": "Toronto" }, "coords": [-79.3832, 43.6532], "radiusKm": 30 },
+  { "id": "niagara-falls-on", "name": { "en": "Niagara Falls", "fr": "Niagara Falls" }, "coords": [-79.0747, 43.0955], "radiusKm": 15 },
+  { "id": "ottawa-on", "name": { "en": "Ottawa", "fr": "Ottawa" }, "coords": [-75.6972, 45.4215], "radiusKm": 30 }
 ]
