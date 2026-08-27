@@ -7,5 +7,6 @@
   { "id": "kitchener-on", "name": { "en": "Kitchener", "fr": "Kitchener" }, "coords": [-80.4925, 43.4516], "radiusKm": 20 },
   { "id": "toronto-on", "name": { "en": "Toronto", "fr": "Toronto" }, "coords": [-79.3832, 43.6532], "radiusKm": 30 },
   { "id": "niagara-falls-on", "name": { "en": "Niagara Falls", "fr": "Niagara Falls" }, "coords": [-79.0747, 43.0955], "radiusKm": 15 },
-  { "id": "ottawa-on", "name": { "en": "Ottawa", "fr": "Ottawa" }, "coords": [-75.6972, 45.4215], "radiusKm": 30 }
+  { "id": "ottawa-on", "name": { "en": "Ottawa", "fr": "Ottawa" }, "coords": [-75.6972, 45.4215], "radiusKm": 30 },
+  { "id": "hamilton-on", "name": { "en": "Hamilton", "fr": "Hamilton" }, "coords": [-79.8711, 43.2557], "radiusKm": 25 }
 ]
