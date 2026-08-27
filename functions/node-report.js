@@ -2,10 +2,10 @@
 // Anyone can flag a node they believe is wrong (doesn't exist, wrong type/brand/location…).
 // Stored to KV binding FLOCK_QUEUE under key report:<createdAt-ms>:<uuid> (same namespace as
 // the Flock queue, separate prefix). Reviewed by the admin in /admin/reports. Best-effort notify.
+import { rateLimited } from './_ratelimit.js';
 const CA_BBOX = { latMin: 41, latMax: 84, lonMin: -142, lonMax: -50 };
 const REASONS = ['nonexistent', 'location', 'type', 'brand', 'duplicate', 'other'];
-// ponytail: no per-IP rate limit — reports self-expire (180d TTL) and the admin dismisses spam.
-// Add a KV counter or Turnstile if abuse shows up.
+// ponytail: soft per-IP rate limit (15 / 10min, see _ratelimit.js) plus 180d self-expiry.
 const TTL_SECONDS = 60 * 60 * 24 * 180;
 
 function json(data, status = 200) {
@@ -50,6 +50,7 @@ async function notify(env, rep) {
 export async function onRequestPost({ request, env }) {
   if (!env.FLOCK_QUEUE) return json({ ok: false, error: 'report queue not configured' }, 503);
   if (Number(request.headers.get('content-length') || 0) > 8000) return json({ ok: false, error: 'too large' }, 413);
+  if (await rateLimited(env, request, 'report', 15, 600)) return json({ ok: false, error: 'rate limited' }, 429);
 
   let body;
   try { body = await request.json(); } catch { return json({ ok: false, error: 'invalid JSON' }, 400); }

@@ -2,7 +2,28 @@
 // Nothing is written to OSM here; the submission waits in KV binding FLOCK_QUEUE until an
 // admin approves it in /admin/flock. Fires a best-effort notification (webhook or email).
 // KV key: sub:<createdAt-ms>:<uuid>  ->  JSON submission record.
+import { rateLimited } from './_ratelimit.js';
 const CA_BBOX = { latMin: 41, latMax: 84, lonMin: -142, lonMax: -50 };
+const TTL_SECONDS = 60 * 60 * 24 * 180; // pending submissions self-expire if never reviewed
+
+// The draft is written to OSM verbatim on approval (buildNodeTags spreads draft.extraTags),
+// so bound the free-form tag surface here — the admin's review is the semantic gate, this
+// just stops an abusive payload from bloating KV or the resulting node.
+export function cleanDraft(d) {
+  if (!d || typeof d !== 'object') return null;
+  const out = { ...d };
+  if (d.extraTags && typeof d.extraTags === 'object' && !Array.isArray(d.extraTags)) {
+    const clean = {}; let n = 0;
+    for (const [k, v] of Object.entries(d.extraTags)) {
+      if (n >= 30) break;
+      if (typeof v !== 'string') continue;
+      clean[String(k).slice(0, 100)] = v.slice(0, 255); n++;
+    }
+    out.extraTags = clean;
+  }
+  if (Array.isArray(d.directions)) out.directions = d.directions.slice(0, 12).map((s) => String(s).slice(0, 40));
+  return out;
+}
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -48,6 +69,7 @@ async function notify(env, sub) {
 export async function onRequestPost({ request, env }) {
   if (!env.FLOCK_QUEUE) return json({ ok: false, error: 'review queue not configured' }, 503);
   if (Number(request.headers.get('content-length') || 0) > 20000) return json({ ok: false, error: 'too large' }, 413);
+  if (await rateLimited(env, request, 'flock', 10, 600)) return json({ ok: false, error: 'rate limited' }, 429);
 
   let body;
   try { body = await request.json(); } catch { return json({ ok: false, error: 'invalid JSON' }, 400); }
@@ -66,11 +88,11 @@ export async function onRequestPost({ request, env }) {
     submitter: clip(body.submitter, 200),
     source: clip(body.source, 1000),
     description: clip(body.description, 2000),
-    draft: body.draft && typeof body.draft === 'object' ? body.draft : null,
+    draft: cleanDraft(body.draft),
     tags: body.tags && typeof body.tags === 'object' ? body.tags : null,
     ua: clip(request.headers.get('user-agent'), 300),
   };
-  await env.FLOCK_QUEUE.put(`sub:${id}`, JSON.stringify(sub));
+  await env.FLOCK_QUEUE.put(`sub:${id}`, JSON.stringify(sub), { expirationTtl: TTL_SECONDS });
   await notify(env, sub);
   return json({ ok: true, id });
 }

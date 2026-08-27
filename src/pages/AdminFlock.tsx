@@ -5,6 +5,7 @@
 import { useEffect, useState, useCallback, type ReactNode } from 'react';
 import { getToken, beginLogin, fetchUsername } from '../osm/auth';
 import { submitAdd } from '../osm/api';
+import { buildNodeTags } from '../osm/tags';
 import { fetchFlockQueue, setFlockStatus, type FlockSubmission } from '../osm/flockReview';
 
 type Phase = 'loading' | 'anon' | 'forbidden' | 'ready' | 'error';
@@ -117,6 +118,29 @@ export function AdminFlock() {
   );
 }
 
+// Exactly the tags that Approve will write to OSM (buildNodeTags spreads draft.extraTags).
+// Rendered so the admin reviews the FULL tag set, not just the four summary fields above —
+// nothing gets written to OSM under the admin's account that isn't shown here first.
+function TagPreview({ draft }: { draft: FlockSubmission['draft'] }) {
+  let tags: Record<string, string> = {};
+  try { if (draft) tags = buildNodeTags(draft); } catch { /* malformed draft */ }
+  const entries = Object.entries(tags);
+  return (
+    <div className="mt-2 border-t border-dark-700 pt-2">
+      <div className="text-[10px] uppercase tracking-widest text-dark-500 mb-1">Tags written to OSM on approval</div>
+      {entries.length === 0 ? (
+        <p className="text-amber-300 text-xs">No writable tags — submission has no valid draft.</p>
+      ) : (
+        <ul className="text-xs font-mono text-dark-200 space-y-0.5">
+          {entries.map(([k, v]) => (
+            <li key={k}><span className="text-dark-400">{k}</span>=<span className="break-all">{v}</span></li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="mb-8">
@@ -142,6 +166,7 @@ function Card({ s, children }: { s: FlockSubmission; children?: ReactNode }) {
         <dt className="text-dark-500">Operator</dt><dd className="text-dark-200 break-words">{s.draft?.operator || '—'}</dd>
         <dt className="text-dark-500">Submitter</dt><dd className="text-dark-200 break-words">{s.submitter || '(anonymous)'}</dd>
       </dl>
+      <TagPreview draft={s.draft} />
       {children}
     </div>
   );
