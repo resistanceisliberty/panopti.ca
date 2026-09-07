@@ -84,6 +84,12 @@ export const STRINGS = {
     load_reload_map: 'Reload map',
     load_oauth_signing_in: 'Signing you in…',
     load_oauth_signin_failed: 'Sign-in failed:',
+    oauth_err_denied: 'You declined the authorization on OpenStreetMap.',
+    oauth_err_lost: "This browser didn't keep your sign-in data. That usually happens in an in-app browser — open maps.panopti.ca directly in Chrome, Safari or Firefox and sign in again.",
+    oauth_err_expired: 'The sign-in took too long. Please try again.',
+    oauth_err_response: "OpenStreetMap didn't return a valid sign-in response. Please try again.",
+    oauth_err_state: 'The sign-in could not be verified. Please try again.',
+    oauth_retry: 'Try again',
 
     // Share modal (ShareModal, ShareButton)
     share_dialog_aria: 'Share This Map',
@@ -405,6 +411,12 @@ export const STRINGS = {
     load_reload_map: 'Recharger la carte',
     load_oauth_signing_in: 'Connexion en cours…',
     load_oauth_signin_failed: 'Échec de la connexion :',
+    oauth_err_denied: "Vous avez refusé l'autorisation sur OpenStreetMap.",
+    oauth_err_lost: "Ce navigateur n'a pas conservé vos données de connexion. Cela se produit généralement dans un navigateur intégré à une application — ouvrez maps.panopti.ca directement dans Chrome, Safari ou Firefox, puis reconnectez-vous.",
+    oauth_err_expired: 'La connexion a pris trop de temps. Veuillez réessayer.',
+    oauth_err_response: "OpenStreetMap n'a pas renvoyé de réponse de connexion valide. Veuillez réessayer.",
+    oauth_err_state: "La connexion n'a pas pu être vérifiée. Veuillez réessayer.",
+    oauth_retry: 'Réessayer',
 
     // Share modal (ShareModal, ShareButton)
     share_dialog_aria: 'Partager cette carte',

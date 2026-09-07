@@ -3,6 +3,33 @@ import { OSM } from './config';
 const TOKEN_KEY = 'osm_access_token';
 const VERIFIER_KEY = 'osm_pkce_verifier';
 const STATE_KEY = 'osm_oauth_state';
+const STARTED_KEY = 'osm_oauth_started';
+// A round-trip through OSM shouldn't outlive this; stops a stale verifier lingering.
+const FLOW_TTL_MS = 15 * 60 * 1000;
+
+// Storage may be unavailable (private modes, blocked cookies) — never let that throw.
+const ls = {
+  get(k: string): string | null { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k: string, v: string) { try { localStorage.setItem(k, v); } catch { /* completeLogin reports oauth_lost */ } },
+  del(k: string) { try { localStorage.removeItem(k); } catch { /* ignore */ } },
+};
+
+// The in-flight PKCE verifier/state live in localStorage, NOT sessionStorage. In-app
+// browsers (Chrome Custom Tabs, the webviews inside mail/social apps) routinely hand the
+// OAuth redirect back in a *different* browsing context, and sessionStorage is per-context,
+// so the verifier vanished and sign-in died with "OAuth callback failed validation".
+// localStorage is shared per-origin. The verifier is single-use and cleared on both success
+// and failure, with a TTL backstop; the access token deliberately stays in sessionStorage.
+function saveFlow(verifier: string, state: string) {
+  ls.set(VERIFIER_KEY, verifier);
+  ls.set(STATE_KEY, state);
+  ls.set(STARTED_KEY, String(Date.now()));
+}
+function clearFlow() {
+  ls.del(VERIFIER_KEY);
+  ls.del(STATE_KEY);
+  ls.del(STARTED_KEY);
+}
 
 function base64url(bytes: ArrayBuffer): string {
   const b = String.fromCharCode(...new Uint8Array(bytes));
@@ -23,8 +50,7 @@ export async function pkceChallenge(verifier: string): Promise<string> {
 export async function beginLogin(): Promise<void> {
   const verifier = randomVerifier();
   const state = randomVerifier();
-  sessionStorage.setItem(VERIFIER_KEY, verifier);
-  sessionStorage.setItem(STATE_KEY, state);
+  saveFlow(verifier, state);
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: OSM.clientId,
@@ -37,13 +63,27 @@ export async function beginLogin(): Promise<void> {
   window.location.assign(`${OSM.webBase}/oauth2/authorize?${params}`);
 }
 
+// Throws an Error whose message is a stable code the callback page maps to a translated,
+// actionable message — not an opaque "failed validation" for every possible cause.
 export async function completeLogin(params: URLSearchParams): Promise<string> {
+  const returnedError = params.get('error');
+  if (returnedError) {
+    clearFlow();
+    throw new Error(returnedError === 'access_denied' ? 'oauth_denied' : 'oauth_response');
+  }
+
   const code = params.get('code');
   const state = params.get('state');
-  const verifier = sessionStorage.getItem(VERIFIER_KEY);
-  if (!code || !state || state !== sessionStorage.getItem(STATE_KEY) || !verifier) {
-    throw new Error('OAuth callback failed validation');
-  }
+  const verifier = ls.get(VERIFIER_KEY);
+  const savedState = ls.get(STATE_KEY);
+  const started = Number(ls.get(STARTED_KEY) || 0);
+
+  if (!code || !state) { clearFlow(); throw new Error('oauth_response'); }
+  // No verifier/state on this origin: the flow started somewhere this browser can't see.
+  if (!verifier || !savedState) { clearFlow(); throw new Error('oauth_lost'); }
+  if (started && Date.now() - started > FLOW_TTL_MS) { clearFlow(); throw new Error('oauth_expired'); }
+  if (state !== savedState) { clearFlow(); throw new Error('oauth_state'); }
+
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
     code,
@@ -56,11 +96,10 @@ export async function completeLogin(params: URLSearchParams): Promise<string> {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
   });
+  clearFlow();
   if (!res.ok) throw new Error(`Token exchange failed: ${res.status}`);
   const json = await res.json();
   sessionStorage.setItem(TOKEN_KEY, json.access_token);
-  sessionStorage.removeItem(VERIFIER_KEY);
-  sessionStorage.removeItem(STATE_KEY);
   return json.access_token;
 }
 
